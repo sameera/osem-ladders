@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { CoreArea } from '@/utils/configParser';
@@ -112,38 +111,6 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
 
   return (
     <div className="relative">
-      {/* Left Navigation Arrow */}
-      <Button
-        variant="outline"
-        size="icon"
-        className={cn(
-          "absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-lg bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
-          canScrollLeft 
-            ? "opacity-100 hover:scale-110 hover:shadow-xl" 
-            : "opacity-0 pointer-events-none"
-        )}
-        onClick={scrollLeft}
-        disabled={!canScrollLeft}
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </Button>
-
-      {/* Right Navigation Arrow */}
-      <Button
-        variant="outline"
-        size="icon"
-        className={cn(
-          "absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-lg bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
-          canScrollRight 
-            ? "opacity-100 hover:scale-110 hover:shadow-xl" 
-            : "opacity-0 pointer-events-none"
-        )}
-        onClick={scrollRight}
-        disabled={!canScrollRight}
-      >
-        <ChevronRight className="h-5 w-5" />
-      </Button>
-
       {/* Scrollable Table Container */}
       <div 
         ref={scrollContainerRef}
@@ -157,11 +124,42 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
         <table className="w-full border-collapse bg-card rounded-lg shadow-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="text-left py-4 px-6 font-semibold text-foreground bg-muted/50 sticky left-0 z-20 min-w-[200px]">
+              <th className="text-left py-4 px-6 font-semibold text-foreground bg-muted sticky left-0 z-20 min-w-[200px] relative">
                 Core Area
+                {/* Left Navigation Arrow */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "absolute right-16 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
+                    canScrollLeft 
+                      ? "opacity-100 hover:scale-110 hover:shadow-lg" 
+                      : "opacity-30 pointer-events-none"
+                  )}
+                  onClick={scrollLeft}
+                  disabled={!canScrollLeft}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                {/* Right Navigation Arrow */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
+                    canScrollRight 
+                      ? "opacity-100 hover:scale-110 hover:shadow-lg" 
+                      : "opacity-30 pointer-events-none"
+                  )}
+                  onClick={scrollRight}
+                  disabled={!canScrollRight}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </th>
               {allLevels.map(level => (
-                <th key={level} className="text-center py-4 px-4 font-semibold text-foreground bg-muted/50 min-w-[200px]">
+                <th key={level} className="text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px]">
                   L{level}
                 </th>
               ))}
@@ -173,7 +171,7 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
                 "border-b border-border hover:bg-muted/30 transition-colors",
                 areaIndex % 2 === 0 && "bg-muted/10"
               )}>
-                <td className="py-4 px-6 font-medium text-foreground sticky left-0 z-10 bg-inherit">
+                <td className="py-4 px-6 font-medium text-foreground sticky left-0 z-10 bg-card">
                   {coreArea.name}
                 </td>
                 {allLevels.map(level => {
