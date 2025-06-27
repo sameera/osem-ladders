@@ -65,10 +65,7 @@ export function Report({ screens, selections }: ReportProps) {
           <CardDescription>Median of all screen assessments</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <div className="flex items-center justify-center space-x-4">
-            <Badge variant="default" className="text-lg px-4 py-2">
-              L{overallLevel}
-            </Badge>
+          <div className="flex items-center justify-center">
             <span className="text-xl font-semibold">{overallLevelName}</span>
           </div>
         </CardContent>
@@ -82,14 +79,13 @@ export function Report({ screens, selections }: ReportProps) {
               <CardTitle className="text-lg">{screen.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-sm">
-                  L{screen.median || 'N/A'}
-                </Badge>
-                <span className="text-sm font-medium text-muted-foreground">
-                  {screen.levelName}
-                </span>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                {screen.median > 0 ? (
+                  <>Meeting the expectations at <strong>{screen.levelName}</strong> level.</>
+                ) : (
+                  'Not Assessed'
+                )}
+              </p>
             </CardContent>
           </Card>
         ))}
