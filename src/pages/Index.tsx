@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { WizardNavigation } from '@/components/WizardNavigation';
 import { LevelingTable } from '@/components/LevelingTable';
+import { Report } from '@/components/Report';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { parseConfig, Screen } from '@/utils/configParser';
@@ -15,6 +16,7 @@ function AppContent() {
   const [selections, setSelections] = useLocalStorage<Record<string, Record<string, number>>>('leveling-selections', {});
   
   const screens: Screen[] = useMemo(() => parseConfig(configMarkdown), []);
+  const allScreens = useMemo(() => [...screens.map(s => s.title), 'Report'], [screens]);
   
   // Track completed screens (screens where all core areas have selections)
   const completedScreens = useMemo(() => {
@@ -31,8 +33,9 @@ function AppContent() {
     return completed;
   }, [selections, screens]);
 
-  const currentScreenData = screens[currentScreen];
-  const currentSelections = selections[currentScreenData?.title] || {};
+  const isReportScreen = currentScreen === screens.length;
+  const currentScreenData = !isReportScreen ? screens[currentScreen] : null;
+  const currentSelections = currentScreenData ? selections[currentScreenData.title] || {} : {};
 
   const handleSelectionChange = (coreArea: string, level: number) => {
     if (!currentScreenData) return;
@@ -47,7 +50,7 @@ function AppContent() {
   };
 
   const handleNext = () => {
-    if (currentScreen < screens.length - 1) {
+    if (currentScreen < allScreens.length - 1) {
       setCurrentScreen(currentScreen + 1);
     }
   };
@@ -103,7 +106,7 @@ function AppContent() {
 
       {/* Navigation */}
       <WizardNavigation
-        screens={screens.map(s => s.title)}
+        screens={allScreens}
         currentScreen={currentScreen}
         onScreenChange={setCurrentScreen}
         completedScreens={completedScreens}
@@ -111,7 +114,9 @@ function AppContent() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {currentScreenData && (
+        {isReportScreen ? (
+          <Report screens={screens} selections={selections} />
+        ) : currentScreenData ? (
           <>
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-foreground mb-2">
@@ -129,34 +134,34 @@ function AppContent() {
                 onSelectionChange={handleSelectionChange}
               />
             </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between items-center mt-8">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentScreen === 0}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Previous</span>
-              </Button>
-
-              <div className="text-sm text-muted-foreground">
-                Screen {currentScreen + 1} of {screens.length}
-              </div>
-
-              <Button
-                onClick={handleNext}
-                disabled={currentScreen === screens.length - 1}
-                className="flex items-center space-x-2"
-              >
-                <span>Next</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
           </>
-        )}
+        ) : null}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between items-center mt-8">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentScreen === 0}
+            className="flex items-center space-x-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Previous</span>
+          </Button>
+
+          <div className="text-sm text-muted-foreground">
+            Screen {currentScreen + 1} of {allScreens.length}
+          </div>
+
+          <Button
+            onClick={handleNext}
+            disabled={currentScreen === allScreens.length - 1}
+            className="flex items-center space-x-2"
+          >
+            <span>Next</span>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       </main>
     </div>
   );
