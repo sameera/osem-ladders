@@ -1,14 +1,22 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { CoreArea } from '@/utils/configParser';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface LevelingTableProps {
   coreAreas: CoreArea[];
   selections: Record<string, number>;
   onSelectionChange: (coreArea: string, level: number) => void;
 }
+
+// Configurable tooltip text length limit
+const TOOLTIP_TEXT_LIMIT = 200;
 
 export function LevelingTable({ coreAreas, selections, onSelectionChange }: LevelingTableProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -109,6 +117,90 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
     }
   }, []);
 
+  const shouldShowDialog = (description: string) => {
+    return description.length > TOOLTIP_TEXT_LIMIT;
+  };
+
+  const getTruncatedDescription = (description: string) => {
+    if (description.length <= TOOLTIP_TEXT_LIMIT) {
+      return description;
+    }
+    return description.substring(0, TOOLTIP_TEXT_LIMIT) + '...';
+  };
+
+  const renderCellContent = (levelContent: any, coreArea: CoreArea, level: number) => {
+    const isSelected = selections[coreArea.name] === level;
+    const hasDescription = levelContent.description && levelContent.description.trim();
+    
+    const cellButton = (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectionChange(coreArea.name, level);
+        }}
+        className={cn(
+          "w-full text-left p-3 rounded-md border transition-all duration-200",
+          "hover:border-primary hover:shadow-md",
+          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+          isSelected 
+            ? "border-primary bg-primary/10 text-primary shadow-md" 
+            : "border-border bg-background hover:bg-accent",
+          "cursor-pointer"
+        )}
+      >
+        <div className="text-sm leading-relaxed">
+          {levelContent.content}
+        </div>
+      </button>
+    );
+
+    if (!hasDescription) {
+      return cellButton;
+    }
+
+    const needsDialog = shouldShowDialog(levelContent.description);
+    const truncatedDescription = getTruncatedDescription(levelContent.description);
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {cellButton}
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-sm p-3">
+            <div className="space-y-2">
+              <MarkdownRenderer 
+                content={truncatedDescription}
+                className="text-sm"
+              />
+              {needsDialog && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="mt-2">
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      View Full Description
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh]">
+                    <DialogHeader>
+                      <DialogTitle>{levelContent.content}</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="mt-4 max-h-[60vh]">
+                      <MarkdownRenderer 
+                        content={levelContent.description}
+                        className="text-sm leading-relaxed pr-4"
+                      />
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   return (
     <div className="relative">
       {/* Scrollable Table Container */}
@@ -131,7 +223,7 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
                   variant="outline"
                   size="icon"
                   className={cn(
-                    "absolute right-16 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
+                    "absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
                     canScrollLeft 
                       ? "opacity-100 hover:scale-110 hover:shadow-lg" 
                       : "opacity-30 pointer-events-none"
@@ -139,28 +231,32 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
                   onClick={scrollLeft}
                   disabled={!canScrollLeft}
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                {/* Right Navigation Arrow */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn(
-                    "absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
-                    canScrollRight 
-                      ? "opacity-100 hover:scale-110 hover:shadow-lg" 
-                      : "opacity-30 pointer-events-none"
-                  )}
-                  onClick={scrollRight}
-                  disabled={!canScrollRight}
-                >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronLeft className="h-3 w-3" />
                 </Button>
               </th>
-              {allLevels.map(level => (
-                <th key={level} className="text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px]">
+              {allLevels.map((level, index) => (
+                <th key={level} className={cn(
+                  "text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px] relative",
+                  index === allLevels.length - 1 && "pr-12" // Add padding for right arrow
+                )}>
                   L{level}
+                  {/* Right Navigation Arrow - only on last column */}
+                  {index === allLevels.length - 1 && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={cn(
+                        "absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
+                        canScrollRight 
+                          ? "opacity-100 hover:scale-110 hover:shadow-lg" 
+                          : "opacity-30 pointer-events-none"
+                      )}
+                      onClick={scrollRight}
+                      disabled={!canScrollRight}
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  )}
                 </th>
               ))}
             </tr>
@@ -176,30 +272,11 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
                 </td>
                 {allLevels.map(level => {
                   const levelContent = coreArea.levels.find(l => l.level === level);
-                  const isSelected = selections[coreArea.name] === level;
                   
                   return (
                     <td key={level} className="py-2 px-2">
                       {levelContent ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectionChange(coreArea.name, level);
-                          }}
-                          className={cn(
-                            "w-full text-left p-3 rounded-md border transition-all duration-200",
-                            "hover:border-primary hover:shadow-md",
-                            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                            isSelected 
-                              ? "border-primary bg-primary/10 text-primary shadow-md" 
-                              : "border-border bg-background hover:bg-accent",
-                            "cursor-pointer"
-                          )}
-                        >
-                          <div className="text-sm leading-relaxed">
-                            {levelContent.content}
-                          </div>
-                        </button>
+                        renderCellContent(levelContent, coreArea, level)
                       ) : (
                         <div className="w-full p-3 text-center text-muted-foreground">
                           —

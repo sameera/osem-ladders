@@ -2,6 +2,7 @@
 export interface LevelContent {
   level: number;
   content: string;
+  description?: string;
 }
 
 export interface CoreArea {
@@ -19,14 +20,48 @@ export function parseConfig(markdown: string): Screen[] {
   const screens: Screen[] = [];
   let currentScreen: Screen | null = null;
   let currentCoreArea: CoreArea | null = null;
+  let currentLevel: LevelContent | null = null;
+  let collectingDescription = false;
+  let descriptionLines: string[] = [];
 
   console.log('Parsing markdown with', lines.length, 'lines');
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmed = line.trim();
     
     // Skip empty lines and main headers
-    if (!trimmed || trimmed.startsWith('# ')) continue;
+    if (!trimmed || trimmed.startsWith('# ')) {
+      if (collectingDescription && !trimmed) {
+        // Empty line might be part of description formatting
+        descriptionLines.push('');
+      }
+      continue;
+    }
+    
+    // Check if we're currently collecting a description
+    if (collectingDescription) {
+      // Check if this line starts a new level, core area, or screen
+      const isNewLevel = line.startsWith('\t\t') && /^\s*\d+\./.test(trimmed);
+      const isNewCoreArea = line.startsWith('\t- ');
+      const isNewScreen = trimmed.startsWith('- ') && !line.startsWith('\t');
+      
+      if (isNewLevel || isNewCoreArea || isNewScreen) {
+        // Finish collecting description for previous level
+        if (currentLevel && descriptionLines.length > 0) {
+          currentLevel.description = descriptionLines.join('\n').trim();
+        }
+        collectingDescription = false;
+        descriptionLines = [];
+        currentLevel = null;
+        
+        // Don't skip this line, process it normally
+      } else {
+        // Continue collecting description
+        descriptionLines.push(line);
+        continue;
+      }
+    }
     
     // Screen title (starts with -)
     if (trimmed.startsWith('- ') && !line.startsWith('\t')) {
@@ -39,6 +74,7 @@ export function parseConfig(markdown: string): Screen[] {
         coreAreas: []
       };
       currentCoreArea = null;
+      currentLevel = null;
     }
     // Core area (indented with tab and -)
     else if (line.startsWith('\t- ')) {
@@ -50,6 +86,7 @@ export function parseConfig(markdown: string): Screen[] {
         };
         currentScreen.coreAreas.push(currentCoreArea);
       }
+      currentLevel = null;
     }
     // Level content (numbered list with double tab)
     else if (line.startsWith('\t\t') && /^\s*\d+\./.test(trimmed)) {
@@ -57,13 +94,23 @@ export function parseConfig(markdown: string): Screen[] {
       if (currentCoreArea) {
         const match = trimmed.match(/^(\d+)\.\s*(.+)$/);
         if (match) {
-          currentCoreArea.levels.push({
+          currentLevel = {
             level: parseInt(match[1], 10),
             content: match[2].trim()
-          });
+          };
+          currentCoreArea.levels.push(currentLevel);
+          
+          // Start collecting description for this level
+          collectingDescription = true;
+          descriptionLines = [];
         }
       }
     }
+  }
+  
+  // Handle any remaining description at end of file
+  if (collectingDescription && currentLevel && descriptionLines.length > 0) {
+    currentLevel.description = descriptionLines.join('\n').trim();
   }
   
   // Add the last screen
