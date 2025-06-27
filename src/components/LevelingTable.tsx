@@ -112,22 +112,6 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
 
   return (
     <div className="relative flex items-center">
-      {/* Left Navigation Arrow */}
-      <Button
-        variant="outline"
-        size="icon"
-        className={cn(
-          "h-10 w-10 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200 mr-4 flex-shrink-0",
-          canScrollLeft 
-            ? "opacity-100 hover:scale-110 hover:shadow-lg" 
-            : "opacity-30 pointer-events-none"
-        )}
-        onClick={scrollLeft}
-        disabled={!canScrollLeft}
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </Button>
-
       {/* Scrollable Table Container */}
       <div 
         ref={scrollContainerRef}
@@ -200,21 +184,38 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
         </table>
       </div>
 
-      {/* Right Navigation Arrow */}
-      <Button
-        variant="outline"
-        size="icon"
-        className={cn(
-          "h-10 w-10 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200 ml-4 flex-shrink-0",
-          canScrollRight 
-            ? "opacity-100 hover:scale-110 hover:shadow-lg" 
-            : "opacity-30 pointer-events-none"
-        )}
-        onClick={scrollRight}
-        disabled={!canScrollRight}
-      >
-        <ChevronRight className="h-5 w-5" />
-      </Button>
+      {/* Navigation Arrows on the Right */}
+      <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
+        <Button
+          variant="outline"
+          size="icon"
+          className={cn(
+            "h-10 w-10 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
+            canScrollLeft 
+              ? "opacity-100 hover:scale-110 hover:shadow-lg" 
+              : "opacity-30 pointer-events-none"
+          )}
+          onClick={scrollLeft}
+          disabled={!canScrollLeft}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className={cn(
+            "h-10 w-10 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
+            canScrollRight 
+              ? "opacity-100 hover:scale-110 hover:shadow-lg" 
+              : "opacity-30 pointer-events-none"
+          )}
+          onClick={scrollRight}
+          disabled={!canScrollRight}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </Button>
+      </div>
     </div>
   );
 }
