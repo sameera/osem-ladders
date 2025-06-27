@@ -1,8 +1,7 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { CoreArea } from '@/utils/configParser';
-import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -217,46 +216,39 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
           <thead>
             <tr className="border-b border-border">
               <th className="text-left py-4 px-6 font-semibold text-foreground bg-muted sticky left-0 z-20 min-w-[200px] relative">
-                Core Area
-                {/* Left Navigation Arrow */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn(
-                    "absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
-                    canScrollLeft 
-                      ? "opacity-100 hover:scale-110 hover:shadow-lg" 
-                      : "opacity-30 pointer-events-none"
-                  )}
-                  onClick={scrollLeft}
-                  disabled={!canScrollLeft}
-                >
-                  <ChevronLeft className="h-3 w-3" />
-                </Button>
-              </th>
-              {allLevels.map((level, index) => (
-                <th key={level} className={cn(
-                  "text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px] relative",
-                  index === allLevels.length - 1 && "pr-12" // Add padding for right arrow
-                )}>
-                  L{level}
-                  {/* Right Navigation Arrow - only on last column */}
-                  {index === allLevels.length - 1 && (
-                    <Button
-                      variant="outline"
-                      size="icon"
+                <div className="flex items-center justify-between">
+                  <span>Core Area</span>
+                  <div className="flex items-center gap-1 border border-border rounded-md p-1 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200 group">
+                    <button
+                      onClick={scrollLeft}
+                      disabled={!canScrollLeft}
                       className={cn(
-                        "absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full shadow-md bg-background/90 backdrop-blur-sm border-2 transition-all duration-200",
-                        canScrollRight 
-                          ? "opacity-100 hover:scale-110 hover:shadow-lg" 
-                          : "opacity-30 pointer-events-none"
+                        "p-1 rounded transition-all duration-200",
+                        canScrollLeft 
+                          ? "text-foreground hover:text-primary hover:bg-primary/10 hover:scale-110" 
+                          : "text-muted-foreground/50 cursor-not-allowed"
                       )}
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                    </button>
+                    <button
                       onClick={scrollRight}
                       disabled={!canScrollRight}
+                      className={cn(
+                        "p-1 rounded transition-all duration-200",
+                        canScrollRight 
+                          ? "text-foreground hover:text-primary hover:bg-primary/10 hover:scale-110" 
+                          : "text-muted-foreground/50 cursor-not-allowed"
+                      )}
                     >
-                      <ChevronRight className="h-3 w-3" />
-                    </Button>
-                  )}
+                      <ArrowRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </th>
+              {allLevels.map((level) => (
+                <th key={level} className="text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px]">
+                  L{level}
                 </th>
               ))}
             </tr>
