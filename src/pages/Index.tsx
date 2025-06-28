@@ -14,6 +14,7 @@ import configMarkdown from '@/data/config.md?raw';
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState(0);
   const [selections, setSelections] = useLocalStorage<Record<string, Record<string, number>>>('leveling-selections', {});
+  const [feedback, setFeedback] = useLocalStorage<Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>>('leveling-feedback', {});
   
   const screens: Screen[] = useMemo(() => parseConfig(configMarkdown), []);
   const allScreens = useMemo(() => [...screens.map(s => s.title), 'Report'], [screens]);
@@ -36,8 +37,9 @@ function AppContent() {
   const isReportScreen = currentScreen === screens.length;
   const currentScreenData = !isReportScreen ? screens[currentScreen] : null;
   const currentSelections = currentScreenData ? selections[currentScreenData.title] || {} : {};
+  const currentFeedback = currentScreenData ? feedback[currentScreenData.title] || {} : {};
 
-  const handleSelectionChange = (coreArea: string, level: number) => {
+  const handleSelectionChange = (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => {
     if (!currentScreenData) return;
     
     setSelections(prev => ({
@@ -45,6 +47,17 @@ function AppContent() {
       [currentScreenData.title]: {
         ...prev[currentScreenData.title],
         [coreArea]: level
+      }
+    }));
+
+    setFeedback(prev => ({
+      ...prev,
+      [currentScreenData.title]: {
+        ...prev[currentScreenData.title],
+        [coreArea]: {
+          ...prev[currentScreenData.title]?.[coreArea],
+          [level]: { evidence, nextLevelFeedback }
+        }
       }
     }));
   };
@@ -64,6 +77,7 @@ function AppContent() {
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all selections? This cannot be undone.')) {
       setSelections({});
+      setFeedback({});
     }
   };
 
@@ -131,6 +145,7 @@ function AppContent() {
               <LevelingTable
                 coreAreas={currentScreenData.coreAreas}
                 selections={currentSelections}
+                feedback={currentFeedback}
                 onSelectionChange={handleSelectionChange}
               />
             </div>

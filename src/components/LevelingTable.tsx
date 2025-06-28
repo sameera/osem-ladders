@@ -9,13 +9,14 @@ import { TableCell } from './TableCell';
 interface LevelingTableProps {
   coreAreas: CoreArea[];
   selections: Record<string, number>;
-  onSelectionChange: (coreArea: string, level: number) => void;
+  feedback: Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>;
+  onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
 }
 
 // Configurable tooltip text length limit
 const TOOLTIP_TEXT_LIMIT = 200;
 
-export function LevelingTable({ coreAreas, selections, onSelectionChange }: LevelingTableProps) {
+export function LevelingTable({ coreAreas, selections, feedback, onSelectionChange }: LevelingTableProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -52,6 +53,7 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
                 {allLevels.map(level => {
                   const levelContent = coreArea.levels.find(l => l.level === level);
                   const isSelected = selections[coreArea.name] === level;
+                  const cellFeedback = feedback[coreArea.name]?.[level];
                   
                   return (
                     <td key={level} className="py-2 px-2">
@@ -63,6 +65,7 @@ export function LevelingTable({ coreAreas, selections, onSelectionChange }: Leve
                           isSelected={isSelected}
                           onSelectionChange={onSelectionChange}
                           tooltipTextLimit={TOOLTIP_TEXT_LIMIT}
+                          feedback={cellFeedback}
                         />
                       ) : (
                         <div className="w-full p-3 text-center text-muted-foreground">
