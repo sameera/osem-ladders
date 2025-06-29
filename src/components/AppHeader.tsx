@@ -18,7 +18,7 @@ export function AppHeader({ teamMemberName, onNewAssessment, onOpenAssessment }:
             <AppMenuBar onNewAssessment={onNewAssessment} onOpenAssessment={onOpenAssessment} />
             <div>
               {teamMemberName && (
-                <h1 className="text-2xl font-bold text-foreground">{teamMemberName ? teamMemberName + " Growth Plan"}</h1>
+                <h1 className="text-2xl font-bold text-foreground">{teamMemberName}</h1>
               )}
               <p className="text-sm text-muted-foreground">
                 Progression Plan Builder</span>
