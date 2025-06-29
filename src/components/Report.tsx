@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 interface ReportProps {
   screens: Screen[];
   selections: Record<string, Record<string, number>>;
+  feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>;
 }
 
 const levelNames = {
@@ -32,7 +33,7 @@ function calculateMedian(values: number[]): number {
   }
 }
 
-export function Report({ screens, selections }: ReportProps) {
+export function Report({ screens, selections, feedback }: ReportProps) {
   const screenLevels = screens.map(screen => {
     const screenSelections = selections[screen.title] || {};
     const values = Object.values(screenSelections).filter(val => val > 0);
@@ -41,7 +42,8 @@ export function Report({ screens, selections }: ReportProps) {
     return {
       title: screen.title,
       median,
-      levelName: levelNames[median as keyof typeof levelNames] || 'Not Assessed'
+      levelName: levelNames[median as keyof typeof levelNames] || 'Not Assessed',
+      coreAreas: screen.coreAreas
     };
   });
 
@@ -71,24 +73,62 @@ export function Report({ screens, selections }: ReportProps) {
         </CardContent>
       </Card>
 
-      {/* Individual Screen Levels */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {screenLevels.map((screen, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle className="text-lg">{screen.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {screen.median > 0 ? (
-                  <>Meeting the expectations at <strong>{screen.levelName}</strong> level.</>
-                ) : (
-                  'Not Assessed'
-                )}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Detailed Screen Breakdown */}
+      <div className="space-y-6">
+        {screenLevels.map((screen, index) => {
+          const screenSelections = selections[screen.title] || {};
+          const screenFeedback = feedback[screen.title] || {};
+          
+          return (
+            <Card key={index} className="w-full">
+              <CardHeader>
+                <CardTitle className="text-xl">{screen.title}</CardTitle>
+                <CardDescription>
+                  {screen.median > 0 ? (
+                    <>Meeting the expectations for <strong>{screen.levelName}</strong> level.</>
+                  ) : (
+                    'Not Assessed'
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {screen.coreAreas.map((coreArea, areaIndex) => {
+                  const selectedLevel = screenSelections[coreArea.name];
+                  const areaFeedback = screenFeedback[coreArea.name]?.[selectedLevel];
+                  
+                  if (!selectedLevel || !areaFeedback) return null;
+                  
+                  const selectedLevelContent = coreArea.levels.find(l => l.level === selectedLevel);
+                  
+                  return (
+                    <div key={areaIndex} className="border-l-4 border-primary/20 pl-4 space-y-3">
+                      <h4 className="font-semibold text-lg">{coreArea.name}</h4>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <span className="font-medium">L{selectedLevel}</span> - {selectedLevelContent?.content || 'Level content'}
+                        </p>
+                        
+                        {areaFeedback.evidence && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Your achievements at this level:</p>
+                            <p className="text-sm bg-muted/50 p-3 rounded-md">{areaFeedback.evidence}</p>
+                          </div>
+                        )}
+                        
+                        {areaFeedback.nextLevelFeedback && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">What next level could look like:</p>
+                            <p className="text-sm bg-muted/50 p-3 rounded-md">{areaFeedback.nextLevelFeedback}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Additional Information */}

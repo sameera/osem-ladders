@@ -238,6 +238,7 @@ function AppContent() {
           selections={selections}
           currentSelections={currentSelections}
           currentFeedback={currentFeedback}
+          feedback={feedback}
           onSelectionChange={handleSelectionChange}
         />
 
