@@ -30,9 +30,9 @@ export function parseConfig(markdown: string): Screen[] {
     const line = lines[i];
     const trimmed = line.trim();
     
-    // Skip empty lines and main headers
-    if (!trimmed || trimmed.startsWith('# ')) {
-      if (collectingDescription && !trimmed) {
+    // Skip empty lines
+    if (!trimmed) {
+      if (collectingDescription) {
         // Empty line might be part of description formatting
         descriptionLines.push('');
       }
@@ -42,9 +42,9 @@ export function parseConfig(markdown: string): Screen[] {
     // Check if we're currently collecting a description
     if (collectingDescription) {
       // Check if this line starts a new level, core area, or screen
-      const isNewLevel = line.startsWith('\t\t') && /^\s*\d+\./.test(trimmed);
-      const isNewCoreArea = line.startsWith('\t- ');
-      const isNewScreen = trimmed.startsWith('- ') && !line.startsWith('\t');
+      const isNewLevel = /^\d+\./.test(trimmed);
+      const isNewCoreArea = trimmed.startsWith('## ');
+      const isNewScreen = trimmed.startsWith('# ');
       
       if (isNewLevel || isNewCoreArea || isNewScreen) {
         // Finish collecting description for previous level
@@ -63,8 +63,8 @@ export function parseConfig(markdown: string): Screen[] {
       }
     }
     
-    // Screen title (starts with -)
-    if (trimmed.startsWith('- ') && !line.startsWith('\t')) {
+    // Screen title (starts with #)
+    if (trimmed.startsWith('# ')) {
       console.log('Found screen:', trimmed);
       if (currentScreen) {
         screens.push(currentScreen);
@@ -76,20 +76,20 @@ export function parseConfig(markdown: string): Screen[] {
       currentCoreArea = null;
       currentLevel = null;
     }
-    // Core area (indented with tab and -)
-    else if (line.startsWith('\t- ')) {
+    // Core area (starts with ##)
+    else if (trimmed.startsWith('## ')) {
       console.log('Found core area:', trimmed);
       if (currentScreen) {
         currentCoreArea = {
-          name: trimmed.substring(2).trim(),
+          name: trimmed.substring(3).trim(),
           levels: []
         };
         currentScreen.coreAreas.push(currentCoreArea);
       }
       currentLevel = null;
     }
-    // Level content (numbered list with double tab)
-    else if (line.startsWith('\t\t') && /^\s*\d+\./.test(trimmed)) {
+    // Level content (numbered list)
+    else if (/^\d+\./.test(trimmed)) {
       console.log('Found level:', trimmed);
       if (currentCoreArea) {
         const match = trimmed.match(/^(\d+)\.\s*(.+)$/);
