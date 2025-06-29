@@ -1,14 +1,13 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { WizardNavigation } from '@/components/WizardNavigation';
-import { LevelingTable } from '@/components/LevelingTable';
-import { Report } from '@/components/Report';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { TeamMemberPrompt } from '@/components/TeamMemberPrompt';
+import { AppHeader } from '@/components/AppHeader';
+import { ScreenContent } from '@/components/ScreenContent';
+import { NavigationButtons } from '@/components/NavigationButtons';
 import { parseConfig, Screen } from '@/utils/configParser';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, RotateCcw, Download } from 'lucide-react';
 import configMarkdown from '@/data/config.md?raw';
 
 function AppContent() {
@@ -17,6 +16,7 @@ function AppContent() {
   const [feedback, setFeedback] = useLocalStorage<Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>>('leveling-feedback', {});
   const [teamMemberName, setTeamMemberName] = useLocalStorage<string>('team-member-name', '');
   const [showNewAssessmentPrompt, setShowNewAssessmentPrompt] = useState(false);
+  const [showConfirmNewAssessment, setShowConfirmNewAssessment] = useState(false);
   
   const screens: Screen[] = useMemo(() => parseConfig(configMarkdown), []);
   const allScreens = useMemo(() => [...screens.map(s => s.title), 'Report'], [screens]);
@@ -128,6 +128,29 @@ function AppContent() {
     setShowNewAssessmentPrompt(true);
   };
 
+  const handleNewAssessmentRequest = () => {
+    // Check if there are any selections made
+    const hasSelections = Object.keys(selections).length > 0 && 
+      Object.values(selections).some(screenSelections => 
+        Object.keys(screenSelections).length > 0
+      );
+
+    if (hasSelections) {
+      setShowConfirmNewAssessment(true);
+    } else {
+      handleStartNewAssessment();
+    }
+  };
+
+  const handleConfirmNewAssessment = () => {
+    setShowConfirmNewAssessment(false);
+    handleStartNewAssessment();
+  };
+
+  const handleCancelConfirmNewAssessment = () => {
+    setShowConfirmNewAssessment(false);
+  };
+
   const handleStartNewAssessment = () => {
     setSelections({});
     setFeedback({});
@@ -152,14 +175,6 @@ function AppContent() {
     }
   };
 
-  const handleReset = () => {
-    if (confirm('Are you sure you want to reset all selections? This cannot be undone.')) {
-      setSelections({});
-      setFeedback({});
-      setTeamMemberName('');
-    }
-  };
-
   if (screens.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -178,6 +193,17 @@ function AppContent() {
         onSubmit={handleTeamMemberSubmit}
       />
       
+      {/* Confirmation prompt for new assessment */}
+      <TeamMemberPrompt
+        isOpen={showConfirmNewAssessment}
+        onSubmit={handleConfirmNewAssessment}
+        onCancel={handleCancelConfirmNewAssessment}
+        title="Start New Assessment"
+        submitText="Yes, Start New"
+        cancelText="Cancel"
+        showCancel={true}
+      />
+      
       {/* New Assessment Prompt */}
       <TeamMemberPrompt
         isOpen={showNewAssessmentPrompt}
@@ -190,32 +216,10 @@ function AppContent() {
       />
       
       {/* Header */}
-      <header className="bg-card border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                {teamMemberName ? `${teamMemberName}'s Progression Plan` : 'Engineer Ladder'}
-              </h1>
-              <p className="text-muted-foreground">
-                Achievements and Growth Opportunities
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                className="text-destructive hover:text-destructive"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Reset All
-              </Button>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader 
+        teamMemberName={teamMemberName}
+        onNewAssessment={handleNewAssessmentRequest}
+      />
 
       {/* Navigation */}
       <WizardNavigation
@@ -227,65 +231,25 @@ function AppContent() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {isReportScreen ? (
-          <Report screens={screens} selections={selections} />
-        ) : currentScreenData ? (
-          <>
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-foreground mb-2">
-                {currentScreenData.title}
-              </h2>
-              <p className="text-muted-foreground">
-                Select the appropriate level for each core area. Click on any cell to make your selection.
-              </p>
-            </div>
-
-            <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-              <LevelingTable
-                coreAreas={currentScreenData.coreAreas}
-                selections={currentSelections}
-                feedback={currentFeedback}
-                onSelectionChange={handleSelectionChange}
-              />
-            </div>
-          </>
-        ) : null}
+        <ScreenContent
+          isReportScreen={isReportScreen}
+          currentScreenData={currentScreenData}
+          screens={screens}
+          selections={selections}
+          currentSelections={currentSelections}
+          currentFeedback={currentFeedback}
+          onSelectionChange={handleSelectionChange}
+        />
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center mt-8">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentScreen === 0}
-            className="flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Previous</span>
-          </Button>
-
-          <div className="text-sm text-muted-foreground">
-            Screen {currentScreen + 1} of {allScreens.length}
-          </div>
-
-          {isReportScreen ? (
-            <Button
-              onClick={handleSubmitAssessment}
-              className="flex items-center space-x-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Submit Assessment</span>
-            </Button>
-          ) : (
-            <Button
-              onClick={handleNext}
-              disabled={currentScreen === allScreens.length - 1}
-              className="flex items-center space-x-2"
-            >
-              <span>Next</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
+        <NavigationButtons
+          currentScreen={currentScreen}
+          totalScreens={allScreens.length}
+          isReportScreen={isReportScreen}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onSubmitAssessment={handleSubmitAssessment}
+        />
       </main>
     </div>
   );

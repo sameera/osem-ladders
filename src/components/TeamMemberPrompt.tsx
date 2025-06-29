@@ -26,8 +26,16 @@ export function TeamMemberPrompt({
 }: TeamMemberPromptProps) {
   const [name, setName] = useState('');
 
+  // Check if this is a confirmation dialog (doesn't need name input)
+  const isConfirmationDialog = title.includes("Start New Assessment") && showCancel;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isConfirmationDialog) {
+      onSubmit('');
+      return;
+    }
+    
     if (name.trim()) {
       onSubmit(name.trim());
       setName('');
@@ -46,34 +54,50 @@ export function TeamMemberPrompt({
           <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="team-member-name" className="text-sm font-medium">
-              Assessment for <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="team-member-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter team member's name"
-              className="w-full"
-              required
-              autoFocus
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            {showCancel && (
+        {isConfirmationDialog ? (
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Are you sure you want to start a new assessment? This will clear all current data and cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={handleCancel}>
                 {cancelText}
               </Button>
-            )}
-            <Button type="submit" disabled={!name.trim()}>
-              {submitText}
-            </Button>
+              <Button type="button" onClick={() => onSubmit('')}>
+                {submitText}
+              </Button>
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="team-member-name" className="text-sm font-medium">
+                Assessment for <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="team-member-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter team member's name"
+                className="w-full"
+                required
+                autoFocus
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              {showCancel && (
+                <Button type="button" variant="outline" onClick={handleCancel}>
+                  {cancelText}
+                </Button>
+              )}
+              <Button type="submit" disabled={!name.trim()}>
+                {submitText}
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
