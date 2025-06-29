@@ -57,21 +57,33 @@ export function TableCell({
     setShowFeedbackPopup(false);
   };
 
+  // Format content to show each sentence on a new line
+  const formatContent = (content: string) => {
+    return content
+      .split(/(?<=[.!?])\s+/)
+      .filter(sentence => sentence.trim())
+      .map((sentence, index) => (
+        <div key={index} className={index > 0 ? "mt-1" : ""}>
+          {sentence.trim()}
+        </div>
+      ));
+  };
+
   const cellButton = (
     <button
       onClick={handleCellClick}
       className={cn(
-        "w-full text-left p-3 rounded-md border transition-all duration-200",
+        "w-full h-full text-left p-3 rounded-md border transition-all duration-200",
         "hover:border-primary hover:shadow-md",
         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         isSelected 
           ? "border-primary bg-primary/10 text-primary shadow-md" 
           : "border-border bg-background hover:bg-accent",
-        "cursor-pointer"
+        "cursor-pointer min-h-[80px] flex items-start"
       )}
     >
-      <div className="text-sm leading-relaxed">
-        {levelContent.content}
+      <div className="text-sm leading-relaxed w-full">
+        {formatContent(levelContent.content)}
       </div>
     </button>
   );

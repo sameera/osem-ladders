@@ -154,7 +154,7 @@ export function WizardNavigation({
 
         <div 
           ref={scrollContainerRef}
-          className="flex items-center justify-between overflow-x-auto scrollbar-hide select-none px-8"
+          className="flex items-center overflow-x-auto scrollbar-hide select-none px-8"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -197,7 +197,7 @@ export function WizardNavigation({
                 </button>
                 
                 {index < screens.length - 1 && (
-                  <div className="w-8 h-px bg-border mx-2 flex-shrink-0" />
+                  <div className="flex-1 h-px bg-border mx-4 min-w-[32px]" />
                 )}
               </div>
             );
