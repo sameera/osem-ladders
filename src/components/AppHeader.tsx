@@ -21,7 +21,7 @@ export function AppHeader({ teamMemberName, onNewAssessment, onOpenAssessment }:
                 <h1 className="text-2xl font-bold text-foreground">{teamMemberName}</h1>
               )}
               <p className="text-sm text-muted-foreground">
-                Progression Plan Builder</span>
+                <span>Progression Plan Builder</span>
               </p>
             </div>
           </div>
