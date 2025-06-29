@@ -8,23 +8,42 @@ import { Label } from '@/components/ui/label';
 interface TeamMemberPromptProps {
   isOpen: boolean;
   onSubmit: (name: string) => void;
+  onCancel?: () => void;
+  title?: string;
+  submitText?: string;
+  cancelText?: string;
+  showCancel?: boolean;
 }
 
-export function TeamMemberPrompt({ isOpen, onSubmit }: TeamMemberPromptProps) {
+export function TeamMemberPrompt({ 
+  isOpen, 
+  onSubmit, 
+  onCancel,
+  title = "New Assessment",
+  submitText = "Start Assessment",
+  cancelText = "Cancel",
+  showCancel = false
+}: TeamMemberPromptProps) {
   const [name, setName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
       onSubmit(name.trim());
+      setName('');
     }
+  };
+
+  const handleCancel = () => {
+    setName('');
+    onCancel?.();
   };
 
   return (
     <Dialog open={isOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">New Assessment</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -44,9 +63,14 @@ export function TeamMemberPrompt({ isOpen, onSubmit }: TeamMemberPromptProps) {
             />
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-2">
+            {showCancel && (
+              <Button type="button" variant="outline" onClick={handleCancel}>
+                {cancelText}
+              </Button>
+            )}
             <Button type="submit" disabled={!name.trim()}>
-              Start Assessment
+              {submitText}
             </Button>
           </div>
         </form>

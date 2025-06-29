@@ -8,7 +8,7 @@ import { TeamMemberPrompt } from '@/components/TeamMemberPrompt';
 import { parseConfig, Screen } from '@/utils/configParser';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCcw, Download } from 'lucide-react';
 import configMarkdown from '@/data/config.md?raw';
 
 function AppContent() {
@@ -16,6 +16,7 @@ function AppContent() {
   const [selections, setSelections] = useLocalStorage<Record<string, Record<string, number>>>('leveling-selections', {});
   const [feedback, setFeedback] = useLocalStorage<Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>>('leveling-feedback', {});
   const [teamMemberName, setTeamMemberName] = useLocalStorage<string>('team-member-name', '');
+  const [showNewAssessmentPrompt, setShowNewAssessmentPrompt] = useState(false);
   
   const screens: Screen[] = useMemo(() => parseConfig(configMarkdown), []);
   const allScreens = useMemo(() => [...screens.map(s => s.title), 'Report'], [screens]);
@@ -70,6 +71,75 @@ function AppContent() {
     }));
   };
 
+  const calculateMedian = (values: number[]): number => {
+    if (values.length === 0) return 0;
+    
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    
+    if (sorted.length % 2 === 0) {
+      return Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+    } else {
+      return sorted[mid];
+    }
+  };
+
+  const handleSubmitAssessment = () => {
+    const assessmentData = {
+      assessee: teamMemberName,
+      leveling: screens.reduce((acc, screen) => {
+        const screenSelections = selections[screen.title] || {};
+        const screenFeedback = feedback[screen.title] || {};
+        const values = Object.values(screenSelections).filter(val => val > 0);
+        const median = calculateMedian(values);
+        
+        acc[screen.title] = {
+          level: median,
+          notes: screen.coreAreas.reduce((noteAcc, coreArea) => {
+            const level = screenSelections[coreArea.name];
+            if (level !== undefined) {
+              const levelFeedback = screenFeedback[coreArea.name]?.[level];
+              noteAcc[coreArea.name] = {
+                level: `L${level}`,
+                evidence: levelFeedback?.evidence || '',
+                advice: levelFeedback?.nextLevelFeedback || ''
+              };
+            }
+            return noteAcc;
+          }, {} as Record<string, any>)
+        };
+        
+        return acc;
+      }, {} as Record<string, any>)
+    };
+
+    // Download as JSON file
+    const blob = new Blob([JSON.stringify(assessmentData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${teamMemberName.replace(/\s+/g, '_')}_assessment.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Show new assessment prompt
+    setShowNewAssessmentPrompt(true);
+  };
+
+  const handleStartNewAssessment = () => {
+    setSelections({});
+    setFeedback({});
+    setTeamMemberName('');
+    setCurrentScreen(0);
+    setShowNewAssessmentPrompt(false);
+  };
+
+  const handleCancelNewAssessment = () => {
+    setShowNewAssessmentPrompt(false);
+  };
+
   const handleNext = () => {
     if (currentScreen < allScreens.length - 1) {
       setCurrentScreen(currentScreen + 1);
@@ -106,6 +176,17 @@ function AppContent() {
       <TeamMemberPrompt
         isOpen={showTeamMemberPrompt}
         onSubmit={handleTeamMemberSubmit}
+      />
+      
+      {/* New Assessment Prompt */}
+      <TeamMemberPrompt
+        isOpen={showNewAssessmentPrompt}
+        onSubmit={handleStartNewAssessment}
+        onCancel={handleCancelNewAssessment}
+        title="Start New Assessment"
+        submitText="Start New Assessment"
+        cancelText="Keep Current Assessment"
+        showCancel={true}
       />
       
       {/* Header */}
@@ -186,14 +267,24 @@ function AppContent() {
             Screen {currentScreen + 1} of {allScreens.length}
           </div>
 
-          <Button
-            onClick={handleNext}
-            disabled={currentScreen === allScreens.length - 1}
-            className="flex items-center space-x-2"
-          >
-            <span>Next</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          {isReportScreen ? (
+            <Button
+              onClick={handleSubmitAssessment}
+              className="flex items-center space-x-2"
+            >
+              <Download className="w-4 h-4" />
+              <span>Submit Assessment</span>
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNext}
+              disabled={currentScreen === allScreens.length - 1}
+              className="flex items-center space-x-2"
+            >
+              <span>Next</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </main>
     </div>
