@@ -114,13 +114,10 @@ function AppContent() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {teamMemberName ? `${teamMemberName}'s Professional Journey` : 'Engineer Leveling System'}
+                {teamMemberName ? `${teamMemberName}'s Progression Plan` : 'Engineer Ladder'}
               </h1>
               <p className="text-muted-foreground">
-                {teamMemberName 
-                  ? 'Celebrating achievements and exploring growth opportunities' 
-                  : 'Assess and track engineering skill levels'
-                }
+                Achievements and Growth Opportunities
               </p>
             </div>
             <div className="flex items-center space-x-2">
