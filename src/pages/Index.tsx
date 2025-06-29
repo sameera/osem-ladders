@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { WizardNavigation } from '@/components/WizardNavigation';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -163,6 +162,49 @@ function AppContent() {
     setShowNewAssessmentPrompt(false);
   };
 
+  const handleOpenAssessment = (data: any) => {
+    try {
+      if (!data.assessee || !data.leveling) {
+        alert('Invalid assessment file format');
+        return;
+      }
+
+      // Set the team member name
+      setTeamMemberName(data.assessee);
+
+      // Convert the leveling data back to the format used by the app
+      const newSelections: Record<string, Record<string, number>> = {};
+      const newFeedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>> = {};
+
+      Object.entries(data.leveling).forEach(([screenTitle, screenData]: [string, any]) => {
+        newSelections[screenTitle] = {};
+        newFeedback[screenTitle] = {};
+
+        Object.entries(screenData.notes).forEach(([coreArea, noteData]: [string, any]) => {
+          const level = parseInt(noteData.level.replace('L', ''));
+          newSelections[screenTitle][coreArea] = level;
+          
+          if (!newFeedback[screenTitle][coreArea]) {
+            newFeedback[screenTitle][coreArea] = {};
+          }
+          
+          newFeedback[screenTitle][coreArea][level] = {
+            evidence: noteData.evidence || '',
+            nextLevelFeedback: noteData.advice || ''
+          };
+        });
+      });
+
+      setSelections(newSelections);
+      setFeedback(newFeedback);
+      setCurrentScreen(0);
+      
+    } catch (error) {
+      console.error('Error loading assessment:', error);
+      alert('Error loading assessment file');
+    }
+  };
+
   const handleNext = () => {
     if (currentScreen < allScreens.length - 1) {
       setCurrentScreen(currentScreen + 1);
@@ -219,6 +261,7 @@ function AppContent() {
       <AppHeader 
         teamMemberName={teamMemberName}
         onNewAssessment={handleNewAssessmentRequest}
+        onOpenAssessment={handleOpenAssessment}
       />
 
       {/* Navigation */}

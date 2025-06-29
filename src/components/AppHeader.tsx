@@ -6,25 +6,26 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 interface AppHeaderProps {
   teamMemberName: string;
   onNewAssessment: () => void;
+  onOpenAssessment: (data: any) => void;
 }
 
-export function AppHeader({ teamMemberName, onNewAssessment }: AppHeaderProps) {
+export function AppHeader({ teamMemberName, onNewAssessment, onOpenAssessment }: AppHeaderProps) {
   return (
-    <header className="bg-card border-b border-border shadow-sm">
+    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {teamMemberName ? `${teamMemberName}'s Progression Plan` : 'Engineer Ladder'}
-            </h1>
-            <p className="text-muted-foreground">
-              Achievements and Growth Opportunities
-            </p>
+          <div className="flex items-center gap-4">
+            <AppMenuBar onNewAssessment={onNewAssessment} onOpenAssessment={onOpenAssessment} />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Engineering Leveling Tool</h1>
+              {teamMemberName && (
+                <p className="text-sm text-muted-foreground">
+                  Assessment for: <span className="font-medium">{teamMemberName}</span>
+                </p>
+              )}
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <AppMenuBar onNewAssessment={onNewAssessment} />
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
       </div>
     </header>
