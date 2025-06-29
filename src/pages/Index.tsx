@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { WizardNavigation } from '@/components/WizardNavigation';
 import { LevelingTable } from '@/components/LevelingTable';
 import { Report } from '@/components/Report';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { TeamMemberPrompt } from '@/components/TeamMemberPrompt';
 import { parseConfig, Screen } from '@/utils/configParser';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,13 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState(0);
   const [selections, setSelections] = useLocalStorage<Record<string, Record<string, number>>>('leveling-selections', {});
   const [feedback, setFeedback] = useLocalStorage<Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>>('leveling-feedback', {});
+  const [teamMemberName, setTeamMemberName] = useLocalStorage<string>('team-member-name', '');
   
   const screens: Screen[] = useMemo(() => parseConfig(configMarkdown), []);
   const allScreens = useMemo(() => [...screens.map(s => s.title), 'Report'], [screens]);
+  
+  // Check if we need to show the team member prompt
+  const showTeamMemberPrompt = !teamMemberName && Object.keys(selections).length === 0;
   
   // Track completed screens (screens where all core areas have selections)
   const completedScreens = useMemo(() => {
@@ -38,6 +42,10 @@ function AppContent() {
   const currentScreenData = !isReportScreen ? screens[currentScreen] : null;
   const currentSelections = currentScreenData ? selections[currentScreenData.title] || {} : {};
   const currentFeedback = currentScreenData ? feedback[currentScreenData.title] || {} : {};
+
+  const handleTeamMemberSubmit = (name: string) => {
+    setTeamMemberName(name);
+  };
 
   const handleSelectionChange = (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => {
     if (!currentScreenData) return;
@@ -78,6 +86,7 @@ function AppContent() {
     if (confirm('Are you sure you want to reset all selections? This cannot be undone.')) {
       setSelections({});
       setFeedback({});
+      setTeamMemberName('');
     }
   };
 
@@ -94,13 +103,25 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background">
+      <TeamMemberPrompt
+        isOpen={showTeamMemberPrompt}
+        onSubmit={handleTeamMemberSubmit}
+      />
+      
       {/* Header */}
       <header className="bg-card border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Engineer Leveling System</h1>
-              <p className="text-muted-foreground">Assess and track engineering skill levels</p>
+              <h1 className="text-2xl font-bold text-foreground">
+                {teamMemberName ? `${teamMemberName}'s Professional Journey` : 'Engineer Leveling System'}
+              </h1>
+              <p className="text-muted-foreground">
+                {teamMemberName 
+                  ? 'Celebrating achievements and exploring growth opportunities' 
+                  : 'Assess and track engineering skill levels'
+                }
+              </p>
             </div>
             <div className="flex items-center space-x-2">
               <Button
