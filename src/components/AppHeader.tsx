@@ -17,12 +17,10 @@ export function AppHeader({ teamMemberName, onNewAssessment, onOpenAssessment }:
           <div className="flex items-center gap-4">
             <AppMenuBar onNewAssessment={onNewAssessment} onOpenAssessment={onOpenAssessment} />
             <div>
-              {teamMemberName && (
-                <h1 className="text-2xl font-bold text-foreground">{teamMemberName}</h1>
-              )}
               <p className="text-sm text-muted-foreground">
-                <span>Progression Plan Builder</span>
+                <span>Career Growth Plan for:</span>
               </p>
+                <h1 className="text-2xl font-bold text-foreground">{teamMemberName}</h1>
             </div>
           </div>
           <ThemeToggle />
