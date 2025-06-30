@@ -27,21 +27,47 @@
 
 ## System Design & Architecture
 1. Translates solutions defined by senior engineers, in to efficient code.
-2. Able to scope and estimate assigned tasks indpependantly.
+2. Able to scope and estimate assigned tasks independently.
 3. Scopes solutions across SSDLC; anticipates edge cases and risks and mitigates them.
 4. Designs scalable, robust architectures that are resource-efficient and cost-effective.
-5. Leads architectural decisions and owns the design of complex, multi-system solutions with broad impact.
-6. Owns and evolves system-level architecture across teams and domains, ensuring scalability, resilience, and strategic alignment with business needs.
-7. Leads the design of cross-cutting systems and critical infrastructure, solving problems with company-wide blast radius and long-term impact.
+    At this level, the engineer designs systems that are not only functional but **scalable, resilient, and cost-efficient**. They apply architectural principles to optimize for long-term performance, reliability, and maintainability — not just immediate delivery.
 
-## Technical Breadth & Expertises
+    This goes beyond level 3 by showing **strategic intent** in balancing technical trade-offs and resource constraints. For example, they may introduce caching to reduce load, restructure workflows to minimize latency, or choose async patterns to improve scalability — all while keeping cost and simplicity in mind.
+
+    Their designs consistently reflect an awareness of **future growth and system impact**, making them trusted contributors to durable, production-grade architecture.
+5. Leads architectural decisions and owns the design of complex, multi-system solutions with broad impact.
+    This level marks a shift from designing within a single system to **taking ownership of architecture that spans multiple systems or services**, often involving coordination across teams. The engineer drives architectural decisions, aligning design with product requirements, operational needs, and long-term scalability goals. They’re expected to navigate complexity — such as distributed ownership, integration boundaries, and inconsistent data models — and produce coherent solutions that reduce system friction and avoid duplication.
+
+    Progressing from level 4, which focuses on scalable design within a well-defined context, this level introduces **cross-system accountability**. For example, designing a customer data pipeline that integrates data across billing, CRM, and product telemetry systems, while maintaining integrity, performance, and clear ownership boundaries. They are relied on to **lead architectural discussions**, gain buy-in, and document design decisions that will guide multiple teams over time — but unlike L6, their scope typically stops at the department or product-line level.
+6. Owns and evolves system-level architecture across teams and domains, ensuring scalability, resilience, and strategic alignment with business needs.
+    At this level, the engineer is responsible for **maintaining and evolving architecture that spans multiple teams and product domains**, ensuring that foundational systems remain adaptable as business priorities and technical constraints shift. Their work moves beyond solutioning for known requirements — they actively shape how systems **should evolve** to support future capabilities, scalability, and reliability.
+
+    Building on level 5, where the focus is designing multi-system solutions, level 6 requires **long-term architectural stewardship**. For instance, they might define and evolve a shared platform API strategy used across product lines, ensuring it scales without duplicating functionality or blocking downstream teams. They also maintain **alignment with broader org strategy**, collaborating with engineering and product leadership to ensure architectural direction supports company goals. Unlike level 7, they typically influence within department/product-line boundaries, rather than across the entire company.
+7. Leads the design of cross-cutting systems and critical infrastructure, solving problems with company-wide blast radius and long-term impact.
+    At this level, the engineer drives the design of systems that are **core to the company’s operational and product infrastructure**, with influence that spans multiple organizations or business units. Their solutions are built to endure — enabling business agility, protecting against systemic risks, and supporting scale far beyond current needs. These systems often form the foundation on which other teams build, such as authentication, data platforms, observability stacks, or deployment frameworks.
+
+    This goes beyond level 6’s architectural stewardship across teams and domains by introducing **company-wide reach and criticality**. For example, they may lead the re-architecture of a service mesh to unify service discovery, security, and observability across all environments, while ensuring minimal downtime during adoption. These initiatives require them to align diverse stakeholders, anticipate broad downstream effects, and make decisions that balance present needs with multi-year strategic objectives.
+
+## Technical Breadth & Expertise
 1. Demonstrate strong fundamentals and is focused on growing as an engineer, learning advanced tools and processes
 2. Solves complex problems with the guidence of senior engineers.
 3. Applies deep domain expertise to guide design, architecture, and tool selection across the team.
 4. Deep understanding in more than one component or technology with significant familiarity across all aspects of the product. 
+    At level 4, the engineer demonstrates **deep expertise in multiple key components or technologies**, while also maintaining a strong working knowledge of how the entire product fits together. They are able to **identify system-level implications** of local changes, guide integration work across components, and foresee technical risks or misalignments before they become blockers.
+
+    This is a progression from level 3, which focuses on domain-specific depth. At level 4, the engineer is expected to work comfortably across boundaries, often bridging multiple teams or systems. For example, they might be the go-to person for both the billing engine and the authentication module, while also understanding how those tie into deployment workflows and user-facing flows. This breadth enables them to contribute meaningfully to technical discussions outside their core focus and to help others reason about system-wide effects.
 5. Brings deep product-wide expertise and influences technical direction through trade-off analysis.
+    At level 5, the engineer possesses comprehensive expertise across the entire product or platform, enabling them to recognize and influence technical direction through principled trade-off analysis. Their depth allows them to anticipate edge cases, interdependencies, and risks that might not be obvious to others. They are often sought out to help evaluate build vs. buy decisions, refactor proposals, or system design choices that affect long-term flexibility and maintainability.
+
+    This represents a clear step beyond level 4, where expertise is distributed across components with broad familiarity. Here, the engineer operates with confidence across all major areas of the system, using that understanding to make recommendations that are aligned with both engineering standards and business context. Their input begins to carry strategic weight, informing decisions that influence how the product evolves and how teams operate around it.
 6. Is the go-to technical authority for one or more major systems or domains; mentors Staff+ engineers in navigating complexity and making trade-offs.
+    At level 6, the engineer is recognized across the organization as the **definitive expert in one or more major systems or technical domains** — not only for their deep knowledge, but for their ability to apply that expertise in situations with high ambiguity, complexity, or risk. They are frequently consulted to **resolve architectural disputes**, lead deep-dive investigations, or unblock critical initiatives that require clarity and judgment.
+
+    This is a clear progression from level 5, where influence is driven by broad product-wide expertise. At level 6, the engineer becomes a **trusted advisor to other senior engineers**, including Staff+, helping them navigate high-stakes technical decisions through mentorship, critical review, and trade-off analysis. For instance, they may guide another team through a rewrite of a core system, advising on performance implications, cross-team dependencies, and long-term maintainability, while staying above the implementation detail unless needed.
 7. Shapes architecture patterns and technical standards adopted across teams and business units; ensures coherence across platforms and domains. Acts as a force multiplier across functions, partnering with product, design, and business stakeholders to define and deliver strategic initiatives.
+    At level 7, the engineer operates as a **cross-functional technical strategist**, shaping **architecture patterns and standards** that are broadly adopted across multiple teams and business units. Their primary focus is not just technical excellence, but ensuring **consistency, scalability, and strategic alignment** across the organization’s technical landscape. They identify fragmentation or inefficiencies at the platform level and work to unify and elevate engineering practice through codified standards, reusable frameworks, and system-wide guidance.
+
+    This level builds on the deep domain leadership of level 6 by adding **organizational influence and systemic scale**. Rather than being the go-to expert for a few systems, they set the direction for **how systems should be built across the company**. For example, they might define the company’s event-driven architecture standard, gain alignment across multiple orgs, and lead the adoption effort — all while ensuring the design supports business agility, product velocity, and future extensibility. Their work **enables hundreds of engineers to move faster and more cohesively**, making them a true force multiplier.
 
 ## Technical Strategy & Judgment
 1. Excercises sound judement in using efficient algorithms and approprite patterns
