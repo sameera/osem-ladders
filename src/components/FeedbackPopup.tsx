@@ -81,7 +81,7 @@ export function FeedbackPopup({
                   )}
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-2">
-                  <ScrollArea className="max-h-48 pr-4">
+                  <ScrollArea className="max-h-48 pr-4 overflow-y-auto">
                     <MarkdownRenderer 
                       content={selectedLevelData.description}
                       className="text-sm text-muted-foreground"
