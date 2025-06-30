@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -30,6 +30,7 @@ export function TableCell({
   feedback
 }: TableCellProps) {
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
+  const [showDescriptionPopover, setShowDescriptionPopover] = useState(false);
   const hasDescription = levelContent.description && levelContent.description.trim();
   
   const shouldShowDialog = (description: string) => {
@@ -55,6 +56,15 @@ export function TableCell({
 
   const handleFeedbackCancel = () => {
     setShowFeedbackPopup(false);
+  };
+
+  const handleSelectFromPopover = () => {
+    setShowDescriptionPopover(false);
+    setShowFeedbackPopup(true);
+  };
+
+  const handleCancelPopover = () => {
+    setShowDescriptionPopover(false);
   };
 
   // Format content to show each sentence on a new line
@@ -110,42 +120,48 @@ export function TableCell({
 
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {cellButton}
-          </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-sm p-3">
-            <div className="space-y-2">
-              <MarkdownRenderer 
-                content={truncatedDescription}
-                className="text-sm"
-              />
-              {needsDialog && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      View Full Description
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh]">
-                    <DialogHeader>
-                      <DialogTitle>{levelContent.content}</DialogTitle>
-                    </DialogHeader>
-                    <ScrollArea className="mt-4 max-h-[60vh]">
-                      <MarkdownRenderer 
-                        content={levelContent.description}
-                        className="text-sm leading-relaxed pr-4"
-                      />
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
-              )}
+      <Popover open={showDescriptionPopover} onOpenChange={setShowDescriptionPopover}>
+        <PopoverTrigger asChild>
+          {cellButton}
+        </PopoverTrigger>
+        <PopoverContent side="top" className="max-w-sm p-3">
+          <div className="space-y-3">
+            <MarkdownRenderer 
+              content={truncatedDescription}
+              className="text-sm"
+            />
+            {needsDialog && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    View Full Description
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh]">
+                  <DialogHeader>
+                    <DialogTitle>{levelContent.content}</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="mt-4 max-h-[60vh]">
+                    <MarkdownRenderer 
+                      content={levelContent.description}
+                      className="text-sm leading-relaxed pr-4"
+                    />
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            )}
+            <div className="flex gap-2 pt-2 border-t">
+              <Button variant="outline" size="sm" onClick={handleCancelPopover} className="flex-1">
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSelectFromPopover} className="flex-1">
+                Select L{level}
+              </Button>
             </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+          </div>
+        </PopoverContent>
+      </Popover>
       
       <FeedbackPopup
         isOpen={showFeedbackPopup}
