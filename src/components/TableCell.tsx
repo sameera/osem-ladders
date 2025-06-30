@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ExternalLink } from 'lucide-react';
@@ -29,42 +28,46 @@ export function TableCell({
   tooltipTextLimit,
   feedback
 }: TableCellProps) {
-  const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
-  const [showFullDescriptionDialog, setShowFullDescriptionDialog] = useState(false);
-  const hasDescription = levelContent.description && levelContent.description.trim();
+  const [showFeedbackPopup, setShowFeedbackPopup] = useState<boolean>(false);
+  const [showFullDescriptionDialog, setShowFullDescriptionDialog] = useState<boolean>(false);
+  const hasDescription: boolean = levelContent.description && levelContent.description.trim();
   
-  const shouldShowDialog = (description: string) => {
+  const shouldShowDialog = (description: string): boolean => {
     return description.length > tooltipTextLimit;
   };
 
-  const getTruncatedDescription = (description: string) => {
+  const getTruncatedDescription = (description: string): string => {
     if (description.length <= tooltipTextLimit) {
       return description;
     }
     return description.substring(0, tooltipTextLimit) + '...';
   };
 
-  const handleCellClick = (e: React.MouseEvent) => {
+  const handleCellClick = (e: React.MouseEvent): void => {
     e.stopPropagation();
     setShowFeedbackPopup(true);
   };
 
-  const handleFeedbackConfirm = (evidence: string, nextLevelFeedback: string) => {
+  const handleFeedbackConfirm = (evidence: string, nextLevelFeedback: string): void => {
     onSelectionChange(coreArea.name, level, evidence, nextLevelFeedback);
     setShowFeedbackPopup(false);
   };
 
-  const handleFeedbackCancel = () => {
+  const handleFeedbackCancel = (): void => {
     setShowFeedbackPopup(false);
   };
 
-  const handleSelectFromFullDescription = () => {
+  const handleSelectFromFullDescription = (): void => {
     setShowFullDescriptionDialog(false);
     setShowFeedbackPopup(true);
   };
 
+  const handleViewFullDescription = (): void => {
+    setShowFullDescriptionDialog(true);
+  };
+
   // Format content to show each sentence on a new line
-  const formatContent = (content: string) => {
+  const formatContent = (content: string): JSX.Element[] => {
     return content
       .split(/(?<=[.!?])\s+/)
       .filter(sentence => sentence.trim())
@@ -111,8 +114,8 @@ export function TableCell({
     );
   }
 
-  const needsDialog = shouldShowDialog(levelContent.description);
-  const truncatedDescription = getTruncatedDescription(levelContent.description);
+  const needsDialog: boolean = shouldShowDialog(levelContent.description);
+  const truncatedDescription: string = getTruncatedDescription(levelContent.description);
 
   return (
     <>
@@ -128,38 +131,43 @@ export function TableCell({
                 className="text-sm"
               />
               {needsDialog && (
-                <Dialog open={showFullDescriptionDialog} onOpenChange={setShowFullDescriptionDialog}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      View Full Description
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh]">
-                    <DialogHeader>
-                      <DialogTitle>{levelContent.content}</DialogTitle>
-                    </DialogHeader>
-                    <ScrollArea className="mt-4 max-h-[60vh]">
-                      <MarkdownRenderer 
-                        content={levelContent.description}
-                        className="text-sm leading-relaxed pr-4"
-                      />
-                    </ScrollArea>
-                    <div className="flex gap-2 pt-4 border-t">
-                      <Button variant="outline" onClick={() => setShowFullDescriptionDialog(false)} className="flex-1">
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSelectFromFullDescription} className="flex-1">
-                        Select L{level}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={handleViewFullDescription}
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  View Full Description
+                </Button>
               )}
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      
+      {/* Dialog moved outside tooltip provider */}
+      <Dialog open={showFullDescriptionDialog} onOpenChange={setShowFullDescriptionDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>{levelContent.content}</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="mt-4 max-h-[60vh]">
+            <MarkdownRenderer 
+              content={levelContent.description}
+              className="text-sm leading-relaxed pr-4"
+            />
+          </ScrollArea>
+          <div className="flex gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowFullDescriptionDialog(false)} className="flex-1">
+              Close
+            </Button>
+            <Button onClick={handleSelectFromFullDescription} className="flex-1">
+              Select L{level}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       <FeedbackPopup
         isOpen={showFeedbackPopup}
