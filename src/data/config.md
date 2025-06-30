@@ -4,15 +4,31 @@
 1. Implements and maintains product or system features with good and maintainable code
 2. Delivers technical solutions with minimal guidance.
 3. Writes reliable code across full SSDLC, with exemplary use of patterns and practices.
-4. Raises quality bar through craftsmanship and code rigor
-5. Sustained history of creating major improvements in large, team-critical systems
-7. Builds foundational improvements that increase org effectiveness
-6. Leads implementation of critical infrastructure with company-wide impact
+4. Raises quality bar through craftsmanship and rigorous application of best practices.
+    This is someone who doesn't just meet expectations, but improves them by demonstrating a high standard of care, discipline and pride in their coding practices, and encouraging others to do the same, thereby lifting the overall quality of the engineering output. They emphasize writing well-tested, performant, maintainable code with sound structure and minimal technical debt. Also includes rigorous code reviews, consistency in patterns, and use of automation to catch defects early. You'll find them regularly digging through old code and sparking conversations on edge cases, inefficiencies or even just "how this could have been done better".
+5. Sustained history of creating major improvements in large, complex, team-critical systems
+    Complex systems refer to those with meaningful architectural or operational depth - involving distributed components, scalability or performance trade-offs, state management across boundaries, integration surfaces, and long-lived dependencies (such as thirdparty auth systems, MQs, observerbility tools).
+
+    Staff Engineers are not just a result of individual career growth—they are necessitated by the complexity of modern, scalable enterprise systems. As systems grow in architectural depth and operational scale, they demand technical leaders who meet an industry-wide standard of expertise and can drive high-impact outcomes across teams and domains.
+6. Builds foundational improvements that increase org effectiveness
+    At this level, the engineer moves beyond contributing to or improving isolated systems and begins to **intentionally design and deliver foundational enhancements** that elevate the performance, velocity, and quality of the **entire engineering organization**. This may include rethinking architectural patterns, creating shared libraries or infrastructure, or introducing practices that eliminate recurring friction across teams.
+
+    What sets this apart from L5 is **scale and abstraction** — while a Staff Engineer may drive improvements in complex, team-critical systems, a Senior Staff Engineer looks for **cross-cutting pain points** and builds durable solutions that other engineers and teams can build upon. Their work often impacts hiring productivity, onboarding speed, test reliability, deployment velocity, or system observability — elements that unlock effectiveness across multiple domains.
+
+    For example, a Senior Staff Engineer might redesign the platform's CI/CD pipeline to make builds 70% faster and dramatically more reliable. When this is done for a complex system (as described elswhere) this is a force multiplier that gives **every team in the org more speed, confidence, and delivery bandwidth.**
+7. Leads implementation of critical infrastructure with company-wide impact
+    At L7, the engineer is entrusted with the **design and delivery of foundational systems that serve as critical enablers for the entire company**, not just the engineering org. This is not about optimizing existing flows or delivering high-impact features — this is about **creating or reshaping infrastructure that the business itself depends on to scale, differentiate, or survive**.
+
+    This level surpasses L6 in two key ways: **scope and risk**. While L6 builds systems that improve how engineering works, L7 **owns infrastructure that affects products, users, or business continuity across multiple lines of business**. Their work typically involves **navigating deep uncertainty**, solving intractable problems, and aligning diverse stakeholders to converge on bold, long-term solutions.
+
+    A practical example: leading the implementation of a unified data platform that consolidates fragmented analytics pipelines across teams, ensuring regulatory compliance, enabling real-time insights for product and marketing, and forming the backbone for ML use cases — all while replacing legacy systems with minimal business disruption.
+
+    This is the level where implementation choices carry **strategic weight**, and success means the entire company runs more reliably, securely, and effectively because of the system you led into existence.
 
 ## System Design & Architecture
 1. Translates solutions defined by senior engineers, in to efficient code.
 2. Able to scope and estimate assigned tasks indpependantly.
-3. Scopes solutions across SSDLC; anticipates edge cases and risks and mitigates them.P
+3. Scopes solutions across SSDLC; anticipates edge cases and risks and mitigates them.
 4. Designs scalable, robust architectures that are resource-efficient and cost-effective.
 5. Leads architectural decisions and owns the design of complex, multi-system solutions with broad impact.
 6. Owns and evolves system-level architecture across teams and domains, ensuring scalability, resilience, and strategic alignment with business needs.
