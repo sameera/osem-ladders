@@ -164,6 +164,8 @@ function AppContent() {
 
   const handleOpenAssessment = (data: any) => {
     try {
+      console.log('Loading assessment data:', data);
+      
       if (!data.assessee || !data.leveling) {
         alert('Invalid assessment file format');
         return;
@@ -177,23 +179,51 @@ function AppContent() {
       const newFeedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>> = {};
 
       Object.entries(data.leveling).forEach(([screenTitle, screenData]: [string, any]) => {
+        console.log('Processing screen:', screenTitle, screenData);
+        
         newSelections[screenTitle] = {};
         newFeedback[screenTitle] = {};
 
-        Object.entries(screenData.notes).forEach(([coreArea, noteData]: [string, any]) => {
-          const level = parseInt(noteData.level.replace('L', ''));
-          newSelections[screenTitle][coreArea] = level;
-          
-          if (!newFeedback[screenTitle][coreArea]) {
-            newFeedback[screenTitle][coreArea] = {};
-          }
-          
-          newFeedback[screenTitle][coreArea][level] = {
-            evidence: noteData.evidence || '',
-            nextLevelFeedback: noteData.advice || ''
-          };
-        });
+        if (screenData.notes) {
+          Object.entries(screenData.notes).forEach(([coreArea, noteData]: [string, any]) => {
+            console.log('Processing core area:', coreArea, noteData);
+            
+            // Parse level more robustly
+            let level: number;
+            if (typeof noteData.level === 'number') {
+              level = noteData.level;
+            } else if (typeof noteData.level === 'string') {
+              // Handle both "L1" format and plain number strings
+              const levelStr = noteData.level.toString().replace(/^L/i, '');
+              level = parseInt(levelStr, 10);
+            } else {
+              console.warn('Invalid level format for', coreArea, ':', noteData.level);
+              return;
+            }
+
+            if (isNaN(level) || level < 1) {
+              console.warn('Invalid level number for', coreArea, ':', level);
+              return;
+            }
+
+            newSelections[screenTitle][coreArea] = level;
+            
+            if (!newFeedback[screenTitle][coreArea]) {
+              newFeedback[screenTitle][coreArea] = {};
+            }
+            
+            newFeedback[screenTitle][coreArea][level] = {
+              evidence: noteData.evidence || '',
+              nextLevelFeedback: noteData.advice || ''
+            };
+            
+            console.log('Set selection:', screenTitle, coreArea, level);
+          });
+        }
       });
+
+      console.log('Final selections:', newSelections);
+      console.log('Final feedback:', newFeedback);
 
       setSelections(newSelections);
       setFeedback(newFeedback);
