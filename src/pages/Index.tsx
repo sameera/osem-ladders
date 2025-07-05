@@ -14,6 +14,7 @@ function AppContent() {
   const [selections, setSelections] = useLocalStorage<Record<string, Record<string, number>>>('leveling-selections', {});
   const [feedback, setFeedback] = useLocalStorage<Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>>('leveling-feedback', {});
   const [teamMemberName, setTeamMemberName] = useLocalStorage<string>('team-member-name', '');
+  const [currentLevel, setCurrentLevel] = useLocalStorage<number>('current-level', 1);
   const [showNewAssessmentPrompt, setShowNewAssessmentPrompt] = useState(false);
   const [showConfirmNewAssessment, setShowConfirmNewAssessment] = useState(false);
   
@@ -43,8 +44,11 @@ function AppContent() {
   const currentSelections = currentScreenData ? selections[currentScreenData.title] || {} : {};
   const currentFeedback = currentScreenData ? feedback[currentScreenData.title] || {} : {};
 
-  const handleTeamMemberSubmit = (name: string) => {
+  const handleTeamMemberSubmit = (name: string, level?: number) => {
     setTeamMemberName(name);
+    if (level !== undefined) {
+      setCurrentLevel(level);
+    }
   };
 
   const handleSelectionChange = (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => {
@@ -86,6 +90,7 @@ function AppContent() {
   const handleSubmitAssessment = () => {
     const assessmentData = {
       assessee: teamMemberName,
+      currentLevel: currentLevel,
       leveling: screens.reduce((acc, screen) => {
         const screenSelections = selections[screen.title] || {};
         const screenFeedback = feedback[screen.title] || {};
@@ -154,6 +159,7 @@ function AppContent() {
     setSelections({});
     setFeedback({});
     setTeamMemberName('');
+    setCurrentLevel(1);
     setCurrentScreen(0);
     setShowNewAssessmentPrompt(false);
   };
@@ -171,8 +177,11 @@ function AppContent() {
         return;
       }
 
-      // Set the team member name
+      // Set the team member name and current level
       setTeamMemberName(data.assessee);
+      if (data.currentLevel) {
+        setCurrentLevel(data.currentLevel);
+      }
 
       // Convert the leveling data back to the format used by the app
       const newSelections: Record<string, Record<string, number>> = {};
@@ -313,6 +322,7 @@ function AppContent() {
           currentFeedback={currentFeedback}
           feedback={feedback}
           onSelectionChange={handleSelectionChange}
+          currentLevel={currentLevel}
         />
 
         {/* Navigation Buttons */}

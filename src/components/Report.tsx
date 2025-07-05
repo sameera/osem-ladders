@@ -8,6 +8,7 @@ interface ReportProps {
   screens: Screen[];
   selections: Record<string, Record<string, number>>;
   feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>;
+  currentLevel: number;
 }
 
 const levelNames = {
@@ -33,7 +34,22 @@ function calculateMedian(values: number[]): number {
   }
 }
 
-export function Report({ screens, selections, feedback }: ReportProps) {
+function getPerformanceStatus(assessedLevel: number, currentLevel: number): string {
+  if (assessedLevel === currentLevel) return "Meets Expectations";
+  if (assessedLevel > currentLevel) return "Exceeds Expectations";
+  return "Needs Improvement";
+}
+
+function getPerformanceColor(status: string): string {
+  switch (status) {
+    case "Exceeds Expectations": return "text-green-600";
+    case "Meets Expectations": return "text-blue-600";
+    case "Needs Improvement": return "text-orange-600";
+    default: return "text-muted-foreground";
+  }
+}
+
+export function Report({ screens, selections, feedback, currentLevel }: ReportProps) {
   const screenLevels = screens.map(screen => {
     const screenSelections = selections[screen.title] || {};
     const values = Object.values(screenSelections).filter(val => val > 0);
@@ -49,26 +65,29 @@ export function Report({ screens, selections, feedback }: ReportProps) {
 
   const allMedianValues = screenLevels.map(s => s.median).filter(val => val > 0);
   const overallLevel = calculateMedian(allMedianValues);
-  const overallLevelName = levelNames[overallLevel as keyof typeof levelNames] || 'Not Assessed';
+  const overallPerformance = overallLevel > 0 ? getPerformanceStatus(overallLevel, currentLevel) : 'Not Assessed';
+  const currentLevelName = levelNames[currentLevel as keyof typeof levelNames] || 'Unknown Level';
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Report</h2>
         <p className="text-muted-foreground">
-          Your engineering level assessment based on the median values across all areas
+          Performance assessment for current level: {currentLevelName}
         </p>
       </div>
 
-      {/* Overall Level */}
+      {/* Overall Performance */}
       <Card className="border-2 border-primary">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Overall Level</CardTitle>
-          <CardDescription>Median of all screen assessments</CardDescription>
+          <CardTitle className="text-2xl">Overall Performance</CardTitle>
+          <CardDescription>Based on median assessment across all areas</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <div className="flex items-center justify-center">
-            <span className="text-xl font-semibold">{overallLevelName}</span>
+            <span className={`text-xl font-semibold ${getPerformanceColor(overallPerformance)}`}>
+              {overallPerformance}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -78,6 +97,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
         {screenLevels.map((screen, index) => {
           const screenSelections = selections[screen.title] || {};
           const screenFeedback = feedback[screen.title] || {};
+          const screenPerformance = screen.median > 0 ? getPerformanceStatus(screen.median, currentLevel) : 'Not Assessed';
           
           return (
             <Card key={index} className="w-full">
@@ -85,7 +105,9 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                 <CardTitle className="text-xl">{screen.title}</CardTitle>
                 <CardDescription>
                   {screen.median > 0 ? (
-                    <>Meeting the expectations for <strong>{screen.levelName}</strong> level.</>
+                    <span className={getPerformanceColor(screenPerformance)}>
+                      <strong>{screenPerformance}</strong> for current level
+                    </span>
                   ) : (
                     'Not Assessed'
                   )}
