@@ -42,9 +42,9 @@ export function RadarChartComponent({ data, title }: RadarChartComponentProps) {
           <Radar
             name="Actual Performance"
             dataKey="actual"
-            stroke="#3b82f6"
-            fill="#3b82f6"
-            fillOpacity={0.25}
+            stroke="#22c55e"
+            fill="#22c55e"
+            fillOpacity={0.3}
             strokeWidth={3}
           />
           <Legend 
