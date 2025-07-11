@@ -33,19 +33,19 @@ export function RadarChartComponent({ data, title }: RadarChartComponentProps) {
           <Radar
             name="Expected Level"
             dataKey="expected"
-            stroke="hsl(var(--muted-foreground))"
-            fill="hsl(var(--muted-foreground))"
-            fillOpacity={0.1}
-            strokeWidth={2}
-            strokeDasharray="5 5"
+            stroke="#94a3b8"
+            fill="#94a3b8"
+            fillOpacity={0.15}
+            strokeWidth={3}
+            strokeDasharray="8 4"
           />
           <Radar
             name="Actual Performance"
             dataKey="actual"
-            stroke="hsl(var(--primary))"
-            fill="hsl(var(--primary))"
-            fillOpacity={0.2}
-            strokeWidth={2}
+            stroke="#3b82f6"
+            fill="#3b82f6"
+            fillOpacity={0.25}
+            strokeWidth={3}
           />
           <Legend 
             wrapperStyle={{ 

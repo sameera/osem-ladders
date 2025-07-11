@@ -83,11 +83,23 @@ export function Report({
           <CardTitle className="text-2xl">Overall Performance</CardTitle>
           <CardDescription>Based on median assessment across all areas</CardDescription>
         </CardHeader>
-        <CardContent className="text-center">
-          <div className="flex items-center justify-center">
+        <CardContent className="space-y-4">
+          <div className="text-center">
             <span className={`text-xl font-semibold ${getPerformanceColor(overallPerformance)}`}>
               {overallPerformance}
             </span>
+          </div>
+          
+          {/* Overall Radar Chart */}
+          <div className="mb-6">
+            <RadarChartComponent 
+              title="Overall Performance Summary" 
+              data={screenLevels.map(screen => ({
+                coreArea: screen.title,
+                actual: screen.median,
+                expected: currentLevel
+              }))} 
+            />
           </div>
         </CardContent>
       </Card>
