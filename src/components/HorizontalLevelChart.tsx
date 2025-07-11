@@ -67,7 +67,7 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
                     )}
                     
                     {/* Level number */}
-                    <span className="text-xs text-muted-foreground mt-3">{level}</span>
+                    <span className="text-xs text-muted-foreground mt-[15px]">{level}</span>
                   </div>
                 ))}
               </div>
