@@ -3,6 +3,7 @@ import React from 'react';
 import { Screen } from '@/utils/configParser';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { RadarChartComponent } from '@/components/RadarChart';
 
 interface ReportProps {
   screens: Screen[];
@@ -114,6 +115,19 @@ export function Report({ screens, selections, feedback, currentLevel }: ReportPr
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Radar Chart */}
+                <div className="mb-6">
+                  <RadarChartComponent
+                    title={screen.title}
+                    data={screen.coreAreas.map(coreArea => ({
+                      coreArea: coreArea.name,
+                      actual: screenSelections[coreArea.name] || 0,
+                      expected: currentLevel
+                    }))}
+                  />
+                </div>
+
+                {/* Detailed feedback for assessed areas */}
                 {screen.coreAreas.map((coreArea, areaIndex) => {
                   const selectedLevel = screenSelections[coreArea.name];
                   const areaFeedback = screenFeedback[coreArea.name]?.[selectedLevel];
