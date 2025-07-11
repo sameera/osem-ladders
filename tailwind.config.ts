@@ -61,6 +61,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				chart: {
+					expected: 'hsl(var(--chart-expected))',
+					'actual-positive': 'hsl(var(--chart-actual-positive))',
+					'actual-negative': 'hsl(var(--chart-actual-negative))',
+					grid: 'hsl(var(--chart-grid))'
 				}
 			},
 			borderRadius: {
