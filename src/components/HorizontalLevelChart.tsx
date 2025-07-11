@@ -50,8 +50,8 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
               <div className="relative flex justify-between items-center h-8">
                 {levels.map((level) => (
                   <div key={level} className="relative flex flex-col items-center">
-                    {/* Base dot */}
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                    {/* Base vertical line */}
+                    <div className="w-0.5 h-4 bg-muted-foreground/30" />
                     
                     {/* Expected level marker (MapPin) */}
                     {level === item.expected && (
@@ -67,7 +67,7 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
                     )}
                     
                     {/* Level number */}
-                    <span className="text-xs text-muted-foreground mt-1">{level}</span>
+                    <span className="text-xs text-muted-foreground mt-3">{level}</span>
                   </div>
                 ))}
               </div>
