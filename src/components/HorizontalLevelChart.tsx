@@ -53,9 +53,9 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
                     {/* Base dot */}
                     <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
                     
-                    {/* Expected level marker (dotted) */}
+                    {/* Expected level marker (MapPin) */}
                     {level === item.expected && (
-                      <div className="absolute -top-1 w-4 h-4 border-2 border-dashed border-muted-foreground rounded-full bg-background" />
+                      <MapPin className="absolute -top-1 w-4 h-4 text-muted-foreground/60" />
                     )}
                     
                     {/* Actual level marker (MapPin icon) */}
@@ -74,11 +74,11 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
             </div>
             
             {/* Legend */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 border-2 border-dashed border-muted-foreground rounded-full bg-background" />
-                <span>Expected (Level {item.expected})</span>
-              </div>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-muted-foreground/60" />
+                  <span>Expected (Level {item.expected})</span>
+                </div>
               <div className="flex items-center gap-1">
                 <MapPin 
                   className="w-3 h-3"
