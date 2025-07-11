@@ -73,20 +73,6 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
               </div>
             </div>
             
-            {/* Legend */}
-              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-muted-foreground/60" />
-                  <span>Expected (Level {item.expected})</span>
-                </div>
-              <div className="flex items-center gap-1">
-                <MapPin 
-                  className="w-3 h-3"
-                  style={{ color: lineColor }}
-                />
-                <span>Actual (Level {item.actual})</span>
-              </div>
-            </div>
           </div>
         );
       })}

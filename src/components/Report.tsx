@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RadarChartComponent } from '@/components/RadarChart';
 import { HorizontalLevelChart } from '@/components/HorizontalLevelChart';
+import { MapPin } from 'lucide-react';
 interface ReportProps {
   screens: Screen[];
   selections: Record<string, Record<string, number>>;
@@ -171,5 +172,30 @@ export function Report({
           </div>
         </CardContent>
       </Card>
+
+      {/* Legend */}
+      {viewType === 'line' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Legend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3 text-sm">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-muted-foreground/60" />
+                <span>Expected Level</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-green-600" />
+                <span>Actual Level (Above Expected)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-red-600" />
+                <span>Actual Level (Below Expected)</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>;
 }
