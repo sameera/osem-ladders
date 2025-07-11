@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Screen } from '@/utils/configParser';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { RadarChartComponent } from '@/components/RadarChart';
+import { HorizontalLevelChart } from '@/components/HorizontalLevelChart';
 interface ReportProps {
   screens: Screen[];
   selections: Record<string, Record<string, number>>;
@@ -54,6 +56,8 @@ export function Report({
   feedback,
   currentLevel
 }: ReportProps) {
+  const [viewType, setViewType] = useState<'radar' | 'line'>('radar');
+  
   const screenLevels = screens.map(screen => {
     const screenSelections = selections[screen.title] || {};
     const values = Object.values(screenSelections).filter(val => val > 0);
@@ -77,6 +81,28 @@ export function Report({
         </p>
       </div>
 
+      {/* View Toggle */}
+      <div className="flex justify-center mb-6">
+        <div className="flex bg-muted rounded-lg p-1">
+          <Button
+            variant={viewType === 'radar' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewType('radar')}
+            className="rounded-md"
+          >
+            Radar View
+          </Button>
+          <Button
+            variant={viewType === 'line' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewType('line')}
+            className="rounded-md"
+          >
+            Line View
+          </Button>
+        </div>
+      </div>
+
       {/* Overall Performance */}
       <Card className="border-2 border-primary">
         <CardHeader className="text-center">
@@ -90,16 +116,27 @@ export function Report({
             </span>
           </div>
           
-          {/* Overall Radar Chart */}
+          {/* Overall Chart */}
           <div className="mb-6">
-            <RadarChartComponent 
-              title="Overall Performance Summary" 
-              data={screenLevels.map(screen => ({
-                coreArea: screen.title,
-                actual: screen.median,
-                expected: currentLevel
-              }))} 
-            />
+            {viewType === 'radar' ? (
+              <RadarChartComponent 
+                title="Overall Performance Summary" 
+                data={screenLevels.map(screen => ({
+                  coreArea: screen.title,
+                  actual: screen.median,
+                  expected: currentLevel
+                }))} 
+              />
+            ) : (
+              <HorizontalLevelChart 
+                title="Overall Performance Summary" 
+                data={screenLevels.map(screen => ({
+                  coreArea: screen.title,
+                  actual: screen.median,
+                  expected: currentLevel
+                }))} 
+              />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -120,13 +157,21 @@ export function Report({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Radar Chart */}
+                {/* Chart */}
                 <div className="mb-6">
-                  <RadarChartComponent title={screen.title} data={screen.coreAreas.map(coreArea => ({
-                coreArea: coreArea.name,
-                actual: screenSelections[coreArea.name] || 0,
-                expected: currentLevel
-              }))} />
+                  {viewType === 'radar' ? (
+                    <RadarChartComponent title={screen.title} data={screen.coreAreas.map(coreArea => ({
+                      coreArea: coreArea.name,
+                      actual: screenSelections[coreArea.name] || 0,
+                      expected: currentLevel
+                    }))} />
+                  ) : (
+                    <HorizontalLevelChart title={screen.title} data={screen.coreAreas.map(coreArea => ({
+                      coreArea: coreArea.name,
+                      actual: screenSelections[coreArea.name] || 0,
+                      expected: currentLevel
+                    }))} />
+                  )}
                 </div>
 
                 {/* Detailed feedback for assessed areas */}
