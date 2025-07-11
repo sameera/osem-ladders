@@ -51,7 +51,7 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
                 {levels.map((level) => (
                   <div key={level} className="relative flex flex-col items-center">
                     {/* Base vertical line */}
-                    <div className="w-0.5 h-4 bg-muted-foreground/30" />
+                    <div className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-3 bg-muted-foreground/30" />
                     
                     {/* Expected level marker (MapPin) */}
                     {level === item.expected && (
