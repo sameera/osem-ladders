@@ -34,6 +34,7 @@ function calculateMedian(values: number[]): number {
   }
 }
 function getPerformanceStatus(assessedLevel: number, currentLevel: number): string {
+  if (assessedLevel === currentLevel) return "Meets Expectations";
   if (assessedLevel > currentLevel) return "Exceeds Expectations";
   return "Needs Improvement";
 }
@@ -56,7 +57,6 @@ export function Report({
   currentLevel
 }: ReportProps) {
   const [viewType, setViewType] = useState<'radar' | 'line'>('radar');
-  
   const screenLevels = screens.map(screen => {
     const screenSelections = selections[screen.title] || {};
     const values = Object.values(screenSelections).filter(val => val > 0);
@@ -83,21 +83,11 @@ export function Report({
       {/* View Toggle */}
       <div className="flex justify-center mb-6">
         <div className="flex bg-muted rounded-lg p-1">
-          <Button
-            variant={viewType === 'radar' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewType('radar')}
-            className="rounded-md"
-          >
+          <Button variant={viewType === 'radar' ? 'default' : 'ghost'} size="sm" onClick={() => setViewType('radar')} className="rounded-md">
             Radar View
           </Button>
-          <Button
-            variant={viewType === 'line' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewType('line')}
-            className="rounded-md"
-          >
-            Journey View
+          <Button variant={viewType === 'line' ? 'default' : 'ghost'} size="sm" onClick={() => setViewType('line')} className="rounded-md">
+            Line View
           </Button>
         </div>
       </div>
@@ -117,25 +107,15 @@ export function Report({
           
           {/* Overall Chart */}
           <div className="mb-6">
-            {viewType === 'radar' ? (
-              <RadarChartComponent 
-                title="Overall Performance Summary" 
-                data={screenLevels.map(screen => ({
-                  coreArea: screen.title,
-                  actual: screen.median,
-                  expected: currentLevel
-                }))} 
-              />
-            ) : (
-              <HorizontalLevelChart 
-                title="Overall Performance Summary" 
-                data={screenLevels.map(screen => ({
-                  coreArea: screen.title,
-                  actual: screen.median,
-                  expected: currentLevel
-                }))} 
-              />
-            )}
+            {viewType === 'radar' ? <RadarChartComponent title="Overall Performance Summary" data={screenLevels.map(screen => ({
+            coreArea: screen.title,
+            actual: screen.median,
+            expected: currentLevel
+          }))} /> : <HorizontalLevelChart title="Overall Performance Summary" data={screenLevels.map(screen => ({
+            coreArea: screen.title,
+            actual: screen.median,
+            expected: currentLevel
+          }))} />}
           </div>
         </CardContent>
       </Card>
@@ -149,28 +129,20 @@ export function Report({
         return <Card key={index} className="w-full">
               <CardHeader>
                 <CardTitle className="text-xl">{screen.title}</CardTitle>
-                <CardDescription>
-                  {screen.median > 0 ? <span className={getPerformanceColor(screenPerformance)}>
-                      <strong>{screenPerformance}</strong> for current level
-                    </span> : 'Not Assessed'}
-                </CardDescription>
+                
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Chart */}
                 <div className="mb-6">
-                  {viewType === 'radar' ? (
-                    <RadarChartComponent title={screen.title} data={screen.coreAreas.map(coreArea => ({
-                      coreArea: coreArea.name,
-                      actual: screenSelections[coreArea.name] || 0,
-                      expected: currentLevel
-                    }))} />
-                  ) : (
-                    <HorizontalLevelChart title={screen.title} data={screen.coreAreas.map(coreArea => ({
-                      coreArea: coreArea.name,
-                      actual: screenSelections[coreArea.name] || 0,
-                      expected: currentLevel
-                    }))} />
-                  )}
+                  {viewType === 'radar' ? <RadarChartComponent title={screen.title} data={screen.coreAreas.map(coreArea => ({
+                coreArea: coreArea.name,
+                actual: screenSelections[coreArea.name] || 0,
+                expected: currentLevel
+              }))} /> : <HorizontalLevelChart title={screen.title} data={screen.coreAreas.map(coreArea => ({
+                coreArea: coreArea.name,
+                actual: screenSelections[coreArea.name] || 0,
+                expected: currentLevel
+              }))} />}
                 </div>
 
                 {/* Detailed feedback for assessed areas */}
