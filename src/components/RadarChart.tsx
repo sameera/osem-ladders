@@ -18,7 +18,7 @@ export function RadarChartComponent({ data, title }: RadarChartComponentProps) {
       <h4 className="text-lg font-semibold mb-4 text-center">{title}</h4>
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-          <PolarGrid />
+          <PolarGrid stroke="hsl(var(--border))" strokeOpacity={0.3} />
           <PolarAngleAxis 
             dataKey="coreArea" 
             className="text-xs"
@@ -33,9 +33,9 @@ export function RadarChartComponent({ data, title }: RadarChartComponentProps) {
           <Radar
             name="Expected Level"
             dataKey="expected"
-            stroke="#94a3b8"
-            fill="#94a3b8"
-            fillOpacity={0.15}
+            stroke="#3b82f6"
+            fill="#3b82f6"
+            fillOpacity={0.2}
             strokeWidth={3}
             strokeDasharray="8 4"
           />
