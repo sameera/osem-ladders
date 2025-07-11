@@ -1,4 +1,5 @@
 import React from 'react';
+import { Component } from 'lucide-react';
 
 interface HorizontalLevelChartProps {
   title: string;
@@ -57,11 +58,11 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
                       <div className="absolute -top-1 w-4 h-4 border-2 border-dashed border-muted-foreground rounded-full bg-background" />
                     )}
                     
-                    {/* Actual level marker (solid colored) */}
+                    {/* Actual level marker (Component icon) */}
                     {level === item.actual && (
-                      <div 
-                        className="absolute -top-1 w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                        style={{ backgroundColor: lineColor }}
+                      <Component 
+                        className="absolute -top-1 w-4 h-4 shadow-sm"
+                        style={{ color: lineColor }}
                       />
                     )}
                     
@@ -79,9 +80,9 @@ export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps)
                 <span>Expected (Level {item.expected})</span>
               </div>
               <div className="flex items-center gap-1">
-                <div 
-                  className="w-3 h-3 rounded-full border-2 border-white"
-                  style={{ backgroundColor: lineColor }}
+                <Component 
+                  className="w-3 h-3"
+                  style={{ color: lineColor }}
                 />
                 <span>Actual (Level {item.actual})</span>
               </div>
