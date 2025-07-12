@@ -8,9 +8,10 @@ interface HorizontalLevelChartProps {
     actual: number;
     expected: number;
   }>;
+  showLegend?: boolean;
 }
 
-export function HorizontalLevelChart({ title, data }: HorizontalLevelChartProps) {
+export function HorizontalLevelChart({ title, data, showLegend = true }: HorizontalLevelChartProps) {
   const levels = [1, 2, 3, 4, 5, 6, 7];
 
   return (

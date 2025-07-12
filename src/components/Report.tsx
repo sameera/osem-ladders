@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RadarChartComponent } from '@/components/RadarChart';
 import { HorizontalLevelChart } from '@/components/HorizontalLevelChart';
+import { MapPin } from 'lucide-react';
 interface ReportProps {
   screens: Screen[];
   selections: Record<string, Record<string, number>>;
@@ -105,23 +106,23 @@ export function Report({
             </span>
           </div>
           
-          {/* Overall Chart */}
+          {/* Overall Chart without legend */}
           <div className="mb-6">
             {viewType === 'radar' ? <RadarChartComponent title="Overall Performance Summary" data={screenLevels.map(screen => ({
             coreArea: screen.title,
             actual: screen.median,
             expected: currentLevel
-          }))} /> : <HorizontalLevelChart title="Overall Performance Summary" data={screenLevels.map(screen => ({
+          }))} showLegend={false} /> : <HorizontalLevelChart title="Overall Performance Summary" data={screenLevels.map(screen => ({
             coreArea: screen.title,
             actual: screen.median,
             expected: currentLevel
-          }))} />}
+          }))} showLegend={false} />}
           </div>
         </CardContent>
       </Card>
 
       {/* Detailed Screen Breakdown */}
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-6">
         {screenLevels.map((screen, index) => {
         const screenSelections = selections[screen.title] || {};
         const screenFeedback = feedback[screen.title] || {};
@@ -132,17 +133,17 @@ export function Report({
                 
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Chart */}
+                {/* Chart without legend */}
                 <div className="mb-6">
                   {viewType === 'radar' ? <RadarChartComponent title={screen.title} data={screen.coreAreas.map(coreArea => ({
                 coreArea: coreArea.name,
                 actual: screenSelections[coreArea.name] || 0,
                 expected: currentLevel
-              }))} /> : <HorizontalLevelChart title={screen.title} data={screen.coreAreas.map(coreArea => ({
+              }))} showLegend={false} /> : <HorizontalLevelChart title={screen.title} data={screen.coreAreas.map(coreArea => ({
                 coreArea: coreArea.name,
                 actual: screenSelections[coreArea.name] || 0,
                 expected: currentLevel
-              }))} />}
+              }))} showLegend={false} />}
                 </div>
 
                 {/* Detailed feedback for assessed areas */}
@@ -157,6 +158,29 @@ export function Report({
             </Card>;
       })}
       </div>
+
+      {/* Chart Legend */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Chart Legend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <MapPin className="w-4 h-4 text-muted-foreground/60" />
+              <span className="text-sm">Expected Level</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin className="w-4 h-4 text-green-500" />
+              <span className="text-sm">Actual Level (Above Expected)</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin className="w-4 h-4 text-red-500" />
+              <span className="text-sm">Actual Level (Below Expected)</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Additional Information */}
       <Card>

@@ -8,13 +8,14 @@ interface RadarChartData {
 interface RadarChartComponentProps {
   data: RadarChartData[];
   title: string;
+  showLegend?: boolean;
 }
 export function RadarChartComponent({
   data,
-  title
+  title,
+  showLegend = true
 }: RadarChartComponentProps) {
   return <div className="w-full h-80">
-      
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data} margin={{
         top: 20,
@@ -22,21 +23,51 @@ export function RadarChartComponent({
         bottom: 20,
         left: 30
       }}>
-          <PolarGrid />
-          <PolarAngleAxis dataKey="coreArea" className="text-xs" tick={{
-          fontSize: 11,
-          fill: 'hsl(var(--foreground))'
-        }} />
-          <PolarRadiusAxis angle={90} domain={[0, 7]} tick={{
-          fontSize: 10,
-          fill: 'hsl(var(--muted-foreground))'
-        }} tickCount={8} />
-          <Radar name="Expected Level" dataKey="expected" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.15} strokeWidth={3} strokeDasharray="8 4" />
-          <Radar name="Actual Performance" dataKey="actual" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} strokeWidth={3} />
-          <Legend wrapperStyle={{
+          <defs>
+            <linearGradient id="expectedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.8} />
+              <stop offset="100%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.2} />
+            </linearGradient>
+            <linearGradient id="actualGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="hsl(var(--chart-primary))" stopOpacity={0.8} />
+              <stop offset="50%" stopColor="hsl(var(--chart-secondary))" stopOpacity={0.6} />
+              <stop offset="100%" stopColor="hsl(var(--chart-accent))" stopOpacity={0.4} />
+            </linearGradient>
+          </defs>
+          <PolarGrid 
+            gridType="polygon"
+            stroke="hsl(var(--border))"
+            strokeWidth={1}
+            strokeDasharray="2 2"
+          />
+          <PolarAngleAxis 
+            dataKey="coreArea" 
+            className="text-xs font-medium" 
+            tick={{
+              fontSize: 11,
+              fill: 'hsl(var(--foreground))',
+              fontWeight: 500
+            }} 
+            tickSize={8}
+          />
+          <PolarRadiusAxis 
+            angle={90} 
+            domain={[0, 7]} 
+            tick={{
+              fontSize: 10,
+              fill: 'hsl(var(--muted-foreground))',
+              fontWeight: 400
+            }} 
+            tickCount={8}
+            stroke="hsl(var(--muted-foreground))"
+            strokeOpacity={0.3}
+          />
+          <Radar name="Expected Level" dataKey="expected" stroke="hsl(var(--muted-foreground))" fill="url(#expectedGradient)" fillOpacity={0.15} strokeWidth={3} strokeDasharray="8 4" />
+          <Radar name="Actual Performance" dataKey="actual" stroke="hsl(var(--chart-primary))" fill="url(#actualGradient)" fillOpacity={0.25} strokeWidth={3} />
+          {showLegend && <Legend wrapperStyle={{
           fontSize: '12px',
           color: 'hsl(var(--foreground))'
-        }} />
+        }} />}
         </RadarChart>
       </ResponsiveContainer>
     </div>;
