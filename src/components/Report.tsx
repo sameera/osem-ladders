@@ -195,5 +195,54 @@ export function Report({
           </div>
         </CardContent>
       </Card>
+
+      {/* User Comments Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Assessment Comments</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {screenLevels.map((screen) => {
+            const screenFeedback = feedback[screen.title] || {};
+            const hasAnyFeedback = Object.keys(screenFeedback).some(coreAreaName => 
+              Object.keys(screenFeedback[coreAreaName] || {}).length > 0
+            );
+            
+            if (!hasAnyFeedback) return null;
+
+            return (
+              <div key={screen.title} className="space-y-4">
+                <h3 className="text-xl font-semibold text-foreground">{screen.title}</h3>
+                {screen.coreAreas.map((coreArea) => {
+                  const areaFeedback = screenFeedback[coreArea.name];
+                  if (!areaFeedback || Object.keys(areaFeedback).length === 0) return null;
+
+                  return (
+                    <div key={coreArea.name} className="ml-4 space-y-3">
+                      <h4 className="text-lg font-medium text-foreground">{coreArea.name}</h4>
+                      {Object.entries(areaFeedback).map(([level, comments]) => (
+                        <div key={level} className="ml-4 space-y-2">
+                          {comments.evidence && (
+                            <div>
+                              <h5 className="text-sm font-medium text-muted-foreground mb-1">What you are doing well</h5>
+                              <p className="text-sm text-foreground">{comments.evidence}</p>
+                            </div>
+                          )}
+                          {comments.nextLevelFeedback && (
+                            <div>
+                              <h5 className="text-sm font-medium text-muted-foreground mb-1">What you can do better</h5>
+                              <p className="text-sm text-foreground">{comments.nextLevelFeedback}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
     </div>;
 }
