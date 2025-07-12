@@ -50,10 +50,32 @@ export function NavigationButtons({
     }
 
     try {
-      // Set a fixed width for consistent rendering
+      // Store original classes and styles
+      const originalBodyClass = document.body.className;
+      const originalHtmlClass = document.documentElement.className;
       const originalStyle = reportElement.style.cssText;
+      
+      // Force light mode for PDF generation
+      document.body.className = originalBodyClass.replace('dark', '');
+      document.documentElement.className = originalHtmlClass.replace('dark', '');
+      
+      // Find and modify the grid layout to single column for PDF
+      const gridElements = reportElement.querySelectorAll('.grid-cols-1.md\\:grid-cols-2');
+      const originalGridClasses: string[] = [];
+      
+      gridElements.forEach((element, index) => {
+        const htmlElement = element as HTMLElement;
+        originalGridClasses[index] = htmlElement.className;
+        htmlElement.className = htmlElement.className.replace('md:grid-cols-2', '');
+      });
+      
+      // Set a fixed width for consistent rendering
       reportElement.style.width = '210mm'; // A4 width
       reportElement.style.maxWidth = '210mm';
+      reportElement.style.backgroundColor = '#ffffff';
+      
+      // Wait a moment for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       const canvas = await html2canvas(reportElement, {
         scale: 2,
@@ -65,8 +87,16 @@ export function NavigationButtons({
         scrollY: 0
       });
 
-      // Restore original styles
+      // Restore original classes and styles
+      document.body.className = originalBodyClass;
+      document.documentElement.className = originalHtmlClass;
       reportElement.style.cssText = originalStyle;
+      
+      // Restore original grid classes
+      gridElements.forEach((element, index) => {
+        const htmlElement = element as HTMLElement;
+        htmlElement.className = originalGridClasses[index];
+      });
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
