@@ -28,11 +28,6 @@ export function RadarChartComponent({
               <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.8} />
               <stop offset="100%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.2} />
             </linearGradient>
-            <linearGradient id="actualGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="hsl(var(--chart-primary))" stopOpacity={0.8} />
-              <stop offset="50%" stopColor="hsl(var(--chart-secondary))" stopOpacity={0.6} />
-              <stop offset="100%" stopColor="hsl(var(--chart-accent))" stopOpacity={0.4} />
-            </linearGradient>
           </defs>
           <PolarGrid 
             gridType="polygon"
@@ -63,7 +58,7 @@ export function RadarChartComponent({
             strokeOpacity={0.3}
           />
           <Radar name="Expected Level" dataKey="expected" stroke="hsl(var(--muted-foreground))" fill="url(#expectedGradient)" fillOpacity={0.15} strokeWidth={3} strokeDasharray="8 4" />
-          <Radar name="Actual Performance" dataKey="actual" stroke="hsl(var(--chart-primary))" fill="url(#actualGradient)" fillOpacity={0.25} strokeWidth={3} />
+          <Radar name="Actual Performance" dataKey="actual" stroke="#22c55e" fill="#22c55e" fillOpacity={0.3} strokeWidth={2} />
           {showLegend && <Legend wrapperStyle={{
           fontSize: '12px',
           color: 'hsl(var(--foreground))'
