@@ -73,7 +73,7 @@ export function Report({
   const overallLevel = calculateMedian(allMedianValues);
   const overallPerformance = overallLevel > 0 ? getPerformanceStatus(overallLevel, currentLevel) : 'Not Assessed';
   const currentLevelName = levelNames[currentLevel as keyof typeof levelNames] || 'Unknown Level';
-  return <div className="space-y-6">
+  return <div className="space-y-6" data-report-content>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Report</h2>
         <p className="text-muted-foreground">

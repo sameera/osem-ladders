@@ -1,7 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ArrowLeft, ArrowRight, Download, ChevronDown, FileDown } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface NavigationButtonsProps {
   currentScreen: number;
@@ -20,6 +23,39 @@ export function NavigationButtons({
   onNext,
   onSubmitAssessment
 }: NavigationButtonsProps) {
+  const handleDownloadPDF = async () => {
+    const reportElement = document.querySelector('[data-report-content]') as HTMLElement;
+    if (!reportElement) {
+      console.error('Report content not found');
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(reportElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 30;
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save('assessment-report.pdf');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
   return (
     <div className="flex justify-between items-center mt-8">
       <Button
@@ -37,13 +73,25 @@ export function NavigationButtons({
       </div>
 
       {isReportScreen ? (
-        <Button
-          onClick={onSubmitAssessment}
-          className="flex items-center space-x-2"
-        >
-          <Download className="w-4 h-4" />
-          <span>Submit Assessment</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="flex items-center space-x-2">
+              <Download className="w-4 h-4" />
+              <span>Submit Assessment</span>
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-background border border-border">
+            <DropdownMenuItem onClick={onSubmitAssessment} className="flex items-center space-x-2">
+              <Download className="w-4 h-4" />
+              <span>Submit Assessment</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDownloadPDF} className="flex items-center space-x-2">
+              <FileDown className="w-4 h-4" />
+              <span>Download as PDF</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
         <Button
           onClick={onNext}
