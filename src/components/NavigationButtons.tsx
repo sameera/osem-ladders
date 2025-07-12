@@ -24,19 +24,49 @@ export function NavigationButtons({
   onSubmitAssessment
 }: NavigationButtonsProps) {
   const handleDownloadPDF = async () => {
-    const reportElement = document.querySelector('[data-report-content]') as HTMLElement;
+    // Wait a bit for the DOM to be ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    let reportElement = document.querySelector('[data-report-content]') as HTMLElement;
+    
+    // If not found by data attribute, try to find by class or other means
     if (!reportElement) {
-      console.error('Report content not found');
+      // Look for the report container by finding elements that likely contain report content
+      const possibleElements = document.querySelectorAll('div');
+      for (const element of possibleElements) {
+        if (element.innerHTML.includes('Assessment Report') || 
+            element.innerHTML.includes('Overall Performance') ||
+            element.innerHTML.includes('Chart Legend')) {
+          reportElement = element as HTMLElement;
+          break;
+        }
+      }
+    }
+    
+    if (!reportElement) {
+      console.error('Could not find report content for PDF generation');
+      alert('Unable to generate PDF. Please try again.');
       return;
     }
 
     try {
+      // Set a fixed width for consistent rendering
+      const originalStyle = reportElement.style.cssText;
+      reportElement.style.width = '210mm'; // A4 width
+      reportElement.style.maxWidth = '210mm';
+      
       const canvas = await html2canvas(reportElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        width: 794, // A4 width in pixels at 96dpi
+        scrollX: 0,
+        scrollY: 0
       });
+
+      // Restore original styles
+      reportElement.style.cssText = originalStyle;
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -46,14 +76,19 @@ export function NavigationButtons({
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
       
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 30;
+      // Calculate scaling to fit the page
+      const ratio = Math.min(pdfWidth / (imgWidth * 0.264583), (pdfHeight - 20) / (imgHeight * 0.264583));
+      const scaledWidth = imgWidth * 0.264583 * ratio;
+      const scaledHeight = imgHeight * 0.264583 * ratio;
+      
+      const imgX = (pdfWidth - scaledWidth) / 2;
+      const imgY = 10;
 
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.addImage(imgData, 'PNG', imgX, imgY, scaledWidth, scaledHeight);
       pdf.save('assessment-report.pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
     }
   };
   return (
