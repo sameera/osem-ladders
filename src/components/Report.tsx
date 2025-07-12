@@ -122,7 +122,7 @@ export function Report({
       </Card>
 
       {/* Detailed Screen Breakdown */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {screenLevels.map((screen, index) => {
         const screenSelections = selections[screen.title] || {};
         const screenFeedback = feedback[screen.title] || {};
