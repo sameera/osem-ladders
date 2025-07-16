@@ -44,6 +44,17 @@ function AppContent() {
   const currentSelections = currentScreenData ? selections[currentScreenData.title] || {} : {};
   const currentFeedback = currentScreenData ? feedback[currentScreenData.title] || {} : {};
 
+  // Debug logging to help troubleshoot
+  console.log('Current state:', {
+    currentScreen,
+    isReportScreen,
+    currentScreenData: currentScreenData?.title,
+    selectionsKeys: Object.keys(selections),
+    feedbackKeys: Object.keys(feedback),
+    currentSelections,
+    currentFeedback
+  });
+
   const handleTeamMemberSubmit = (name: string, level?: number) => {
     setTeamMemberName(name);
     if (level !== undefined) {
