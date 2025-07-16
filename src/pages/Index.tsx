@@ -234,9 +234,16 @@ function AppContent() {
       console.log('Final selections:', newSelections);
       console.log('Final feedback:', newFeedback);
 
+      // Force update by setting data and then ensuring we're on the first screen
       setSelections(newSelections);
       setFeedback(newFeedback);
-      setCurrentScreen(0);
+      
+      // Add a small delay to ensure state updates have propagated
+      setTimeout(() => {
+        setCurrentScreen(0);
+        console.log('Current selections after load:', newSelections);
+        console.log('Current feedback after load:', newFeedback);
+      }, 100);
       
     } catch (error) {
       console.error('Error loading assessment:', error);
