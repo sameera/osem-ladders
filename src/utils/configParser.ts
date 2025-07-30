@@ -1,14 +1,24 @@
 
-import { Category, CoreArea, LevelContent } from '@/types/assessment';
-
-function generateId(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+export interface LevelContent {
+  level: number;
+  content: string;
+  description?: string;
 }
 
-export function parseConfig(markdown: string): Category[] {
+export interface CoreArea {
+  name: string;
+  levels: LevelContent[];
+}
+
+export interface Screen {
+  title: string;
+  coreAreas: CoreArea[];
+}
+
+export function parseConfig(markdown: string): Screen[] {
   const lines = markdown.split('\n');
-  const categories: Category[] = [];
-  let currentCategory: Category | null = null;
+  const screens: Screen[] = [];
+  let currentScreen: Screen | null = null;
   let currentCoreArea: CoreArea | null = null;
   let currentLevel: LevelContent | null = null;
   let collectingDescription = false;
@@ -31,12 +41,12 @@ export function parseConfig(markdown: string): Category[] {
     
     // Check if we're currently collecting a description
     if (collectingDescription) {
-      // Check if this line starts a new level, core area, or category
+      // Check if this line starts a new level, core area, or screen
       const isNewLevel = /^\d+\./.test(trimmed);
       const isNewCoreArea = trimmed.startsWith('## ');
-      const isNewCategory = trimmed.startsWith('# ');
+      const isNewScreen = trimmed.startsWith('# ');
       
-      if (isNewLevel || isNewCoreArea || isNewCategory) {
+      if (isNewLevel || isNewCoreArea || isNewScreen) {
         // Finish collecting description for previous level
         if (currentLevel && descriptionLines.length > 0) {
           currentLevel.description = descriptionLines.join('\n').trim();
@@ -53,16 +63,14 @@ export function parseConfig(markdown: string): Category[] {
       }
     }
     
-    // Category title (starts with #)
+    // Screen title (starts with #)
     if (trimmed.startsWith('# ')) {
-      console.log('Found category:', trimmed);
-      if (currentCategory) {
-        categories.push(currentCategory);
+      console.log('Found screen:', trimmed);
+      if (currentScreen) {
+        screens.push(currentScreen);
       }
-      const title = trimmed.substring(2).trim();
-      currentCategory = {
-        id: generateId(title),
-        title,
+      currentScreen = {
+        title: trimmed.substring(2).trim(),
         coreAreas: []
       };
       currentCoreArea = null;
@@ -71,14 +79,12 @@ export function parseConfig(markdown: string): Category[] {
     // Core area (starts with ##)
     else if (trimmed.startsWith('## ')) {
       console.log('Found core area:', trimmed);
-      if (currentCategory) {
-        const name = trimmed.substring(3).trim();
+      if (currentScreen) {
         currentCoreArea = {
-          id: generateId(name),
-          name,
+          name: trimmed.substring(3).trim(),
           levels: []
         };
-        currentCategory.coreAreas.push(currentCoreArea);
+        currentScreen.coreAreas.push(currentCoreArea);
       }
       currentLevel = null;
     }
@@ -107,11 +113,11 @@ export function parseConfig(markdown: string): Category[] {
     currentLevel.description = descriptionLines.join('\n').trim();
   }
   
-  // Add the last category
-  if (currentCategory) {
-    categories.push(currentCategory);
+  // Add the last screen
+  if (currentScreen) {
+    screens.push(currentScreen);
   }
   
-  console.log('Parsed', categories.length, 'categories');
-  return categories;
+  console.log('Parsed', screens.length, 'screens');
+  return screens;
 }

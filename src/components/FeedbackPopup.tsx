@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,14 +7,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { CoreArea } from '@/utils/configParser';
+import { cn } from '@/lib/utils';
 
 interface FeedbackPopupProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (evidence: string, nextLevelFeedback: string) => void;
-  level: number;
-  content: string;
-  description?: string;
+  coreArea: CoreArea;
+  selectedLevel: number;
   initialEvidence?: string;
   initialNextLevelFeedback?: string;
 }
@@ -22,9 +24,8 @@ export function FeedbackPopup({
   isOpen,
   onClose,
   onConfirm,
-  level,
-  content,
-  description,
+  coreArea,
+  selectedLevel,
   initialEvidence = '',
   initialNextLevelFeedback = ''
 }: FeedbackPopupProps) {
@@ -36,6 +37,9 @@ export function FeedbackPopup({
     setEvidence(initialEvidence);
     setNextLevelFeedback(initialNextLevelFeedback);
   }, [initialEvidence, initialNextLevelFeedback, isOpen]);
+
+  const selectedLevelData = coreArea.levels.find(l => l.level === selectedLevel);
+  const nextLevelData = coreArea.levels.find(l => l.level === selectedLevel + 1);
 
   const handleConfirm = () => {
     if (!evidence.trim()) {
@@ -49,22 +53,24 @@ export function FeedbackPopup({
     onClose();
   };
 
+  if (!selectedLevelData) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Level {level}
+            {coreArea.name} - L{selectedLevel}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Selected Level Content */}
           <div className="p-4 bg-muted/30 rounded-lg">
-            <p className="font-medium text-lg mb-2">{content}</p>
+            <p className="font-medium text-lg mb-2">{selectedLevelData.content}</p>
             
             {/* Description (Collapsible) */}
-            {description && (
+            {selectedLevelData.description && (
               <Collapsible open={isDescriptionExpanded} onOpenChange={setIsDescriptionExpanded}>
                 <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                   <span>Description</span>
@@ -77,7 +83,7 @@ export function FeedbackPopup({
                 <CollapsibleContent className="mt-2">
                   <ScrollArea className="max-h-48 pr-4 overflow-y-auto">
                     <MarkdownRenderer 
-                      content={description}
+                      content={selectedLevelData.description}
                       className="text-sm text-muted-foreground"
                     />
                   </ScrollArea>
@@ -91,7 +97,7 @@ export function FeedbackPopup({
             {/* Evidence Column */}
             <div className="space-y-2">
               <h3 className="font-semibold text-center bg-muted/50 py-2 rounded-t-lg">
-                L{level}
+                L{selectedLevel}
               </h3>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">
@@ -110,11 +116,11 @@ export function FeedbackPopup({
             {/* Next Level Column */}
             <div className="space-y-2">
               <h3 className="font-semibold text-center bg-muted/50 py-2 rounded-t-lg">
-                L{level + 1}+
+                {nextLevelData ? `L${selectedLevel + 1}` : `L${selectedLevel + 1}+`}
               </h3>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">
-                  What L{level + 1} could have looked like...
+                  What L{selectedLevel + 1} could have looked like...
                 </label>
                 <Textarea
                   value={nextLevelFeedback}

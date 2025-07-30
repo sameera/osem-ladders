@@ -7,41 +7,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { FeedbackPopup } from './FeedbackPopup';
+import { CoreArea } from '@/utils/configParser';
 
 interface TableCellProps {
+  levelContent: any;
+  coreArea: CoreArea;
   level: number;
-  content: string;
-  description?: string;
   isSelected: boolean;
-  evidence: string;
-  nextLevelFeedback: string;
-  onSelect: (evidence: string, nextLevelFeedback: string) => void;
+  onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
   tooltipTextLimit: number;
+  feedback?: { evidence: string; nextLevelFeedback: string };
 }
 
 export function TableCell({ 
-  level,
-  content,
-  description,
+  levelContent, 
+  coreArea, 
+  level, 
   isSelected, 
-  evidence,
-  nextLevelFeedback,
-  onSelect, 
-  tooltipTextLimit
+  onSelectionChange, 
+  tooltipTextLimit,
+  feedback
 }: TableCellProps) {
   const [showFeedbackPopup, setShowFeedbackPopup] = useState<boolean>(false);
   const [showFullDescriptionDialog, setShowFullDescriptionDialog] = useState<boolean>(false);
-  const hasDescription: boolean = !!(description && description.trim());
+  const hasDescription: boolean = levelContent.description && levelContent.description.trim();
   
-  const shouldShowDialog = (desc: string): boolean => {
-    return desc.length > tooltipTextLimit;
+  const shouldShowDialog = (description: string): boolean => {
+    return description.length > tooltipTextLimit;
   };
 
-  const getTruncatedDescription = (desc: string): string => {
-    if (desc.length <= tooltipTextLimit) {
-      return desc;
+  const getTruncatedDescription = (description: string): string => {
+    if (description.length <= tooltipTextLimit) {
+      return description;
     }
-    return desc.substring(0, tooltipTextLimit) + '...';
+    return description.substring(0, tooltipTextLimit) + '...';
   };
 
   const handleCellClick = (e: React.MouseEvent): void => {
@@ -49,8 +48,8 @@ export function TableCell({
     setShowFeedbackPopup(true);
   };
 
-  const handleFeedbackConfirm = (newEvidence: string, newNextLevelFeedback: string): void => {
-    onSelect(newEvidence, newNextLevelFeedback);
+  const handleFeedbackConfirm = (evidence: string, nextLevelFeedback: string): void => {
+    onSelectionChange(coreArea.name, level, evidence, nextLevelFeedback);
     setShowFeedbackPopup(false);
   };
 
@@ -68,8 +67,8 @@ export function TableCell({
   };
 
   // Format content to show each sentence on a new line
-  const formatContent = (contentText: string): JSX.Element[] => {
-    return contentText
+  const formatContent = (content: string): JSX.Element[] => {
+    return content
       .split(/(?<=[.!?])\s+/)
       .filter(sentence => sentence.trim())
       .map((sentence, index) => (
@@ -93,7 +92,7 @@ export function TableCell({
       )}
     >
       <div className="text-sm leading-relaxed w-full">
-        {formatContent(content)}
+        {formatContent(levelContent.content)}
       </div>
     </button>
   );
@@ -106,18 +105,17 @@ export function TableCell({
           isOpen={showFeedbackPopup}
           onClose={handleFeedbackCancel}
           onConfirm={handleFeedbackConfirm}
-          level={level}
-          content={content}
-          description={description}
-          initialEvidence={evidence}
-          initialNextLevelFeedback={nextLevelFeedback}
+          coreArea={coreArea}
+          selectedLevel={level}
+          initialEvidence={feedback?.evidence || ''}
+          initialNextLevelFeedback={feedback?.nextLevelFeedback || ''}
         />
       </>
     );
   }
 
-  const needsDialog: boolean = shouldShowDialog(description);
-  const truncatedDescription: string = getTruncatedDescription(description);
+  const needsDialog: boolean = shouldShowDialog(levelContent.description);
+  const truncatedDescription: string = getTruncatedDescription(levelContent.description);
 
   return (
     <>
@@ -152,11 +150,11 @@ export function TableCell({
       <Dialog open={showFullDescriptionDialog} onOpenChange={setShowFullDescriptionDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle>{content}</DialogTitle>
+            <DialogTitle>{levelContent.content}</DialogTitle>
           </DialogHeader>
           <ScrollArea className="mt-4 max-h-[60vh]">
             <MarkdownRenderer 
-              content={description}
+              content={levelContent.description}
               className="text-sm leading-relaxed pr-4"
             />
           </ScrollArea>
@@ -175,11 +173,10 @@ export function TableCell({
         isOpen={showFeedbackPopup}
         onClose={handleFeedbackCancel}
         onConfirm={handleFeedbackConfirm}
-        level={level}
-        content={content}
-        description={description}
-        initialEvidence={evidence}
-        initialNextLevelFeedback={nextLevelFeedback}
+        coreArea={coreArea}
+        selectedLevel={level}
+        initialEvidence={feedback?.evidence || ''}
+        initialNextLevelFeedback={feedback?.nextLevelFeedback || ''}
       />
     </>
   );

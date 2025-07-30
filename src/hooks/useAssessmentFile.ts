@@ -1,41 +1,41 @@
-import { Category, AssessmentSelection } from '@/types/assessment';
+import { Screen } from '@/utils/configParser';
 import { calculateMedian } from '@/utils/assessmentUtils';
 
 export function useAssessmentFile() {
   const handleSubmitAssessment = (
     teamMemberName: string,
     currentLevel: number,
-    categories: Category[],
-    selections: AssessmentSelection[]
+    screens: Screen[],
+    selections: Record<string, Record<string, number>>,
+    feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>
   ) => {
     const assessmentData = {
-      teamMember: teamMemberName,
-      assessmentDate: new Date().toISOString(),
-      currentLevel,
-      categories: categories.map(category => {
-        const categorySelections = selections.filter(s => s.categoryId === category.id);
-        const levels = categorySelections.map(s => s.level).filter(level => level > 0);
+      assessee: teamMemberName,
+      currentLevel: currentLevel,
+      leveling: screens.reduce((acc, screen) => {
+        const screenSelections = selections[screen.title] || {};
+        const screenFeedback = feedback[screen.title] || {};
+        const values = Object.values(screenSelections).filter(val => val > 0);
+        const median = calculateMedian(values);
         
-        return {
-          id: category.id,
-          name: category.title,
-          medianLevel: levels.length > 0 ? calculateMedian(levels) : 0,
-          coreAreas: category.coreAreas.map(area => {
-            const selection = selections.find(s => s.categoryId === category.id && s.coreAreaId === area.id);
-            return {
-              id: area.id,
-              name: area.name,
-              selectedLevel: selection?.level || 0,
-              evidence: selection?.evidence || '',
-              nextLevelFeedback: selection?.nextLevelFeedback || ''
-            };
-          })
+        acc[screen.title] = {
+          level: median,
+          notes: screen.coreAreas.reduce((noteAcc, coreArea) => {
+            const level = screenSelections[coreArea.name];
+            if (level !== undefined) {
+              const levelFeedback = screenFeedback[coreArea.name]?.[level];
+              noteAcc[coreArea.name] = {
+                level: `L${level}`,
+                evidence: levelFeedback?.evidence || '',
+                advice: levelFeedback?.nextLevelFeedback || ''
+              };
+            }
+            return noteAcc;
+          }, {} as Record<string, any>)
         };
-      }),
-      metadata: {
-        version: '2.0',
-        exportedAt: new Date().toISOString()
-      }
+        
+        return acc;
+      }, {} as Record<string, any>)
     };
 
     // Download as JSON file
@@ -54,78 +54,78 @@ export function useAssessmentFile() {
     data: any,
     setTeamMemberName: (name: string) => void,
     setCurrentLevel: (level: number) => void,
-    setSelections: (selections: AssessmentSelection[]) => void,
+    setSelections: (selections: Record<string, Record<string, number>>) => void,
+    setFeedback: (feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>) => void,
     setCurrentScreen: (screen: number) => void
   ) => {
     try {
       console.log('Loading assessment data:', data);
       
-      if (!data.teamMember && !data.assessee) {
+      if (!data.assessee || !data.leveling) {
         alert('Invalid assessment file format');
         return;
       }
 
-      // Parse selections from the assessment data
-      const newSelections: AssessmentSelection[] = [];
-
-      if (data.categories && Array.isArray(data.categories)) {
-        data.categories.forEach((category: any) => {
-          if (category.coreAreas && Array.isArray(category.coreAreas)) {
-            category.coreAreas.forEach((coreArea: any) => {
-              if (coreArea.selectedLevel && coreArea.selectedLevel > 0) {
-                const selection: AssessmentSelection = {
-                  id: `${category.id || category.name}-${coreArea.id || coreArea.name}`,
-                  categoryId: category.id || category.name,
-                  coreAreaId: coreArea.id || coreArea.name,
-                  level: coreArea.selectedLevel,
-                  evidence: coreArea.evidence || (coreArea.feedback?.evidence) || '',
-                  nextLevelFeedback: coreArea.nextLevelFeedback || (coreArea.feedback?.nextLevelFeedback) || ''
-                };
-                newSelections.push(selection);
-              }
-            });
-          }
-        });
-      } else if (data.leveling) {
-        // Handle legacy format
-        Object.entries(data.leveling).forEach(([categoryTitle, categoryData]: [string, any]) => {
-          if (categoryData.notes) {
-            Object.entries(categoryData.notes).forEach(([coreArea, noteData]: [string, any]) => {
-              let level: number;
-              if (typeof noteData.level === 'number') {
-                level = noteData.level;
-              } else if (typeof noteData.level === 'string') {
-                const levelStr = noteData.level.toString().replace(/^L/i, '');
-                level = parseInt(levelStr, 10);
-              } else {
-                return;
-              }
-
-              if (isNaN(level) || level < 1) {
-                return;
-              }
-
-              const selection: AssessmentSelection = {
-                id: `${categoryTitle}-${coreArea}`,
-                categoryId: categoryTitle,
-                coreAreaId: coreArea,
-                level,
-                evidence: noteData.evidence || '',
-                nextLevelFeedback: noteData.advice || ''
-              };
-              newSelections.push(selection);
-            });
-          }
-        });
+      setTeamMemberName(data.assessee);
+      if (data.currentLevel) {
+        setCurrentLevel(data.currentLevel);
       }
 
-      // Update state
-      setTeamMemberName(data.teamMember || data.assessee || '');
-      setCurrentLevel(data.currentLevel || 1);
+      const newSelections: Record<string, Record<string, number>> = {};
+      const newFeedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>> = {};
+
+      Object.entries(data.leveling).forEach(([screenTitle, screenData]: [string, any]) => {
+        console.log('Processing screen:', screenTitle, screenData);
+        
+        newSelections[screenTitle] = {};
+        newFeedback[screenTitle] = {};
+
+        if (screenData.notes) {
+          Object.entries(screenData.notes).forEach(([coreArea, noteData]: [string, any]) => {
+            console.log('Processing core area:', coreArea, noteData);
+            
+            let level: number;
+            if (typeof noteData.level === 'number') {
+              level = noteData.level;
+            } else if (typeof noteData.level === 'string') {
+              const levelStr = noteData.level.toString().replace(/^L/i, '');
+              level = parseInt(levelStr, 10);
+            } else {
+              console.warn('Invalid level format for', coreArea, ':', noteData.level);
+              return;
+            }
+
+            if (isNaN(level) || level < 1) {
+              console.warn('Invalid level number for', coreArea, ':', level);
+              return;
+            }
+
+            newSelections[screenTitle][coreArea] = level;
+            
+            if (!newFeedback[screenTitle][coreArea]) {
+              newFeedback[screenTitle][coreArea] = {};
+            }
+            
+            newFeedback[screenTitle][coreArea][level] = {
+              evidence: noteData.evidence || '',
+              nextLevelFeedback: noteData.advice || ''
+            };
+            
+            console.log('Set selection:', screenTitle, coreArea, level);
+          });
+        }
+      });
+
+      console.log('Final selections:', newSelections);
+      console.log('Final feedback:', newFeedback);
+
       setSelections(newSelections);
+      setFeedback(newFeedback);
       
       setTimeout(() => {
         setCurrentScreen(0);
+        console.log('Current selections after load:', newSelections);
+        console.log('Current feedback after load:', newFeedback);
       }, 100);
       
     } catch (error) {
