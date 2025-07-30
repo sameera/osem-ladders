@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Screen } from '@/utils/configParser';
+import { Category } from '@/utils/configParser';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { RadarChartComponent } from '@/components/RadarChart';
 import { HorizontalLevelChart } from '@/components/HorizontalLevelChart';
 import { MapPin } from 'lucide-react';
 interface ReportProps {
-  screens: Screen[];
+  screens: Category[];
   selections: Record<string, Record<string, number>>;
   feedback: Record<string, Record<string, Record<string, {
     evidence: string;
@@ -58,18 +58,18 @@ export function Report({
   currentLevel
 }: ReportProps) {
   const [viewType, setViewType] = useState<'radar' | 'line'>('radar');
-  const screenLevels = screens.map(screen => {
-    const screenSelections = selections[screen.title] || {};
-    const values = Object.values(screenSelections).filter(val => val > 0);
+  const categoryLevels = screens.map(category => {
+    const categorySelections = selections[category.title] || {};
+    const values = Object.values(categorySelections).filter(val => val > 0);
     const median = calculateMedian(values);
     return {
-      title: screen.title,
+      title: category.title,
       median,
       levelName: levelNames[median as keyof typeof levelNames] || 'Not Assessed',
-      coreAreas: screen.coreAreas
+      coreAreas: category.coreAreas
     };
   });
-  const allMedianValues = screenLevels.map(s => s.median).filter(val => val > 0);
+  const allMedianValues = categoryLevels.map(c => c.median).filter(val => val > 0);
   const overallLevel = calculateMedian(allMedianValues);
   const overallPerformance = overallLevel > 0 ? getPerformanceStatus(overallLevel, currentLevel) : 'Not Assessed';
   const currentLevelName = levelNames[currentLevel as keyof typeof levelNames] || 'Unknown Level';
@@ -108,48 +108,48 @@ export function Report({
           
           {/* Overall Chart without legend */}
           <div className="mb-6">
-            {viewType === 'radar' ? <RadarChartComponent title="Overall Performance Summary" data={screenLevels.map(screen => ({
-            coreArea: screen.title,
-            actual: screen.median,
+            {viewType === 'radar' ? <RadarChartComponent title="Overall Performance Summary" data={categoryLevels.map(category => ({
+            coreArea: category.title,
+            actual: category.median,
             expected: currentLevel
-          }))} showLegend={false} /> : <HorizontalLevelChart title="Overall Performance Summary" data={screenLevels.map(screen => ({
-            coreArea: screen.title,
-            actual: screen.median,
+          }))} showLegend={false} /> : <HorizontalLevelChart title="Overall Performance Summary" data={categoryLevels.map(category => ({
+            coreArea: category.title,
+            actual: category.median,
             expected: currentLevel
           }))} showLegend={false} />}
           </div>
         </CardContent>
       </Card>
 
-      {/* Detailed Screen Breakdown */}
+      {/* Detailed Category Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {screenLevels.map((screen, index) => {
-        const screenSelections = selections[screen.title] || {};
-        const screenFeedback = feedback[screen.title] || {};
-        const screenPerformance = screen.median > 0 ? getPerformanceStatus(screen.median, currentLevel) : 'Not Assessed';
+        {categoryLevels.map((category, index) => {
+        const categorySelections = selections[category.title] || {};
+        const categoryFeedback = feedback[category.title] || {};
+        const categoryPerformance = category.median > 0 ? getPerformanceStatus(category.median, currentLevel) : 'Not Assessed';
         return <Card key={index} className="w-full">
               <CardHeader>
-                <CardTitle className="text-xl">{screen.title}</CardTitle>
+                <CardTitle className="text-xl">{category.title}</CardTitle>
                 
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Chart without legend */}
                 <div className="mb-6">
-                  {viewType === 'radar' ? <RadarChartComponent title={screen.title} data={screen.coreAreas.map(coreArea => ({
+                  {viewType === 'radar' ? <RadarChartComponent title={category.title} data={category.coreAreas.map(coreArea => ({
                 coreArea: coreArea.name,
-                actual: screenSelections[coreArea.name] || 0,
+                actual: categorySelections[coreArea.name] || 0,
                 expected: currentLevel
-              }))} showLegend={false} /> : <HorizontalLevelChart title={screen.title} data={screen.coreAreas.map(coreArea => ({
+              }))} showLegend={false} /> : <HorizontalLevelChart title={category.title} data={category.coreAreas.map(coreArea => ({
                 coreArea: coreArea.name,
-                actual: screenSelections[coreArea.name] || 0,
+                actual: categorySelections[coreArea.name] || 0,
                 expected: currentLevel
               }))} showLegend={false} />}
                 </div>
 
                 {/* Detailed feedback for assessed areas */}
-                {screen.coreAreas.map((coreArea, areaIndex) => {
-              const selectedLevel = screenSelections[coreArea.name];
-              const areaFeedback = screenFeedback[coreArea.name]?.[selectedLevel];
+                {category.coreAreas.map((coreArea, areaIndex) => {
+              const selectedLevel = categorySelections[coreArea.name];
+              const areaFeedback = categoryFeedback[coreArea.name]?.[selectedLevel];
               if (!selectedLevel || !areaFeedback) return null;
               const selectedLevelContent = coreArea.levels.find(l => l.level === selectedLevel);
               return;
@@ -189,8 +189,8 @@ export function Report({
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm text-muted-foreground">
-            <p>• Levels are calculated using the median value of all assessed areas within each screen</p>
-            <p>• Overall level is the median of all individual screen levels</p>
+            <p>• Levels are calculated using the median value of all assessed areas within each category</p>
+            <p>• Overall level is the median of all individual category levels</p>
             <p>• Areas not assessed are excluded from calculations</p>
           </div>
         </CardContent>
@@ -202,19 +202,19 @@ export function Report({
           <CardTitle>Your Assessment Comments</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {screenLevels.map((screen) => {
-            const screenFeedback = feedback[screen.title] || {};
-            const hasAnyFeedback = Object.keys(screenFeedback).some(coreAreaName => 
-              Object.keys(screenFeedback[coreAreaName] || {}).length > 0
+          {categoryLevels.map((category) => {
+            const categoryFeedback = feedback[category.title] || {};
+            const hasAnyFeedback = Object.keys(categoryFeedback).some(coreAreaName => 
+              Object.keys(categoryFeedback[coreAreaName] || {}).length > 0
             );
             
             if (!hasAnyFeedback) return null;
 
             return (
-              <div key={screen.title} className="space-y-4">
-                <h3 className="text-xl font-semibold text-foreground">{screen.title}</h3>
-                {screen.coreAreas.map((coreArea) => {
-                  const areaFeedback = screenFeedback[coreArea.name];
+              <div key={category.title} className="space-y-4">
+                <h3 className="text-xl font-semibold text-foreground">{category.title}</h3>
+                {category.coreAreas.map((coreArea) => {
+                  const areaFeedback = categoryFeedback[coreArea.name];
                   if (!areaFeedback || Object.keys(areaFeedback).length === 0) return null;
 
                   return (

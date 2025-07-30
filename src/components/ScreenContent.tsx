@@ -2,12 +2,12 @@
 import React from 'react';
 import { LevelingTable } from '@/components/LevelingTable';
 import { Report } from '@/components/Report';
-import { Screen } from '@/utils/configParser';
+import { Category } from '@/utils/configParser';
 
 interface ScreenContentProps {
   isReportScreen: boolean;
-  currentScreenData: Screen | null;
-  screens: Screen[];
+  currentScreenData: Category | null;
+  screens: Category[];
   selections: Record<string, Record<string, number>>;
   currentSelections: Record<string, number>;
   currentFeedback: Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>;

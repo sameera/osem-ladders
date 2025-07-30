@@ -1,29 +1,29 @@
-import { Screen } from '@/utils/configParser';
+import { Category } from '@/utils/configParser';
 import { calculateMedian } from '@/utils/assessmentUtils';
 
 export function useAssessmentFile() {
   const handleSubmitAssessment = (
     teamMemberName: string,
     currentLevel: number,
-    screens: Screen[],
+    categories: Category[],
     selections: Record<string, Record<string, number>>,
     feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>
   ) => {
     const assessmentData = {
       assessee: teamMemberName,
       currentLevel: currentLevel,
-      leveling: screens.reduce((acc, screen) => {
-        const screenSelections = selections[screen.title] || {};
-        const screenFeedback = feedback[screen.title] || {};
-        const values = Object.values(screenSelections).filter(val => val > 0);
+      leveling: categories.reduce((acc, category) => {
+        const categorySelections = selections[category.title] || {};
+        const categoryFeedback = feedback[category.title] || {};
+        const values = Object.values(categorySelections).filter(val => val > 0);
         const median = calculateMedian(values);
         
-        acc[screen.title] = {
+        acc[category.title] = {
           level: median,
-          notes: screen.coreAreas.reduce((noteAcc, coreArea) => {
-            const level = screenSelections[coreArea.name];
+          notes: category.coreAreas.reduce((noteAcc, coreArea) => {
+            const level = categorySelections[coreArea.name];
             if (level !== undefined) {
-              const levelFeedback = screenFeedback[coreArea.name]?.[level];
+              const levelFeedback = categoryFeedback[coreArea.name]?.[level];
               noteAcc[coreArea.name] = {
                 level: `L${level}`,
                 evidence: levelFeedback?.evidence || '',
@@ -74,14 +74,14 @@ export function useAssessmentFile() {
       const newSelections: Record<string, Record<string, number>> = {};
       const newFeedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>> = {};
 
-      Object.entries(data.leveling).forEach(([screenTitle, screenData]: [string, any]) => {
-        console.log('Processing screen:', screenTitle, screenData);
+      Object.entries(data.leveling).forEach(([categoryTitle, categoryData]: [string, any]) => {
+        console.log('Processing category:', categoryTitle, categoryData);
         
-        newSelections[screenTitle] = {};
-        newFeedback[screenTitle] = {};
+        newSelections[categoryTitle] = {};
+        newFeedback[categoryTitle] = {};
 
-        if (screenData.notes) {
-          Object.entries(screenData.notes).forEach(([coreArea, noteData]: [string, any]) => {
+        if (categoryData.notes) {
+          Object.entries(categoryData.notes).forEach(([coreArea, noteData]: [string, any]) => {
             console.log('Processing core area:', coreArea, noteData);
             
             let level: number;
@@ -100,18 +100,18 @@ export function useAssessmentFile() {
               return;
             }
 
-            newSelections[screenTitle][coreArea] = level;
+            newSelections[categoryTitle][coreArea] = level;
             
-            if (!newFeedback[screenTitle][coreArea]) {
-              newFeedback[screenTitle][coreArea] = {};
+            if (!newFeedback[categoryTitle][coreArea]) {
+              newFeedback[categoryTitle][coreArea] = {};
             }
             
-            newFeedback[screenTitle][coreArea][level] = {
+            newFeedback[categoryTitle][coreArea][level] = {
               evidence: noteData.evidence || '',
               nextLevelFeedback: noteData.advice || ''
             };
             
-            console.log('Set selection:', screenTitle, coreArea, level);
+            console.log('Set selection:', categoryTitle, coreArea, level);
           });
         }
       });

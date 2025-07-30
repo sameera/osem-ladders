@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ScreenContent } from '@/components/ScreenContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
-import { parseConfig, Screen } from '@/utils/configParser';
+import { parseConfig, Category } from '@/utils/configParser';
 import { useAssessmentState } from '@/hooks/useAssessmentState';
 import { useAssessmentNavigation } from '@/hooks/useAssessmentNavigation';
 import { useAssessmentCompletion } from '@/hooks/useAssessmentCompletion';
@@ -15,8 +15,8 @@ function AppContent() {
   const [showNewAssessmentPrompt, setShowNewAssessmentPrompt] = useState(false);
   const [showConfirmNewAssessment, setShowConfirmNewAssessment] = useState(false);
   
-  const screens: Screen[] = useMemo(() => parseConfig(configMarkdown), []);
-  const allScreens = useMemo(() => [...screens.map(s => s.title), 'Report'], [screens]);
+  const categories: Category[] = useMemo(() => parseConfig(configMarkdown), []);
+  const allCategories = useMemo(() => [...categories.map(c => c.title), 'Report'], [categories]);
   
   // Custom hooks
   const {
@@ -32,29 +32,29 @@ function AppContent() {
   } = useAssessmentState();
 
   const {
-    currentScreen,
-    setCurrentScreen,
+    currentScreen: currentCategory,
+    setCurrentScreen: setCurrentCategory,
     handleNext,
     handlePrevious,
     resetNavigation
-  } = useAssessmentNavigation(allScreens.length);
+  } = useAssessmentNavigation(allCategories.length);
 
-  const completedScreens = useAssessmentCompletion(screens, selections);
+  const completedCategories = useAssessmentCompletion(categories, selections);
   const { handleSubmitAssessment, handleOpenAssessment } = useAssessmentFile();
   
   // Check if we need to show the team member prompt
   const showTeamMemberPrompt = !teamMemberName && Object.keys(selections).length === 0;
 
-  const isReportScreen = currentScreen === screens.length;
-  const currentScreenData = !isReportScreen ? screens[currentScreen] : null;
-  const currentSelections = currentScreenData ? selections[currentScreenData.title] || {} : {};
-  const currentFeedback = currentScreenData ? feedback[currentScreenData.title] || {} : {};
+  const isReportScreen = currentCategory === categories.length;
+  const currentCategoryData = !isReportScreen ? categories[currentCategory] : null;
+  const currentSelections = currentCategoryData ? selections[currentCategoryData.title] || {} : {};
+  const currentFeedback = currentCategoryData ? feedback[currentCategoryData.title] || {} : {};
 
   // Debug logging to help troubleshoot
   console.log('Current state:', {
-    currentScreen,
+    currentCategory,
     isReportScreen,
-    currentScreenData: currentScreenData?.title,
+    currentCategoryData: currentCategoryData?.title,
     selectionsKeys: Object.keys(selections),
     feedbackKeys: Object.keys(feedback),
     currentSelections,
@@ -69,22 +69,22 @@ function AppContent() {
   };
 
   const handleSelectionChange = (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => {
-    if (!currentScreenData) return;
+    if (!currentCategoryData) return;
     
     setSelections(prev => ({
       ...prev,
-      [currentScreenData.title]: {
-        ...prev[currentScreenData.title],
+      [currentCategoryData.title]: {
+        ...prev[currentCategoryData.title],
         [coreArea]: level
       }
     }));
 
     setFeedback(prev => ({
       ...prev,
-      [currentScreenData.title]: {
-        ...prev[currentScreenData.title],
+      [currentCategoryData.title]: {
+        ...prev[currentCategoryData.title],
         [coreArea]: {
-          ...prev[currentScreenData.title]?.[coreArea],
+          ...prev[currentCategoryData.title]?.[coreArea],
           [level]: { evidence, nextLevelFeedback }
         }
       }
@@ -92,15 +92,15 @@ function AppContent() {
   };
 
   const handleSubmitAssessmentClick = () => {
-    handleSubmitAssessment(teamMemberName, currentLevel, screens, selections, feedback);
+    handleSubmitAssessment(teamMemberName, currentLevel, categories, selections, feedback);
     setShowNewAssessmentPrompt(true);
   };
 
   const handleNewAssessmentRequest = () => {
     // Check if there are any selections made
     const hasSelections = Object.keys(selections).length > 0 && 
-      Object.values(selections).some(screenSelections => 
-        Object.keys(screenSelections).length > 0
+      Object.values(selections).some(categorySelections => 
+        Object.keys(categorySelections).length > 0
       );
 
     if (hasSelections) {
@@ -136,11 +136,11 @@ function AppContent() {
       setCurrentLevel,
       setSelections,
       setFeedback,
-      setCurrentScreen
+      setCurrentCategory
     );
   };
 
-  if (screens.length === 0) {
+  if (categories.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -166,17 +166,17 @@ function AppContent() {
       
       <AssessmentLayout
         teamMemberName={teamMemberName}
-        allScreens={allScreens}
-        currentScreen={currentScreen}
-        completedScreens={completedScreens}
+        allScreens={allCategories}
+        currentScreen={currentCategory}
+        completedScreens={completedCategories}
         onNewAssessment={handleNewAssessmentRequest}
         onOpenAssessment={handleOpenAssessmentFile}
-        onScreenChange={setCurrentScreen}
+        onScreenChange={setCurrentCategory}
       >
         <ScreenContent
           isReportScreen={isReportScreen}
-          currentScreenData={currentScreenData}
-          screens={screens}
+          currentScreenData={currentCategoryData}
+          screens={categories}
           selections={selections}
           currentSelections={currentSelections}
           currentFeedback={currentFeedback}
@@ -186,8 +186,8 @@ function AppContent() {
         />
 
         <NavigationButtons
-          currentScreen={currentScreen}
-          totalScreens={allScreens.length}
+          currentScreen={currentCategory}
+          totalScreens={allCategories.length}
           isReportScreen={isReportScreen}
           onPrevious={handlePrevious}
           onNext={handleNext}
