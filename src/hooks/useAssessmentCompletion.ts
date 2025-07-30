@@ -1,23 +1,22 @@
 import { useMemo } from 'react';
-import { Screen } from '@/utils/configParser';
+import { Category, AssessmentSelection } from '@/types/assessment';
 
 export function useAssessmentCompletion(
-  screens: Screen[],
-  selections: Record<string, Record<string, number>>
+  categories: Category[],
+  selections: AssessmentSelection[]
 ) {
-  const completedScreens = useMemo(() => {
+  const completedCategories = useMemo(() => {
     const completed = new Set<number>();
-    screens.forEach((screen, index) => {
-      const screenSelections = selections[screen.title] || {};
-      const allSelected = screen.coreAreas.every(area => 
-        screenSelections[area.name] !== undefined
+    categories.forEach((category, index) => {
+      const allSelected = category.coreAreas.every(area => 
+        selections.some(s => s.categoryId === category.id && s.coreAreaId === area.id)
       );
-      if (allSelected && screen.coreAreas.length > 0) {
+      if (allSelected && category.coreAreas.length > 0) {
         completed.add(index);
       }
     });
     return completed;
-  }, [selections, screens]);
+  }, [selections, categories]);
 
-  return completedScreens;
+  return completedCategories;
 }
