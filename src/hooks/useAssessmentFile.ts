@@ -1,4 +1,4 @@
-import { Category } from '@/utils/configParser';
+import { Category } from '@/utils/model';
 import { calculateMedian } from '@/utils/assessmentUtils';
 
 export function useAssessmentFile() {

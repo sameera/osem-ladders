@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { FeedbackPopup } from './FeedbackPopup';
-import { CoreArea } from '@/utils/configParser';
+import { CoreArea } from '@/utils/model';
 
 interface TableCellProps {
   levelContent: any;

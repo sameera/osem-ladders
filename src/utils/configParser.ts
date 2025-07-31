@@ -1,19 +1,4 @@
-
-export interface LevelContent {
-  level: number;
-  content: string;
-  description?: string;
-}
-
-export interface CoreArea {
-  name: string;
-  levels: LevelContent[];
-}
-
-export interface Category {
-  title: string;
-  coreAreas: CoreArea[];
-}
+import { Category, CoreArea, LevelContent } from "./model";
 
 export function parseConfig(markdown: string): Category[] {
   const lines = markdown.split('\n');

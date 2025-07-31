@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ScreenContent } from '@/components/ScreenContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
-import { parseConfig, Category } from '@/utils/configParser';
+import { parseConfig,  } from '@/utils/configParser';
 import { useAssessmentState } from '@/hooks/useAssessmentState';
 import { useAssessmentNavigation } from '@/hooks/useAssessmentNavigation';
 import { useAssessmentCompletion } from '@/hooks/useAssessmentCompletion';
@@ -10,6 +10,7 @@ import { useAssessmentFile } from '@/hooks/useAssessmentFile';
 import { AssessmentPrompts } from '@/components/assessment/AssessmentPrompts';
 import { AssessmentLayout } from '@/components/assessment/AssessmentLayout';
 import configMarkdown from '@/data/config.md?raw';
+import { Category } from "@/utils/model";
 
 function AppContent() {
   const [showNewAssessmentPrompt, setShowNewAssessmentPrompt] = useState(false);
