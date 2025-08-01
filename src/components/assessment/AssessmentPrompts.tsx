@@ -5,7 +5,7 @@ interface AssessmentPromptsProps {
   showTeamMemberPrompt: boolean;
   showConfirmNewAssessment: boolean;
   showNewAssessmentPrompt: boolean;
-  onTeamMemberSubmit: (name: string, level?: number) => void;
+  onTeamMemberSubmit: (name: string) => void;
   onConfirmNewAssessment: () => void;
   onCancelConfirmNewAssessment: () => void;
   onStartNewAssessment: () => void;

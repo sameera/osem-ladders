@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface TeamMemberPromptProps {
   isOpen: boolean;
-  onSubmit: (name: string, currentLevel?: number) => void;
+  onSubmit: (name: string) => void;
   onCancel?: () => void;
   title?: string;
   submitText?: string;
@@ -16,15 +16,6 @@ interface TeamMemberPromptProps {
   showCancel?: boolean;
 }
 
-const levelOptions = [
-  { value: 1, label: "SE1 - Software Engineer I" },
-  { value: 2, label: "SE2 - Software Engineer II" },
-  { value: 3, label: "SE3 - Senior Software Engineer I" },
-  { value: 4, label: "SE4 - Senior Software Engineer II" },
-  { value: 5, label: "SE5 - Staff Engineer" },
-  { value: 6, label: "SE6 - Senior Staff Engineer" },
-  { value: 7, label: "SE7 - Principal Engineer" },
-];
 
 export function TeamMemberPrompt({ 
   isOpen, 
@@ -36,7 +27,6 @@ export function TeamMemberPrompt({
   showCancel = false
 }: TeamMemberPromptProps) {
   const [name, setName] = useState('');
-  const [currentLevel, setCurrentLevel] = useState<number | undefined>(undefined);
 
   // Check if this is a confirmation dialog (doesn't need name input)
   const isConfirmationDialog = title.includes("Start New Assessment") && showCancel;
@@ -48,16 +38,14 @@ export function TeamMemberPrompt({
       return;
     }
     
-    if (name.trim() && currentLevel !== undefined) {
-      onSubmit(name.trim(), currentLevel);
+    if (name.trim()) {
+      onSubmit(name.trim());
       setName('');
-      setCurrentLevel(undefined);
     }
   };
 
   const handleCancel = () => {
     setName('');
-    setCurrentLevel(undefined);
     onCancel?.();
   };
 
@@ -100,31 +88,13 @@ export function TeamMemberPrompt({
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="current-level" className="text-sm font-medium">
-                Current Level <span className="text-destructive">*</span>
-              </Label>
-              <Select value={currentLevel?.toString()} onValueChange={(value) => setCurrentLevel(parseInt(value))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select current level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {levelOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value.toString()}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
             <div className="flex justify-end space-x-2">
               {showCancel && (
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   {cancelText}
                 </Button>
               )}
-              <Button type="submit" disabled={!name.trim() || currentLevel === undefined}>
+              <Button type="submit" disabled={!name.trim()}>
                 {submitText}
               </Button>
             </div>

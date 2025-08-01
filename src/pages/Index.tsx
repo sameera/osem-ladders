@@ -62,11 +62,8 @@ function AppContent() {
     currentFeedback
   });
 
-  const handleTeamMemberSubmit = (name: string, level?: number) => {
+  const handleTeamMemberSubmit = (name: string) => {
     setTeamMemberName(name);
-    if (level !== undefined) {
-      setCurrentLevel(level);
-    }
   };
 
   const handleSelectionChange = (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => {
@@ -183,7 +180,6 @@ function AppContent() {
           currentFeedback={currentFeedback}
           feedback={feedback}
           onSelectionChange={handleSelectionChange}
-          currentLevel={currentLevel}
         />
 
         <NavigationButtons

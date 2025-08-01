@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Category } from '@/utils/model';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { RadarChartComponent } from '@/components/RadarChart';
 import { HorizontalLevelChart } from '@/components/HorizontalLevelChart';
 import { MapPin } from 'lucide-react';
@@ -13,7 +15,6 @@ interface ReportProps {
     evidence: string;
     nextLevelFeedback: string;
   }>>>;
-  currentLevel: number;
 }
 const levelNames = {
   1: 'Software Engineer I',
@@ -51,11 +52,20 @@ function getPerformanceColor(status: string): string {
       return "text-muted-foreground";
   }
 }
+const levelOptions = [
+  { value: 1, label: "SE1 - Software Engineer I" },
+  { value: 2, label: "SE2 - Software Engineer II" },
+  { value: 3, label: "SE3 - Senior Software Engineer I" },
+  { value: 4, label: "SE4 - Senior Software Engineer II" },
+  { value: 5, label: "SE5 - Staff Engineer" },
+  { value: 6, label: "SE6 - Senior Staff Engineer" },
+  { value: 7, label: "SE7 - Principal Engineer" },
+];
+
 export function Report({
   screens,
   selections,
-  feedback,
-  currentLevel
+  feedback
 }: ReportProps) {
   const [viewType, setViewType] = useState<'radar' | 'line'>('radar');
   const categoryLevels = screens.map(category => {
@@ -69,17 +79,60 @@ export function Report({
       coreAreas: category.coreAreas
     };
   });
+  
   const allMedianValues = categoryLevels.map(c => c.median).filter(val => val > 0);
   const overallLevel = calculateMedian(allMedianValues);
-  const overallPerformance = overallLevel > 0 ? getPerformanceStatus(overallLevel, currentLevel) : 'Not Assessed';
-  const currentLevelName = levelNames[currentLevel as keyof typeof levelNames] || 'Unknown Level';
+  
+  // Calculate default baseline (one level above overall assessed level)
+  const defaultBaseline = useMemo(() => {
+    return overallLevel > 0 ? Math.min(overallLevel + 1, 7) : 2;
+  }, [overallLevel]);
+  
+  const [baselineLevel, setBaselineLevel] = useState<number>(defaultBaseline);
+  
+  // Update baseline when overall level changes
+  React.useEffect(() => {
+    if (overallLevel > 0) {
+      setBaselineLevel(Math.min(overallLevel + 1, 7));
+    }
+  }, [overallLevel]);
+  
+  const overallPerformance = overallLevel > 0 ? getPerformanceStatus(overallLevel, baselineLevel) : 'Not Assessed';
+  const baselineLevelName = levelNames[baselineLevel as keyof typeof levelNames] || 'Unknown Level';
   return <div className="space-y-6" data-report-content>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Report</h2>
         <p className="text-muted-foreground">
-          Performance assessment for current level: {currentLevelName}
+          Performance assessment against baseline level
         </p>
       </div>
+
+      {/* Baseline Level Selector */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Baseline Level</CardTitle>
+          <CardDescription>Select the baseline level to compare performance against</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="baseline-level" className="text-sm font-medium">
+              Baseline Level
+            </Label>
+            <Select value={baselineLevel.toString()} onValueChange={(value) => setBaselineLevel(parseInt(value))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select baseline level" />
+              </SelectTrigger>
+              <SelectContent>
+                {levelOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value.toString()}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* View Toggle */}
       <div className="flex justify-center mb-6">
@@ -111,11 +164,11 @@ export function Report({
             {viewType === 'radar' ? <RadarChartComponent title="Overall Performance Summary" data={categoryLevels.map(category => ({
             coreArea: category.title,
             actual: category.median,
-            expected: currentLevel
+            expected: baselineLevel
           }))} showLegend={false} /> : <HorizontalLevelChart title="Overall Performance Summary" data={categoryLevels.map(category => ({
             coreArea: category.title,
             actual: category.median,
-            expected: currentLevel
+            expected: baselineLevel
           }))} showLegend={false} />}
           </div>
         </CardContent>
@@ -126,7 +179,7 @@ export function Report({
         {categoryLevels.map((category, index) => {
         const categorySelections = selections[category.title] || {};
         const categoryFeedback = feedback[category.title] || {};
-        const categoryPerformance = category.median > 0 ? getPerformanceStatus(category.median, currentLevel) : 'Not Assessed';
+        const categoryPerformance = category.median > 0 ? getPerformanceStatus(category.median, baselineLevel) : 'Not Assessed';
         return <Card key={index} className="w-full">
               <CardHeader>
                 <CardTitle className="text-xl">{category.title}</CardTitle>
@@ -138,11 +191,11 @@ export function Report({
                   {viewType === 'radar' ? <RadarChartComponent title={category.title} data={category.coreAreas.map(coreArea => ({
                 coreArea: coreArea.name,
                 actual: categorySelections[coreArea.name] || 0,
-                expected: currentLevel
+                expected: baselineLevel
               }))} showLegend={false} /> : <HorizontalLevelChart title={category.title} data={category.coreAreas.map(coreArea => ({
                 coreArea: coreArea.name,
                 actual: categorySelections[coreArea.name] || 0,
-                expected: currentLevel
+                expected: baselineLevel
               }))} showLegend={false} />}
                 </div>
 

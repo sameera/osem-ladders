@@ -13,7 +13,6 @@ interface ScreenContentProps {
   currentFeedback: Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>;
   feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>;
   onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
-  currentLevel: number;
 }
 
 export function ScreenContent({
@@ -24,11 +23,16 @@ export function ScreenContent({
   currentSelections,
   currentFeedback,
   feedback,
-  onSelectionChange,
-  currentLevel
+  onSelectionChange
 }: ScreenContentProps) {
   if (isReportScreen) {
-    return <Report screens={screens} selections={selections} feedback={feedback} currentLevel={currentLevel} />;
+    return (
+      <Report
+        screens={screens}
+        selections={selections}
+        feedback={feedback}
+      />
+    );
   }
 
   if (!currentScreenData) {
