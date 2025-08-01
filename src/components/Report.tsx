@@ -35,22 +35,22 @@ function calculateMedian(values: number[]): number {
     return sorted[mid];
   }
 }
-function getPerformanceStatus(assessedLevel: number, currentLevel: number): string {
-  if (assessedLevel === currentLevel) return "Meets Expectations";
-  if (assessedLevel > currentLevel) return "Exceeds Expectations";
-  return "Needs Improvement";
+function getPerformanceStatus(assessedLevel: number, baselineLevel: number): string {
+  if (assessedLevel === 0) return "Not Assessed";
+  if (assessedLevel === baselineLevel) return "100% achieved";
+  if (assessedLevel < baselineLevel) {
+    const percentage = Math.round((assessedLevel / baselineLevel) * 100);
+    return `${percentage}% progress towards the goal`;
+  } else {
+    const percentage = Math.round(((assessedLevel - baselineLevel) / baselineLevel) * 100);
+    return `${percentage}% above the goal`;
+  }
 }
 function getPerformanceColor(status: string): string {
-  switch (status) {
-    case "Exceeds Expectations":
-      return "text-green-600";
-    case "Meets Expectations":
-      return "text-blue-600";
-    case "Needs Improvement":
-      return "text-orange-600";
-    default:
-      return "text-muted-foreground";
-  }
+  if (status.includes("above the goal")) return "text-green-600";
+  if (status.includes("100% achieved")) return "text-blue-600";
+  if (status.includes("progress towards")) return "text-orange-600";
+  return "text-muted-foreground";
 }
 const levelOptions = [
   { value: 1, label: "SE1 - Software Engineer I" },
