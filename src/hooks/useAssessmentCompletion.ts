@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Category } from '@/utils/configParser';
+import { Category } from '@/utils/model';
 
 export function useAssessmentCompletion(
   categories: Category[],

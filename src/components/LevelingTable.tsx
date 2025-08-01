@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { CoreArea } from '@/utils/configParser';
+import { CoreArea } from '@/utils/model';
 import { ScrollableTableContainer } from './ScrollableTableContainer';
 import { TableHeader } from './TableHeader';
 import { TableCell } from './TableCell';

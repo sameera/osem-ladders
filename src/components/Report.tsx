@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Category } from '@/utils/configParser';
+import { Category } from '@/utils/model';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

@@ -2,7 +2,7 @@
 import React from 'react';
 import { LevelingTable } from '@/components/LevelingTable';
 import { Report } from '@/components/Report';
-import { Category } from '@/utils/configParser';
+import { Category } from '@/utils/model';
 
 interface ScreenContentProps {
   isReportScreen: boolean;

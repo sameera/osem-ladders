@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import { CoreArea } from '@/utils/configParser';
+import { CoreArea } from '@/utils/model';
 import { cn } from '@/lib/utils';
 
 interface FeedbackPopupProps {
