@@ -36,19 +36,13 @@ export function TableHeader({
             if (level === 6) return "🤘";
             if (level === 7) return "🤘🤘";
             
-            const rocks = level === 1 || level === 2 ? level : level - 1;
-            const stars = level - 2;
+            const rocks = Math.min(level === 1 || level === 2 ? level : level - 1, 3);
+            const stars = Math.min(Math.max(level - 2, 0), 3);
             
-            return (
-              <span>
-                🪨 <span className="text-muted-foreground">x {rocks}</span>
-                {stars > 0 && (
-                  <>
-                    {"  "}🌟 <span className="text-muted-foreground">x {stars}</span>
-                  </>
-                )}
-              </span>
-            );
+            const rockEmojis = "🪨".repeat(rocks);
+            const starEmojis = stars > 0 ? " " + "🌟".repeat(stars) : "";
+            
+            return rockEmojis + starEmojis;
           };
           
           return (
