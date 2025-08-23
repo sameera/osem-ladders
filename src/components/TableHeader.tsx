@@ -32,6 +32,23 @@ export function TableHeader({
           </div>
         </th>
         {allLevels.map((level) => {
+          const getRepeatedEmoji = (emoji: string, count: number) => {
+            const maxCount = Math.min(count, 3);
+            return (
+              <span className="inline-flex items-center">
+                {Array.from({ length: maxCount }, (_, i) => (
+                  <span 
+                    key={i} 
+                    className="drop-shadow-md"
+                    style={i > 0 ? { marginLeft: '-0.75em' } : {}}
+                  >
+                    {emoji}
+                  </span>
+                ))}
+              </span>
+            );
+          };
+
           const getHeaderContent = (level: number) => {
             if (level === 6) return "🤘";
             if (level === 7) return "🤘🤘";
@@ -40,13 +57,9 @@ export function TableHeader({
             const stars = level - 2;
             
             return (
-              <span>
-                🪨 <span className="text-muted-foreground">x {rocks}</span>
-                {stars > 0 && (
-                  <>
-                    {"  "}🌟 <span className="text-muted-foreground">x {stars}</span>
-                  </>
-                )}
+              <span className="flex items-center justify-center gap-2">
+                {getRepeatedEmoji("🪨", rocks)}
+                {stars > 0 && getRepeatedEmoji("🌟", stars)}
               </span>
             );
           };
