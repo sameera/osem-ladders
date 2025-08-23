@@ -17,13 +17,13 @@ interface ReportProps {
   }>>>;
 }
 const levelNames = {
-  1: 'Software Engineer I',
-  2: 'Software Engineer II',
-  3: 'Senior Software Engineer I',
-  4: 'Senior Software Engineer II',
-  5: 'Staff Engineer',
-  6: 'Senior Staff Engineer',
-  7: 'Principal Engineer'
+  1: 'Apprentice',
+  2: 'Builder',
+  3: 'Pathfinder',
+  4: 'Craftsman',
+  5: 'Expert',
+  6: 'Catalyst',
+  7: 'Luminary'
 };
 function calculateMedian(values: number[]): number {
   if (values.length === 0) return 0;
@@ -53,13 +53,13 @@ function getPerformanceColor(status: string): string {
   return "text-muted-foreground";
 }
 const levelOptions = [
-  { value: 1, label: "SE1 - Software Engineer I" },
-  { value: 2, label: "SE2 - Software Engineer II" },
-  { value: 3, label: "SE3 - Senior Software Engineer I" },
-  { value: 4, label: "SE4 - Senior Software Engineer II" },
-  { value: 5, label: "SE5 - Staff Engineer" },
-  { value: 6, label: "SE6 - Senior Staff Engineer" },
-  { value: 7, label: "SE7 - Principal Engineer" },
+  { value: 1, label: "L1 - Apprentice" },
+  { value: 2, label: "L2 - Builder" },
+  { value: 3, label: "L3 - Pathfinder" },
+  { value: 4, label: "L4 - Craftsman" },
+  { value: 5, label: "L5 - Expert" },
+  { value: 6, label: "L6 - Catalyst" },
+  { value: 7, label: "L7 - Luminary" },
 ];
 
 export function Report({
