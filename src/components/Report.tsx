@@ -57,17 +57,17 @@ function calculateMedian(values: number[]): number {
     }
 }
 function getPerformanceStatus(
-    assessedLevel: number,
+    evaluatedLevel: number,
     baselineLevel: number
 ): string {
-    if (assessedLevel === 0) return "Not Assessed";
-    if (assessedLevel === baselineLevel) return "100% achieved";
-    if (assessedLevel < baselineLevel) {
-        const percentage = Math.round((assessedLevel / baselineLevel) * 100);
+    if (evaluatedLevel === 0) return "Not evaluated";
+    if (evaluatedLevel === baselineLevel) return "100% achieved";
+    if (evaluatedLevel < baselineLevel) {
+        const percentage = Math.round((evaluatedLevel / baselineLevel) * 100);
         return `${percentage}% progress towards the goal`;
     } else {
         const percentage = Math.round(
-            ((assessedLevel - baselineLevel) / baselineLevel) * 100
+            ((evaluatedLevel - baselineLevel) / baselineLevel) * 100
         );
         return `${percentage}% above the goal`;
     }
@@ -78,7 +78,10 @@ function getPerformanceColor(status: string): string {
     if (status.includes("progress towards")) return "text-orange-600";
     return "text-muted-foreground";
 }
-const levelOptions = [1, 2, 3, 4, 5, 6, 7].map(value => ({ value, label: levelNames[value] }));
+const levelOptions = [1, 2, 3, 4, 5, 6, 7].map((value) => ({
+    value,
+    label: levelNames[value],
+}));
 
 export function Report({ screens, selections, feedback }: ReportProps) {
     const [viewType, setViewType] = useState<"radar" | "line">("radar");
@@ -92,7 +95,8 @@ export function Report({ screens, selections, feedback }: ReportProps) {
             title: category.title,
             median,
             levelName:
-                levelNames[median as keyof typeof levelNames] || "Not Assessed",
+                levelNames[median as keyof typeof levelNames] ||
+                "Not evaluated",
             coreAreas: category.coreAreas,
         };
     });
@@ -102,7 +106,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
         .filter((val) => val > 0);
     const overallLevel = calculateMedian(allMedianValues);
 
-    // Calculate default baseline (one level above overall assessed level)
+    // Calculate default baseline (one level above overall evaluated level)
     const defaultBaseline = useMemo(() => {
         return overallLevel > 0 ? Math.min(overallLevel + 1, 7) : 2;
     }, [overallLevel]);
@@ -119,26 +123,26 @@ export function Report({ screens, selections, feedback }: ReportProps) {
     const overallPerformance =
         overallLevel > 0
             ? getPerformanceStatus(overallLevel, baselineLevel)
-            : "Not Assessed";
+            : "Not evaluated";
     const baselineLevelName =
         levelNames[baselineLevel as keyof typeof levelNames] || "Unknown Level";
     return (
         <div className="space-y-6" data-report-content>
             <div className="text-center">
                 <h2 className="text-3xl font-bold text-foreground mb-2">
-                    Assessment Report
+                    GROWth Plan
                 </h2>
                 <p className="text-muted-foreground">
-                    Performance assessment against baseline level
+                    Goal 🡢 Reality 🡢 Opportunity 🡢 Way Forward
                 </p>
             </div>
 
             {/* Baseline Level Selector */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Baseline Level</CardTitle>
+                    <CardTitle>Goal</CardTitle>
                     <CardDescription>
-                        Select the baseline level to compare performance against
+                        Select where you aspire to be in the next 6-12 months.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -146,7 +150,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                         <Label
                             htmlFor="baseline-level"
                             className="text-sm font-medium">
-                            Baseline Level
+                            Aspired goal
                         </Label>
                         <Select
                             value={baselineLevel.toString()}
@@ -190,14 +194,12 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                 </div>
             </div>
 
-            {/* Overall Performance */}
+            {/* Reality Check */}
             <Card className="border-2 border-primary">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">
-                        Overall Performance
-                    </CardTitle>
+                    <CardTitle className="text-2xl">Reality Check</CardTitle>
                     <CardDescription>
-                        Based on median assessment across all areas
+                        Based on median outcomes across all areas
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -248,7 +250,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                                   category.median,
                                   baselineLevel
                               )
-                            : "Not Assessed";
+                            : "Not evaluated";
                     return (
                         <Card key={index} className="w-full">
                             <CardHeader>
@@ -292,7 +294,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                                     )}
                                 </div>
 
-                                {/* Detailed feedback for assessed areas */}
+                                {/* Detailed feedback for evaluated areas */}
                                 {category.coreAreas.map(
                                     (coreArea, areaIndex) => {
                                         const selectedLevel =
@@ -325,18 +327,18 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <MapPin className="w-4 h-4 text-muted-foreground/60" />
-                            <span className="text-sm">Expected Level</span>
+                            <span className="text-sm">Aspired outcome</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <MapPin className="w-4 h-4 text-green-500" />
                             <span className="text-sm">
-                                Actual Level (Above Expected)
+                                Actual outcome (when above aspirations)
                             </span>
                         </div>
                         <div className="flex items-center gap-3">
                             <MapPin className="w-4 h-4 text-red-500" />
                             <span className="text-sm">
-                                Actual Level (Below Expected)
+                                Actual outcome (when below aspirations)
                             </span>
                         </div>
                     </div>
@@ -352,14 +354,14 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                     <div className="space-y-2 text-sm text-muted-foreground">
                         <p>
                             • Levels are calculated using the median value of
-                            all assessed areas within each category
+                            all evaluated areas within each category
                         </p>
                         <p>
                             • Overall level is the median of all individual
                             category levels
                         </p>
                         <p>
-                            • Areas not assessed are excluded from calculations
+                            • Areas not evaluated are excluded from calculations
                         </p>
                     </div>
                 </CardContent>

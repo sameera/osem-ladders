@@ -56,7 +56,7 @@ export function LevelingTable({ coreAreas, selections, feedback, onSelectionChan
                   const cellFeedback = feedback[coreArea.name]?.[level];
                   
                   return (
-                    <td key={level} className="py-2 px-2 h-24 align-top">
+                    <td key={level} className="py-2 px-1.5 h-24 align-top min-w-[300px]">
                       {levelContent ? (
                         <TableCell
                           levelContent={levelContent}
@@ -68,7 +68,7 @@ export function LevelingTable({ coreAreas, selections, feedback, onSelectionChan
                           feedback={cellFeedback}
                         />
                       ) : (
-                        <div className="w-full h-full p-3 text-center text-muted-foreground flex items-center justify-center min-h-[80px]">
+                        <div className="w-full h-full p-1 text-center text-muted-foreground flex items-center justify-center min-h-[80px]">
                           —
                         </div>
                       )}
