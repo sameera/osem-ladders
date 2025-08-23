@@ -7,11 +7,13 @@ export function useAssessmentFile() {
     currentLevel: number,
     categories: Category[],
     selections: Record<string, Record<string, number>>,
-    feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>
+    feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>,
+    wayForward?: string
   ) => {
     const assessmentData = {
       assessee: teamMemberName,
       currentLevel: currentLevel,
+      wayForward: wayForward || "",
       leveling: categories.reduce((acc, category) => {
         const categorySelections = selections[category.title] || {};
         const categoryFeedback = feedback[category.title] || {};
@@ -56,7 +58,8 @@ export function useAssessmentFile() {
     setCurrentLevel: (level: number) => void,
     setSelections: (selections: Record<string, Record<string, number>>) => void,
     setFeedback: (feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>) => void,
-    setCurrentScreen: (screen: number) => void
+    setCurrentScreen: (screen: number) => void,
+    setWayForward?: (wayForward: string) => void
   ) => {
     try {
       console.log('Loading assessment data:', data);
@@ -69,6 +72,9 @@ export function useAssessmentFile() {
       setTeamMemberName(data.assessee);
       if (data.currentLevel) {
         setCurrentLevel(data.currentLevel);
+      }
+      if (data.wayForward && setWayForward) {
+        setWayForward(data.wayForward);
       }
 
       const newSelections: Record<string, Record<string, number>> = {};

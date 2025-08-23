@@ -32,6 +32,9 @@ function AppContent() {
     resetAssessment
   } = useAssessmentState();
 
+  // Way forward state
+  const [wayForward, setWayForward] = useState<string>("");
+
   const {
     currentScreen: currentCategory,
     setCurrentScreen: setCurrentCategory,
@@ -90,7 +93,7 @@ function AppContent() {
   };
 
   const handleSubmitAssessmentClick = () => {
-    handleSubmitAssessment(teamMemberName, currentLevel, categories, selections, feedback);
+    handleSubmitAssessment(teamMemberName, currentLevel, categories, selections, feedback, wayForward);
     setShowNewAssessmentPrompt(true);
   };
 
@@ -120,6 +123,7 @@ function AppContent() {
   const handleStartNewAssessment = () => {
     resetAssessment();
     resetNavigation();
+    setWayForward("");
     setShowNewAssessmentPrompt(false);
   };
 
@@ -134,7 +138,8 @@ function AppContent() {
       setCurrentLevel,
       setSelections,
       setFeedback,
-      setCurrentCategory
+      setCurrentCategory,
+      setWayForward
     );
   };
 
@@ -180,6 +185,8 @@ function AppContent() {
           currentFeedback={currentFeedback}
           feedback={feedback}
           onSelectionChange={handleSelectionChange}
+          wayForward={wayForward}
+          onWayForwardChange={setWayForward}
         />
 
         <NavigationButtons

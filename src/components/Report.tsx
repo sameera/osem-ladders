@@ -17,6 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { RadarChartComponent } from "@/components/RadarChart";
 import { HorizontalLevelChart } from "@/components/HorizontalLevelChart";
 import { MapPin } from "lucide-react";
@@ -36,6 +37,8 @@ interface ReportProps {
             >
         >
     >;
+    wayForward?: string;
+    onWayForwardChange?: (wayForward: string) => void;
 }
 const levelNames = {
     1: "Apprentice",
@@ -83,7 +86,7 @@ const levelOptions = [1, 2, 3, 4, 5, 6, 7].map((value) => ({
     label: levelNames[value],
 }));
 
-export function Report({ screens, selections, feedback }: ReportProps) {
+export function Report({ screens, selections, feedback, wayForward = "", onWayForwardChange }: ReportProps) {
     const [viewType, setViewType] = useState<"radar" | "line">("radar");
     const categoryLevels = screens.map((category) => {
         const categorySelections = selections[category.title] || {};
@@ -348,7 +351,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
             {/* Additional Information */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Assessment Details</CardTitle>
+                    <CardTitle>How this works</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2 text-sm text-muted-foreground">
@@ -370,7 +373,7 @@ export function Report({ screens, selections, feedback }: ReportProps) {
             {/* User Comments Section */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Your Assessment Comments</CardTitle>
+                    <CardTitle>Opportunities</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {categoryLevels.map((category) => {
@@ -447,6 +450,30 @@ export function Report({ screens, selections, feedback }: ReportProps) {
                             </div>
                         );
                     })}
+                </CardContent>
+            </Card>
+
+            {/* Way Forward Section */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Way Forward</CardTitle>
+                    <CardDescription>
+                        Outline your action plan and next steps based on the assessment results
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-2">
+                        <Label htmlFor="way-forward" className="text-sm font-medium">
+                            Action plan and next steps
+                        </Label>
+                        <Textarea
+                            id="way-forward"
+                            placeholder="Describe your planned actions, learning goals, development priorities, and specific next steps based on your assessment results..."
+                            value={wayForward}
+                            onChange={(e) => onWayForwardChange?.(e.target.value)}
+                            className="min-h-[120px] resize-none"
+                        />
+                    </div>
                 </CardContent>
             </Card>
         </div>

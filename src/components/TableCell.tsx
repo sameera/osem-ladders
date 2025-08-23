@@ -17,6 +17,7 @@ interface TableCellProps {
   onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
   tooltipTextLimit: number;
   feedback?: { evidence: string; nextLevelFeedback: string };
+  hoverColor?: string;
 }
 
 export function TableCell({ 
@@ -26,7 +27,8 @@ export function TableCell({
   isSelected, 
   onSelectionChange, 
   tooltipTextLimit,
-  feedback
+  feedback,
+  hoverColor
 }: TableCellProps) {
   const [showFeedbackPopup, setShowFeedbackPopup] = useState<boolean>(false);
   const [showFullDescriptionDialog, setShowFullDescriptionDialog] = useState<boolean>(false);
@@ -83,13 +85,31 @@ export function TableCell({
       onClick={handleCellClick}
       className={cn(
         "w-full h-full text-left p-3 rounded-md border transition-all duration-200",
-        "hover:border-primary hover:shadow-md",
+        "hover:shadow-md",
         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         isSelected 
-          ? "border-primary bg-primary/10 text-primary shadow-md" 
+          ? "bg-primary/10 text-primary shadow-md" 
           : "border-border bg-background hover:bg-accent",
         "cursor-pointer min-h-[120px] flex items-start"
       )}
+      style={{
+        ...(hoverColor ? {
+          '--hover-border-color': hoverColor
+        } as React.CSSProperties & { '--hover-border-color': string } : {}),
+        ...(isSelected && hoverColor ? {
+          borderColor: hoverColor
+        } : {})
+      }}
+      onMouseEnter={(e) => {
+        if (hoverColor && !isSelected) {
+          e.currentTarget.style.borderColor = hoverColor;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (hoverColor && !isSelected) {
+          e.currentTarget.style.borderColor = '';
+        }
+      }}
     >
       <div className="text-sm leading-relaxed w-full">
         {formatContent(levelContent.content)}

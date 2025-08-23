@@ -13,6 +13,8 @@ interface ScreenContentProps {
   currentFeedback: Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>;
   feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>;
   onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
+  wayForward?: string;
+  onWayForwardChange?: (wayForward: string) => void;
 }
 
 export function ScreenContent({
@@ -23,7 +25,9 @@ export function ScreenContent({
   currentSelections,
   currentFeedback,
   feedback,
-  onSelectionChange
+  onSelectionChange,
+  wayForward,
+  onWayForwardChange
 }: ScreenContentProps) {
   if (isReportScreen) {
     return (
@@ -31,6 +35,8 @@ export function ScreenContent({
         screens={screens}
         selections={selections}
         feedback={feedback}
+        wayForward={wayForward}
+        onWayForwardChange={onWayForwardChange}
       />
     );
   }
