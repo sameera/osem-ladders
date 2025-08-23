@@ -31,11 +31,27 @@ export function TableHeader({
             />
           </div>
         </th>
-        {allLevels.map((level) => (
-          <th key={level} className="text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px]">
-            L{level}
-          </th>
-        ))}
+        {allLevels.map((level) => {
+          const getHeaderText = (level: number) => {
+            if (level === 6) return "🤘";
+            if (level === 7) return "🤘🤘";
+            
+            const rocks = level === 1 || level === 2 ? level : level - 1;
+            const stars = level - 2;
+            
+            let text = `🪨 x ${rocks}`;
+            if (stars > 0) {
+              text += `  🌟 x ${stars}`;
+            }
+            return text;
+          };
+          
+          return (
+            <th key={level} className="text-center py-4 px-4 font-semibold text-foreground bg-muted min-w-[200px]">
+              {getHeaderText(level)}
+            </th>
+          );
+        })}
       </tr>
     </thead>
   );
