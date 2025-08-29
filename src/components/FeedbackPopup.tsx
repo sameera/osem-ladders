@@ -71,15 +71,15 @@ export function FeedbackPopup({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl h-[80vh] max-h-[80vh] overflow-hidden">
-                <DialogHeader className="space-y-0 pb-2">
+            <DialogContent className="max-w-4xl w-full h-[85vh] max-h-[85vh] overflow-hidden flex flex-col">
+                <DialogHeader className="space-y-0 pb-2 flex-shrink-0">
                     <DialogTitle className="text-xl font-bold">
                         {coreArea.name}
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-3 flex flex-col h-full">
-                    <ScrollArea className="h-[300px] pr-4 overflow-y-auto">
+                <div className="space-y-3 flex flex-col flex-1 min-h-0">
+                    <ScrollArea className="flex-shrink-0 max-h-[30vh] pr-4 overflow-y-auto">
                         <div className="space-y-4">
                             {/* Selected Level Content */}
                             <div className="p-4 bg-muted/30 rounded-lg">
@@ -152,13 +152,13 @@ export function FeedbackPopup({
                         </div>
                     </ScrollArea>
                     {/* Two Column Feedback Table */}
-                    <div className="grid grid-cols-2 gap-4 flex-shrink-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0">
                         {/* Evidence Column */}
-                        <div className="space-y-2">
+                        <div className="space-y-2 flex flex-col">
                             <h3 className="font-semibold text-center bg-muted/50 py-2 rounded-t-lg">
                                 Strengths
                             </h3>
-                            <div className="space-y-2">
+                            <div className="space-y-2 flex flex-col flex-1">
                                 <label className="text-sm font-medium text-muted-foreground">
                                     Evidence for this level{" "}
                                     <span className="text-destructive">*</span>
@@ -169,18 +169,18 @@ export function FeedbackPopup({
                                         setEvidence(e.target.value)
                                     }
                                     placeholder="Provide evidence that demonstrates this level..."
-                                    className="min-h-[200px] resize-none"
+                                    className="flex-1 min-h-[100px] resize-none"
                                     required
                                 />
                             </div>
                         </div>
 
                         {/* Next Level Column */}
-                        <div className="space-y-2">
+                        <div className="space-y-2 flex flex-col">
                             <h3 className="font-semibold text-center bg-muted/50 py-2 rounded-t-lg">
                                 Opportunities
                             </h3>
-                            <div className="space-y-2">
+                            <div className="space-y-2 flex flex-col flex-1">
                                 <label className="text-sm font-medium text-muted-foreground">
                                     What L{selectedLevel + 1} could have looked
                                     like...
@@ -191,7 +191,7 @@ export function FeedbackPopup({
                                         setNextLevelFeedback(e.target.value)
                                     }
                                     placeholder="Describe what the next level would look like..."
-                                    className="min-h-[200px] resize-none"
+                                    className="flex-1 min-h-[100px] resize-none"
                                 />
                             </div>
                         </div>
