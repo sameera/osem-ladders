@@ -1,4 +1,4 @@
-export interface LevelContent {
+export interface Expectation {
   level: number;
   content: string;
   description?: string;
@@ -6,7 +6,7 @@ export interface LevelContent {
 
 export interface CoreArea {
   name: string;
-  levels: LevelContent[];
+  levels: Expectation[];
 }
 
 export interface Category {

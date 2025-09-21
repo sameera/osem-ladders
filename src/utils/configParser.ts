@@ -1,11 +1,11 @@
-import { Category, CoreArea, LevelContent } from "./model";
+import { Category, CoreArea, Expectation } from "./model";
 
 export function parseConfig(markdown: string): Category[] {
   const lines = markdown.split('\n');
   const categories: Category[] = [];
   let currentCategory: Category | null = null;
   let currentCoreArea: CoreArea | null = null;
-  let currentLevel: LevelContent | null = null;
+  let currentLevel: Expectation | null = null;
   let collectingDescription = false;
   let descriptionLines: string[] = [];
 
