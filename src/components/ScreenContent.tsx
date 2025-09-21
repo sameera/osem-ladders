@@ -12,7 +12,7 @@ interface ScreenContentProps {
   currentSelections: Record<string, number>;
   currentFeedback: Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>;
   feedback: Record<string, Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>>;
-  onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
+  onSelectionChange: (competence: string, level: number, evidence: string, nextLevelFeedback: string) => void;
   wayForward?: string;
   onWayForwardChange?: (wayForward: string) => void;
 }
@@ -52,13 +52,13 @@ export function ScreenContent({
           {currentScreenData.title}
         </h2>
         <p className="text-muted-foreground">
-          Select the appropriate level for each core area. Click on any cell to make your selection.
+          Select the appropriate level for each competence. Click on any cell to make your selection.
         </p>
       </div>
 
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
         <LevelingTable
-          coreAreas={currentScreenData.coreAreas}
+          competencies={currentScreenData.competencies}
           selections={currentSelections}
           feedback={currentFeedback}
           onSelectionChange={onSelectionChange}

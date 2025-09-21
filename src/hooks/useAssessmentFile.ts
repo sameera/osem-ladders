@@ -22,11 +22,11 @@ export function useAssessmentFile() {
         
         acc[category.title] = {
           level: median,
-          notes: category.coreAreas.reduce((noteAcc, coreArea) => {
-            const level = categorySelections[coreArea.name];
+          notes: category.competencies.reduce((noteAcc, competence) => {
+            const level = categorySelections[competence.name];
             if (level !== undefined) {
-              const levelFeedback = categoryFeedback[coreArea.name]?.[level];
-              noteAcc[coreArea.name] = {
+              const levelFeedback = categoryFeedback[competence.name]?.[level];
+              noteAcc[competence.name] = {
                 level: `L${level}`,
                 evidence: levelFeedback?.evidence || '',
                 advice: levelFeedback?.nextLevelFeedback || ''
@@ -87,8 +87,8 @@ export function useAssessmentFile() {
         newFeedback[categoryTitle] = {};
 
         if (categoryData.notes) {
-          Object.entries(categoryData.notes).forEach(([coreArea, noteData]: [string, any]) => {
-            console.log('Processing core area:', coreArea, noteData);
+          Object.entries(categoryData.notes).forEach(([competence, noteData]: [string, any]) => {
+            console.log('Processing competence:', competence, noteData);
             
             let level: number;
             if (typeof noteData.level === 'number') {
@@ -97,27 +97,27 @@ export function useAssessmentFile() {
               const levelStr = noteData.level.toString().replace(/^L/i, '');
               level = parseInt(levelStr, 10);
             } else {
-              console.warn('Invalid level format for', coreArea, ':', noteData.level);
+              console.warn('Invalid level format for', competence, ':', noteData.level);
               return;
             }
 
             if (isNaN(level) || level < 1) {
-              console.warn('Invalid level number for', coreArea, ':', level);
+              console.warn('Invalid level number for', competence, ':', level);
               return;
             }
 
-            newSelections[categoryTitle][coreArea] = level;
+            newSelections[categoryTitle][competence] = level;
             
-            if (!newFeedback[categoryTitle][coreArea]) {
-              newFeedback[categoryTitle][coreArea] = {};
+            if (!newFeedback[categoryTitle][competence]) {
+              newFeedback[categoryTitle][competence] = {};
             }
             
-            newFeedback[categoryTitle][coreArea][level] = {
+            newFeedback[categoryTitle][competence][level] = {
               evidence: noteData.evidence || '',
               nextLevelFeedback: noteData.advice || ''
             };
             
-            console.log('Set selection:', categoryTitle, coreArea, level);
+            console.log('Set selection:', categoryTitle, competence, level);
           });
         }
       });

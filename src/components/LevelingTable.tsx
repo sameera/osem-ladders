@@ -1,28 +1,28 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { CoreArea } from '@/utils/model';
+import { Competence } from '@/utils/model';
 import { ScrollableTableContainer } from './ScrollableTableContainer';
 import { TableHeader } from './TableHeader';
 import { TableCell } from './TableCell';
 
 interface LevelingTableProps {
-  coreAreas: CoreArea[];
+  competencies: Competence[];
   selections: Record<string, number>;
   feedback: Record<string, Record<string, { evidence: string; nextLevelFeedback: string }>>;
-  onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
+  onSelectionChange: (competence: string, level: number, evidence: string, nextLevelFeedback: string) => void;
 }
 
 // Configurable tooltip text length limit
 const TOOLTIP_TEXT_LIMIT = 200;
 
-export function LevelingTable({ coreAreas, selections, feedback, onSelectionChange }: LevelingTableProps) {
+export function LevelingTable({ competencies, selections, feedback, onSelectionChange }: LevelingTableProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // Get all unique levels across all core areas
+  // Get all unique levels across all competencies
   const allLevels = Array.from(
-    new Set(coreAreas.flatMap(area => area.levels.map(level => level.level)))
+    new Set(competencies.flatMap(area => area.levels.map(level => level.level)))
   ).sort((a, b) => a - b);
 
   const handleScrollStateChange = (canLeft: boolean, canRight: boolean) => {
@@ -42,18 +42,18 @@ export function LevelingTable({ coreAreas, selections, feedback, onSelectionChan
             onScrollRight={() => {}}
           />
           <tbody>
-            {coreAreas.map((coreArea, areaIndex) => (
-              <tr key={coreArea.name} className={cn(
+            {competencies.map((competence, areaIndex) => (
+              <tr key={competence.name} className={cn(
                 "border-b border-border hover:bg-muted/30 transition-colors",
                 areaIndex % 2 === 0 && "bg-muted/10"
               )}>
                 <td className="py-4 px-6 font-medium text-foreground sticky left-0 z-10 bg-card">
-                  {coreArea.name}
+                  {competence.name}
                 </td>
                 {allLevels.map((level, levelIndex) => {
-                  const levelContent = coreArea.levels.find(l => l.level === level);
-                  const isSelected = selections[coreArea.name] === level;
-                  const cellFeedback = feedback[coreArea.name]?.[level];
+                  const levelContent = competence.levels.find(l => l.level === level);
+                  const isSelected = selections[competence.name] === level;
+                  const cellFeedback = feedback[competence.name]?.[level];
                   
                   // Calculate gradient color based on position
                   const getHoverColor = (index: number, total: number) => {
@@ -85,7 +85,7 @@ export function LevelingTable({ coreAreas, selections, feedback, onSelectionChan
                       {levelContent ? (
                         <TableCell
                           levelContent={levelContent}
-                          coreArea={coreArea}
+                          competence={competence}
                           level={level}
                           isSelected={isSelected}
                           onSelectionChange={onSelectionChange}

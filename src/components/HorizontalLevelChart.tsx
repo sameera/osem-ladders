@@ -4,7 +4,7 @@ import { MapPin } from 'lucide-react';
 interface HorizontalLevelChartProps {
   title: string;
   data: Array<{
-    coreArea: string;
+    competence: string;
     actual: number;
     expected: number;
   }>;
@@ -29,7 +29,7 @@ export function HorizontalLevelChart({ title, data, showLegend = true }: Horizon
         
         return (
           <div key={index} className="space-y-2">
-            <div className="text-sm font-medium text-foreground">{item.coreArea}</div>
+            <div className="text-sm font-medium text-foreground">{item.competence}</div>
             
             <div className="relative">
               {/* Horizontal line background */}

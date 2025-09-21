@@ -21,7 +21,7 @@ export function TableHeader({
             <tr className="border-b border-border">
                 <th className="text-left py-4 px-6 font-semibold text-foreground bg-muted sticky left-0 z-20 min-w-[200px] relative">
                     <div className="flex items-center justify-between">
-                        <span>Core Area</span>
+                        <span>Competence</span>
                         <NavigationArrows
                             canScrollLeft={canScrollLeft}
                             canScrollRight={canScrollRight}

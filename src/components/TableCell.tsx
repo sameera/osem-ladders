@@ -7,14 +7,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { FeedbackPopup } from './FeedbackPopup';
-import { CoreArea } from '@/utils/model';
+import { Competence } from '@/utils/model';
 
 interface TableCellProps {
   levelContent: any;
-  coreArea: CoreArea;
+  competence: Competence;
   level: number;
   isSelected: boolean;
-  onSelectionChange: (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => void;
+  onSelectionChange: (competence: string, level: number, evidence: string, nextLevelFeedback: string) => void;
   tooltipTextLimit: number;
   feedback?: { evidence: string; nextLevelFeedback: string };
   hoverColor?: string;
@@ -22,7 +22,7 @@ interface TableCellProps {
 
 export function TableCell({ 
   levelContent, 
-  coreArea, 
+  competence, 
   level, 
   isSelected, 
   onSelectionChange, 
@@ -51,7 +51,7 @@ export function TableCell({
   };
 
   const handleFeedbackConfirm = (evidence: string, nextLevelFeedback: string): void => {
-    onSelectionChange(coreArea.name, level, evidence, nextLevelFeedback);
+    onSelectionChange(competence.name, level, evidence, nextLevelFeedback);
     setShowFeedbackPopup(false);
   };
 
@@ -125,7 +125,7 @@ export function TableCell({
           isOpen={showFeedbackPopup}
           onClose={handleFeedbackCancel}
           onConfirm={handleFeedbackConfirm}
-          coreArea={coreArea}
+          competence={competence}
           selectedLevel={level}
           initialEvidence={feedback?.evidence || ''}
           initialNextLevelFeedback={feedback?.nextLevelFeedback || ''}
@@ -193,7 +193,7 @@ export function TableCell({
         isOpen={showFeedbackPopup}
         onClose={handleFeedbackCancel}
         onConfirm={handleFeedbackConfirm}
-        coreArea={coreArea}
+        competence={competence}
         selectedLevel={level}
         initialEvidence={feedback?.evidence || ''}
         initialNextLevelFeedback={feedback?.nextLevelFeedback || ''}

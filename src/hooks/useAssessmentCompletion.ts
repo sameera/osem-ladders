@@ -9,10 +9,10 @@ export function useAssessmentCompletion(
     const completed = new Set<number>();
     categories.forEach((category, index) => {
       const categorySelections = selections[category.title] || {};
-      const allSelected = category.coreAreas.every(area => 
+      const allSelected = category.competencies.every(area => 
         categorySelections[area.name] !== undefined
       );
-      if (allSelected && category.coreAreas.length > 0) {
+      if (allSelected && category.competencies.length > 0) {
         completed.add(index);
       }
     });

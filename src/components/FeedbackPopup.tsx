@@ -15,14 +15,14 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "./MarkdownRenderer";
-import { CoreArea } from "@/utils/model";
+import { Competence } from "@/utils/model";
 import { cn } from "@/lib/utils";
 
 interface FeedbackPopupProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (evidence: string, nextLevelFeedback: string) => void;
-    coreArea: CoreArea;
+    competence: Competence;
     selectedLevel: number;
     initialEvidence?: string;
     initialNextLevelFeedback?: string;
@@ -32,7 +32,7 @@ export function FeedbackPopup({
     isOpen,
     onClose,
     onConfirm,
-    coreArea,
+    competence,
     selectedLevel,
     initialEvidence = "",
     initialNextLevelFeedback = "",
@@ -48,10 +48,10 @@ export function FeedbackPopup({
         setNextLevelFeedback(initialNextLevelFeedback);
     }, [initialEvidence, initialNextLevelFeedback, isOpen]);
 
-    const selectedLevelData = coreArea.levels.find(
+    const selectedLevelData = competence.levels.find(
         (l) => l.level === selectedLevel
     );
-    const nextLevelData = coreArea.levels.find(
+    const nextLevelData = competence.levels.find(
         (l) => l.level === selectedLevel + 1
     );
 
@@ -74,7 +74,7 @@ export function FeedbackPopup({
             <DialogContent className="max-w-4xl w-full h-[85vh] max-h-[85vh] overflow-hidden flex flex-col">
                 <DialogHeader className="space-y-0 pb-2 flex-shrink-0">
                     <DialogTitle className="text-xl font-bold">
-                        {coreArea.name}
+                        {competence.name}
                     </DialogTitle>
                 </DialogHeader>
 

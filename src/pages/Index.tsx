@@ -69,14 +69,14 @@ function AppContent() {
     setTeamMemberName(name);
   };
 
-  const handleSelectionChange = (coreArea: string, level: number, evidence: string, nextLevelFeedback: string) => {
+  const handleSelectionChange = (competence: string, level: number, evidence: string, nextLevelFeedback: string) => {
     if (!currentCategoryData) return;
     
     setSelections(prev => ({
       ...prev,
       [currentCategoryData.title]: {
         ...prev[currentCategoryData.title],
-        [coreArea]: level
+        [competence]: level
       }
     }));
 
@@ -84,8 +84,8 @@ function AppContent() {
       ...prev,
       [currentCategoryData.title]: {
         ...prev[currentCategoryData.title],
-        [coreArea]: {
-          ...prev[currentCategoryData.title]?.[coreArea],
+        [competence]: {
+          ...prev[currentCategoryData.title]?.[competence],
           [level]: { evidence, nextLevelFeedback }
         }
       }

@@ -1,10 +1,10 @@
-import { Category, CoreArea, Expectation } from "./model";
+import { Category, Competence, Expectation } from "./model";
 
 export function parseConfig(markdown: string): Category[] {
   const lines = markdown.split('\n');
   const categories: Category[] = [];
   let currentCategory: Category | null = null;
-  let currentCoreArea: CoreArea | null = null;
+  let currentCompetence: Competence | null = null;
   let currentLevel: Expectation | null = null;
   let collectingDescription = false;
   let descriptionLines: string[] = [];
@@ -26,12 +26,12 @@ export function parseConfig(markdown: string): Category[] {
     
     // Check if we're currently collecting a description
     if (collectingDescription) {
-      // Check if this line starts a new level, core area, or category
+      // Check if this line starts a new level, competence, or category
       const isNewLevel = /^\d+\./.test(trimmed);
-      const isNewCoreArea = trimmed.startsWith('## ');
+      const isNewCompetence = trimmed.startsWith('## ');
       const isNewCategory = trimmed.startsWith('# ');
       
-      if (isNewLevel || isNewCoreArea || isNewCategory) {
+      if (isNewLevel || isNewCompetence || isNewCategory) {
         // Finish collecting description for previous level
         if (currentLevel && descriptionLines.length > 0) {
           currentLevel.description = descriptionLines.join('\n').trim();
@@ -56,34 +56,34 @@ export function parseConfig(markdown: string): Category[] {
       }
       currentCategory = {
         title: trimmed.substring(2).trim(),
-        coreAreas: []
+        competencies: []
       };
-      currentCoreArea = null;
+      currentCompetence = null;
       currentLevel = null;
     }
-    // Core area (starts with ##)
+    // Competence (starts with ##)
     else if (trimmed.startsWith('## ')) {
-      console.log('Found core area:', trimmed);
+      console.log('Found competence:', trimmed);
       if (currentCategory) {
-        currentCoreArea = {
+        currentCompetence = {
           name: trimmed.substring(3).trim(),
           levels: []
         };
-        currentCategory.coreAreas.push(currentCoreArea);
+        currentCategory.competencies.push(currentCompetence);
       }
       currentLevel = null;
     }
     // Level content (numbered list)
     else if (/^\d+\./.test(trimmed)) {
       console.log('Found level:', trimmed);
-      if (currentCoreArea) {
+      if (currentCompetence) {
         const match = trimmed.match(/^(\d+)\.\s*(.+)$/);
         if (match) {
           currentLevel = {
             level: parseInt(match[1], 10),
             content: match[2].trim()
           };
-          currentCoreArea.levels.push(currentLevel);
+          currentCompetence.levels.push(currentLevel);
           
           // Start collecting description for this level
           collectingDescription = true;

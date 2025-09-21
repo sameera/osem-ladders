@@ -100,7 +100,7 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
             levelName:
                 levelNames[median as keyof typeof levelNames] ||
                 "Not evaluated",
-            coreAreas: category.coreAreas,
+            competences: category.competences,
         };
     });
 
@@ -221,7 +221,7 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                             <RadarChartComponent
                                 title="Overall Performance Summary"
                                 data={categoryLevels.map((category) => ({
-                                    coreArea: category.title,
+                                    competence: category.title,
                                     actual: category.median,
                                     expected: baselineLevel,
                                 }))}
@@ -231,7 +231,7 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                             <HorizontalLevelChart
                                 title="Overall Performance Summary"
                                 data={categoryLevels.map((category) => ({
-                                    coreArea: category.title,
+                                    competence: category.title,
                                     actual: category.median,
                                     expected: baselineLevel,
                                 }))}
@@ -267,12 +267,12 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                     {viewType === "radar" ? (
                                         <RadarChartComponent
                                             title={category.title}
-                                            data={category.coreAreas.map(
-                                                (coreArea) => ({
-                                                    coreArea: coreArea.name,
+                                            data={category.competences.map(
+                                                (competence) => ({
+                                                    competence: competence.name,
                                                     actual:
                                                         categorySelections[
-                                                            coreArea.name
+                                                            competence.name
                                                         ] || 0,
                                                     expected: baselineLevel,
                                                 })
@@ -282,12 +282,12 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                     ) : (
                                         <HorizontalLevelChart
                                             title={category.title}
-                                            data={category.coreAreas.map(
-                                                (coreArea) => ({
-                                                    coreArea: coreArea.name,
+                                            data={category.competences.map(
+                                                (competence) => ({
+                                                    competence: competence.name,
                                                     actual:
                                                         categorySelections[
-                                                            coreArea.name
+                                                            competence.name
                                                         ] || 0,
                                                     expected: baselineLevel,
                                                 })
@@ -298,18 +298,18 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                 </div>
 
                                 {/* Detailed feedback for evaluated areas */}
-                                {category.coreAreas.map(
-                                    (coreArea, areaIndex) => {
+                                {category.competences.map(
+                                    (competence, areaIndex) => {
                                         const selectedLevel =
-                                            categorySelections[coreArea.name];
+                                            categorySelections[competence.name];
                                         const areaFeedback =
-                                            categoryFeedback[coreArea.name]?.[
+                                            categoryFeedback[competence.name]?.[
                                                 selectedLevel
                                             ];
                                         if (!selectedLevel || !areaFeedback)
                                             return null;
                                         const selectedLevelContent =
-                                            coreArea.levels.find(
+                                            competence.levels.find(
                                                 (l) => l.level === selectedLevel
                                             );
                                         return;
@@ -381,9 +381,9 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                         const hasAnyFeedback = Object.keys(
                             categoryFeedback
                         ).some(
-                            (coreAreaName) =>
+                            (competenceName) =>
                                 Object.keys(
-                                    categoryFeedback[coreAreaName] || {}
+                                    categoryFeedback[competenceName] || {}
                                 ).length > 0
                         );
 
@@ -394,9 +394,9 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                 <h3 className="text-xl font-semibold text-foreground">
                                     {category.title}
                                 </h3>
-                                {category.coreAreas.map((coreArea) => {
+                                {category.competences.map((competence) => {
                                     const areaFeedback =
-                                        categoryFeedback[coreArea.name];
+                                        categoryFeedback[competence.name];
                                     if (
                                         !areaFeedback ||
                                         Object.keys(areaFeedback).length === 0
@@ -405,10 +405,10 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
 
                                     return (
                                         <div
-                                            key={coreArea.name}
+                                            key={competence.name}
                                             className="ml-4 space-y-3">
                                             <h4 className="text-lg font-medium text-foreground">
-                                                {coreArea.name}
+                                                {competence.name}
                                             </h4>
                                             {Object.entries(areaFeedback).map(
                                                 ([level, comments]) => (

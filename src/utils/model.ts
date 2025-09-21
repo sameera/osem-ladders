@@ -4,12 +4,12 @@ export interface Expectation {
   description?: string;
 }
 
-export interface CoreArea {
+export interface Competence {
   name: string;
   levels: Expectation[];
 }
 
 export interface Category {
   title: string;
-  coreAreas: CoreArea[];
+  competencies: Competence[];
 }

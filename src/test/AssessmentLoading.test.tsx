@@ -205,7 +205,7 @@ describe('Assessment Loading Functionality', () => {
       newFeedback[screenTitle] = {}
 
       if (screenData.notes) {
-        Object.entries(screenData.notes).forEach(([coreArea, noteData]: [string, any]) => {
+        Object.entries(screenData.notes).forEach(([competence, noteData]: [string, any]) => {
           // Parse level more robustly
           let level: number
           if (typeof noteData.level === 'number') {
@@ -221,13 +221,13 @@ describe('Assessment Loading Functionality', () => {
             return
           }
 
-          newSelections[screenTitle][coreArea] = level
+          newSelections[screenTitle][competence] = level
           
-          if (!newFeedback[screenTitle][coreArea]) {
-            newFeedback[screenTitle][coreArea] = {}
+          if (!newFeedback[screenTitle][competence]) {
+            newFeedback[screenTitle][competence] = {}
           }
           
-          newFeedback[screenTitle][coreArea][level] = {
+          newFeedback[screenTitle][competence][level] = {
             evidence: noteData.evidence || '',
             nextLevelFeedback: noteData.advice || ''
           }

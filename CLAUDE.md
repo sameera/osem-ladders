@@ -38,8 +38,8 @@ This is a **career ladder assessment application** that helps visualize and trac
 
 #### Core Data Model (`src/utils/model.ts`)
 - `Expectation` - Individual competency level with content and description
-- `CoreArea` - Group of levels for a specific competency area  
-- `Category` - Collection of core areas (e.g., Technical Execution, Impact, Leadership)
+- `Competence` - Group of levels for a specific competency area
+- `Category` - Collection of competencies (e.g., Technical Execution, Impact, Leadership)
 
 #### Key Directories
 - `src/components/` - Reusable React components

@@ -1,7 +1,7 @@
 import React from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend } from 'recharts';
 interface RadarChartData {
-  coreArea: string;
+  competence: string;
   actual: number;
   expected: number;
 }
@@ -35,8 +35,8 @@ export function RadarChartComponent({
             strokeWidth={1}
             strokeDasharray="2 2"
           />
-          <PolarAngleAxis 
-            dataKey="coreArea" 
+          <PolarAngleAxis
+            dataKey="competence" 
             className="text-xs font-medium" 
             tick={{
               fontSize: 11,
