@@ -1,4 +1,3 @@
-
 # Technical Execution
 ## Code & Implementation
 1. Implements and maintains product or system features with good and maintainable code

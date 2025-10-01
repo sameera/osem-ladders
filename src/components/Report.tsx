@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Category } from "@/utils/model";
+import { parseLevels } from "@/utils/configParser";
 import {
     Card,
     CardContent,
@@ -21,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadarChartComponent } from "@/components/RadarChart";
 import { HorizontalLevelChart } from "@/components/HorizontalLevelChart";
 import { MapPin } from "lucide-react";
+import levelsMarkdown from '@/data/levels.md?raw';
 interface ReportProps {
     screens: Category[];
     selections: Record<string, Record<string, number>>;
@@ -40,15 +42,6 @@ interface ReportProps {
     wayForward?: string;
     onWayForwardChange?: (wayForward: string) => void;
 }
-const levelNames = {
-    1: "Apprentice",
-    2: "Builder",
-    3: "Pathfinder",
-    4: "Craftsman",
-    5: "Expert",
-    6: "Catalyst",
-    7: "Luminary",
-};
 function calculateMedian(values: number[]): number {
     if (values.length === 0) return 0;
     const sorted = [...values].sort((a, b) => a - b);
@@ -81,13 +74,13 @@ function getPerformanceColor(status: string): string {
     if (status.includes("progress towards")) return "text-orange-600";
     return "text-muted-foreground";
 }
-const levelOptions = [1, 2, 3, 4, 5, 6, 7].map((value) => ({
-    value,
-    label: levelNames[value],
-}));
-
 export function Report({ screens, selections, feedback, wayForward = "", onWayForwardChange }: ReportProps) {
     const [viewType, setViewType] = useState<"radar" | "line">("radar");
+    const levelNames = useMemo(() => parseLevels(levelsMarkdown), []);
+    const levelOptions = useMemo(() => [1, 2, 3, 4, 5, 6, 7].map((value) => ({
+        value,
+        label: levelNames[value],
+    })), [levelNames]);
     const categoryLevels = screens.map((category) => {
         const categorySelections = selections[category.title] || {};
         const values = Object.values(categorySelections).filter(

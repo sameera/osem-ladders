@@ -1,5 +1,24 @@
 import { Category, Competence, Expectation } from "./model";
 
+export function parseLevels(markdown: string): Record<number, string> {
+  const lines = markdown.split('\n');
+  const levels: Record<number, string> = {};
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Parse numbered list items (e.g., "1. Apprentice")
+    const match = trimmed.match(/^(\d+)\.\s*(.+)$/);
+    if (match) {
+      const levelNumber = parseInt(match[1], 10);
+      const levelName = match[2].trim();
+      levels[levelNumber] = levelName;
+    }
+  }
+
+  return levels;
+}
+
 export function parseConfig(markdown: string): Category[] {
   const lines = markdown.split('\n');
   const categories: Category[] = [];
