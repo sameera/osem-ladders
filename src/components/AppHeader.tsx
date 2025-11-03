@@ -18,7 +18,7 @@ export function AppHeader({ teamMemberName, onNewAssessment, onOpenAssessment }:
             <AppMenuBar onNewAssessment={onNewAssessment} onOpenAssessment={onOpenAssessment} />
             <div>
               <p className="text-sm text-muted-foreground">
-                <span>Career Growth Plan</span>
+                <span>{import.meta.env.VITE_BRANDING_APP_NAME || 'Career Growth Plan'}</span>
               </p>
                 <h1 className="text-2xl font-bold text-foreground">{teamMemberName}</h1>
             </div>

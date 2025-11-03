@@ -30,7 +30,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **React Query** (@tanstack/react-query) for state management
 - **React Router** for navigation
 - **Vitest** for testing
-- **Supabase** integration for backend services
+- **AWS Amplify** and **AWS Cognito** for authentication with Microsoft 365
+- **Supabase** integration for backend services (legacy)
 
 ### Application Structure
 
@@ -45,10 +46,13 @@ This is a **career ladder assessment application** that helps visualize and trac
 - `src/components/` - Reusable React components
 - `src/components/ui/` - shadcn/ui component library
 - `src/components/assessment/` - Assessment-specific components
+- `src/contexts/` - React contexts (including AuthContext for authentication)
+- `src/config/` - Configuration files (including Cognito setup)
+- `src/pages/` - Page components (Index, Login, NotFound)
 - `src/hooks/` - Custom React hooks for state management
 - `src/utils/` - Utility functions including data models and parsers
 - `src/data/config.md` - Career ladder configuration in Markdown format
-- `src/integrations/supabase/` - Supabase client and types
+- `src/integrations/supabase/` - Supabase client and types (legacy)
 
 #### Assessment System
 The app implements a multi-step assessment wizard:
@@ -59,10 +63,24 @@ The app implements a multi-step assessment wizard:
 
 #### Component Architecture
 - Uses **ThemeProvider** with next-themes for dark/light mode
+- **AuthProvider** with AWS Cognito for Microsoft 365 authentication
+- **ProtectedRoute** component for route-level authentication
 - **React Query** for server state management
 - **React Router** with catch-all route handling
 - **Local storage** hooks for persistent state
 - **Responsive design** with mobile-first approach using Tailwind
+
+#### Authentication
+- **AWS Cognito** configured with Microsoft 365 (Azure AD) OIDC provider
+- All routes except `/login` require authentication
+- OAuth 2.0 authorization code flow with PKCE
+- See [AUTHENTICATION_SETUP.md](AUTHENTICATION_SETUP.md) for detailed setup instructions
+- Environment variables required (see `.env.example`):
+  - `VITE_BRANDING_APP_NAME` - Application display name shown in UI
+  - `VITE_COGNITO_REGION`
+  - `VITE_COGNITO_USER_POOL_ID`
+  - `VITE_COGNITO_USER_POOL_CLIENT_ID`
+  - `VITE_COGNITO_DOMAIN`
 
 ### Key Configuration Files
 - `vite.config.ts` - Vite configuration with path aliases (`@/` → `./src/`)
