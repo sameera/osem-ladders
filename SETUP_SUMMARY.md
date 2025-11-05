@@ -2,11 +2,11 @@
 
 ## What Was Done
 
-This application has been configured to require authentication using AWS Cognito with Microsoft 365 login.
+This application has been configured to require authentication using AWS Cognito with Microsoft 365 login via standard OIDC (OpenID Connect).
 
 ### Files Created
 
-1. **[src/config/cognito.ts](src/config/cognito.ts)** - AWS Cognito configuration
+1. **[src/config/oidc.ts](src/config/oidc.ts)** - OIDC configuration for AWS Cognito
 2. **[src/contexts/AuthContext.tsx](src/contexts/AuthContext.tsx)** - Authentication context and provider
 3. **[src/pages/Login.tsx](src/pages/Login.tsx)** - Login page with Microsoft 365 button
 4. **[src/components/ProtectedRoute.tsx](src/components/ProtectedRoute.tsx)** - Protected route wrapper
@@ -15,14 +15,14 @@ This application has been configured to require authentication using AWS Cognito
 
 ### Files Modified
 
-1. **[src/App.tsx](src/App.tsx)** - Added authentication provider and protected routes
+1. **[src/App.tsx](src/App.tsx)** - Added OIDC authentication provider and protected routes
 2. **[CLAUDE.md](CLAUDE.md)** - Updated project documentation
 3. **[.gitignore](.gitignore)** - Added `.env` to prevent committing secrets
 
 ### Dependencies Installed
 
-- `aws-amplify` - AWS Amplify library for authentication
-- `@aws-amplify/ui-react` - UI components for AWS Amplify
+- `react-oidc-context` - Standard React OIDC library
+- `oidc-client-ts` - OIDC client for TypeScript
 
 ## Next Steps
 

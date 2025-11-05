@@ -30,7 +30,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **React Query** (@tanstack/react-query) for state management
 - **React Router** for navigation
 - **Vitest** for testing
-- **AWS Amplify** and **AWS Cognito** for authentication with Microsoft 365
+- **react-oidc-context** and **AWS Cognito** for authentication with Microsoft 365 via standard OIDC
 - **Supabase** integration for backend services (legacy)
 
 ### Application Structure
