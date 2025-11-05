@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# OSEM Ladders Monorepo
 
-## Project info
+Engineering career ladder assessment application - Nx monorepo with pnpm.
 
-**URL**: https://lovable.dev/projects/43f63d56-19ef-4893-9ec9-705e724f0507
+## Monorepo Structure
 
-## How can I edit this code?
+This repository uses **Nx** as the build system and **pnpm** as the package manager.
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/43f63d56-19ef-4893-9ec9-705e724f0507) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+osem-ladders/
+├── apps/
+│   └── web/          # Main React application (career ladder assessment)
+├── libs/             # Shared libraries (future)
+├── nx.json           # Nx workspace configuration
+└── pnpm-workspace.yaml
 ```
 
-**Edit a file directly in GitHub**
+## Prerequisites
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Node.js** (v18+) - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **pnpm** - Install with: `npm install -g pnpm`
 
-**Use GitHub Codespaces**
+## Getting Started
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+# Clone the repository
+git clone <YOUR_GIT_URL>
 
-## What technologies are used for this project?
+# Navigate to the project directory
+cd osem-ladders
 
-This project is built with:
+# Install dependencies
+pnpm install
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Start the development server
+pnpm dev
+```
 
-## How can I deploy this project?
+The development server will start on [http://localhost:8080](http://localhost:8080).
 
-Simply open [Lovable](https://lovable.dev/projects/43f63d56-19ef-4893-9ec9-705e724f0507) and click on Share -> Publish.
+## Available Commands
 
-## Can I connect a custom domain to my Lovable project?
+### Development
+- `pnpm dev` - Start development server for web app
+- `pnpm build` - Build web app for production
+- `pnpm build:dev` - Build web app in development mode
+- `pnpm lint` - Lint web app
+- `pnpm test` - Run tests for web app
+- `pnpm preview` - Preview production build
 
-Yes, you can!
+### Nx Commands
+- `nx serve web` - Start dev server
+- `nx build web` - Build web application
+- `nx test web` - Run tests
+- `nx lint web` - Lint application
+- `nx graph` - View project dependency graph
+- `nx affected:build` - Build only affected projects
+- `nx affected:test` - Test only affected projects
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Deployment
+- `pnpm deploy` - Deploy to GitHub Pages
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Technologies
+
+- **Nx** - Monorepo build system
+- **pnpm** - Fast, disk space efficient package manager
+- **React 18** - UI framework
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Fast build tool
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Radix UI component library
+- **AWS Cognito** - Authentication (Microsoft 365 OIDC)
+
+## Applications
+
+### Web App (`apps/web`)
+
+Career ladder assessment application for engineering competency tracking.
+
+See [apps/web/AUTHENTICATION_SETUP.md](apps/web/AUTHENTICATION_SETUP.md) for authentication configuration.
+
+## Adding New Projects
+
+### Add a Lambda Function
+
+```sh
+# Create a new Node.js application
+nx g @nx/node:application my-lambda --directory=apps/my-lambda
+
+# Or use the Nx console in your IDE
+```
+
+### Add a Shared Library
+
+```sh
+# Create a new TypeScript library
+nx g @nx/js:library my-lib --directory=libs/my-lib
+```
+
+## Project Documentation
+
+- [CLAUDE.md](CLAUDE.md) - Development guide for AI assistants
+- [apps/web/AUTHENTICATION_SETUP.md](apps/web/AUTHENTICATION_SETUP.md) - Authentication setup instructions
+- [apps/web/SETUP_SUMMARY.md](apps/web/SETUP_SUMMARY.md) - Web app setup summary

@@ -2,28 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Monorepo Structure
+
+This is an **Nx monorepo** with **pnpm** as the package manager.
+
+### Repository Layout
+- `apps/web/` - Main React application (career ladder assessment tool)
+- `apps/` - Future applications (e.g., Lambda functions)
+- `libs/` - Shared libraries (to be added as needed)
+
 ## Development Commands
 
 ### Core Commands
-- `npm run dev` - Start development server on port 8080
-- `npm run build` - Build for production
-- `npm run build:dev` - Build for development mode
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build
+- `pnpm dev` - Start development server on port 8080 (runs `nx serve web`)
+- `pnpm build` - Build web app for production (runs `nx build web`)
+- `pnpm build:dev` - Build for development mode (runs `nx build web --mode development`)
+- `pnpm lint` - Run ESLint on web app (runs `nx lint web`)
+- `pnpm preview` - Preview production build (runs `nx preview web`)
+- `pnpm test` - Run tests (runs `nx test web`)
+
+### Nx Commands
+- `nx serve web` - Start development server
+- `nx build web` - Build web application
+- `nx test web` - Run tests for web app
+- `nx lint web` - Lint web application
+- `nx graph` - View dependency graph
+- `nx affected:build` - Build only affected projects
+- `nx affected:test` - Test only affected projects
 
 ### Testing
-- `vitest` - Run tests (Vitest is configured but no test command in package.json)
-- Tests are in `src/test/` directory
-- Test setup file: `src/test/setup.ts`
+- Tests are in `apps/web/src/test/` directory
+- Test setup file: `apps/web/src/test/setup.ts`
 - Uses jsdom environment for React component testing
+- Vitest is configured for testing
 
 ### Deployment
-- `npm run predeploy` - Runs build automatically before deploy
-- `npm run deploy` - Deploy to GitHub Pages
+- `pnpm predeploy` - Runs build automatically before deploy
+- `pnpm deploy` - Deploy to GitHub Pages (runs `nx deploy web`)
 
 ## Project Architecture
 
 ### Tech Stack
+- **Nx** - Monorepo build system
+- **pnpm** - Package manager
 - **React 18** with TypeScript and Vite
 - **shadcn/ui** components with Radix UI primitives
 - **Tailwind CSS** for styling
@@ -37,26 +58,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **career ladder assessment application** that helps visualize and track engineering career progression through different levels and competencies.
 
-#### Core Data Model (`src/utils/model.ts`)
+#### Core Data Model (`apps/web/src/utils/model.ts`)
 - `Expectation` - Individual competency level with content and description
 - `Competence` - Group of levels for a specific competency area
 - `Category` - Collection of competencies (e.g., Technical Execution, Impact, Leadership)
 
 #### Key Directories
-- `src/components/` - Reusable React components
-- `src/components/ui/` - shadcn/ui component library
-- `src/components/assessment/` - Assessment-specific components
-- `src/contexts/` - React contexts (including AuthContext for authentication)
-- `src/config/` - Configuration files (including Cognito setup)
-- `src/pages/` - Page components (Index, Login, NotFound)
-- `src/hooks/` - Custom React hooks for state management
-- `src/utils/` - Utility functions including data models and parsers
-- `src/data/config.md` - Career ladder configuration in Markdown format
-- `src/integrations/supabase/` - Supabase client and types (legacy)
+- `apps/web/src/components/` - Reusable React components
+- `apps/web/src/components/ui/` - shadcn/ui component library
+- `apps/web/src/components/assessment/` - Assessment-specific components
+- `apps/web/src/contexts/` - React contexts (including AuthContext for authentication)
+- `apps/web/src/config/` - Configuration files (including Cognito setup)
+- `apps/web/src/pages/` - Page components (Index, Login, NotFound)
+- `apps/web/src/hooks/` - Custom React hooks for state management
+- `apps/web/src/utils/` - Utility functions including data models and parsers
+- `apps/web/src/data/config.md` - Career ladder configuration in Markdown format
+- `apps/web/src/integrations/supabase/` - Supabase client and types (legacy)
 
 #### Assessment System
 The app implements a multi-step assessment wizard:
-- **Configuration parsing** (`src/utils/configParser.ts`) - Parses Markdown config into data structures
+- **Configuration parsing** (`apps/web/src/utils/configParser.ts`) - Parses Markdown config into data structures
 - **Assessment state management** - Custom hooks handle navigation, completion tracking, and local storage
 - **Data visualization** - Radar charts, level charts, and tables show assessment results
 - **Report generation** - PDF export functionality for assessment results
@@ -83,12 +104,15 @@ The app implements a multi-step assessment wizard:
   - `VITE_COGNITO_DOMAIN`
 
 ### Key Configuration Files
-- `vite.config.ts` - Vite configuration with path aliases (`@/` → `./src/`)
-- `vitest.config.ts` - Test configuration
-- `tailwind.config.ts` - Tailwind CSS configuration
-- `components.json` - shadcn/ui configuration
+- `nx.json` - Nx workspace configuration
+- `pnpm-workspace.yaml` - pnpm workspace configuration
+- `apps/web/project.json` - Nx project configuration for web app
+- `apps/web/vite.config.ts` - Vite configuration with path aliases (`@/` → `./src/`)
+- `apps/web/vitest.config.ts` - Test configuration
+- `apps/web/tailwind.config.ts` - Tailwind CSS configuration
+- `apps/web/components.json` - shadcn/ui configuration
 
 ### Path Aliases
-- `@/` resolves to `./src/` for clean imports
+- `@/` resolves to `apps/web/src/` for clean imports within the web app
 
 This application focuses on engineering career development, providing structured assessment tools and visualization of competency progression across technical execution, impact, collaboration, and leadership domains.
