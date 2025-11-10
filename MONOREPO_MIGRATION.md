@@ -75,10 +75,14 @@ osem-ladders/
 4. **`apps/web/postcss.config.js`**
    - Explicitly specifies Tailwind config path for monorepo compatibility
 
-5. **`pnpm-workspace.yaml`**
+5. **`apps/web/tailwind.config.ts`**
+   - Updated content paths to use absolute paths via `path.join(__dirname, ...)`
+   - This ensures Tailwind can find source files regardless of working directory
+
+6. **`pnpm-workspace.yaml`**
    - New file: Defines pnpm workspace packages
 
-6. **`nx.json`**
+7. **`nx.json`**
    - New file: Nx workspace configuration with caching and plugin settings
 
 ### Documentation Updates
