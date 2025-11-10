@@ -15,7 +15,7 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "./MarkdownRenderer";
-import { Competence } from "@/utils/model";
+import { Competence } from "@/data/model";
 import { cn } from "@/lib/utils";
 
 interface FeedbackPopupProps {
@@ -93,7 +93,8 @@ export function FeedbackPopup({
                                 {selectedLevelData.description && (
                                     <Collapsible
                                         open={isDescriptionExpanded}
-                                        onOpenChange={setIsDescriptionExpanded}>
+                                        onOpenChange={setIsDescriptionExpanded}
+                                    >
                                         <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                                             <span>Description</span>
                                             {isDescriptionExpanded ? (
@@ -128,7 +129,8 @@ export function FeedbackPopup({
                                             open={isDescriptionExpanded}
                                             onOpenChange={
                                                 setIsDescriptionExpanded
-                                            }>
+                                            }
+                                        >
                                             <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                                                 <span>Description</span>
                                                 {isDescriptionExpanded ? (

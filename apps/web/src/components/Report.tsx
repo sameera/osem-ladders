@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Category } from "@/utils/model";
+import { Category } from "@/data/model";
 import { parseLevels } from "@/utils/configParser";
 import {
     Card,
@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadarChartComponent } from "@/components/RadarChart";
 import { HorizontalLevelChart } from "@/components/HorizontalLevelChart";
 import { MapPin } from "lucide-react";
-import levelsMarkdown from '@/data/levels.md?raw';
+import levelsMarkdown from "@/data/levels.md?raw";
 interface ReportProps {
     screens: Category[];
     selections: Record<string, Record<string, number>>;
@@ -74,13 +74,23 @@ function getPerformanceColor(status: string): string {
     if (status.includes("progress towards")) return "text-orange-600";
     return "text-muted-foreground";
 }
-export function Report({ screens, selections, feedback, wayForward = "", onWayForwardChange }: ReportProps) {
+export function Report({
+    screens,
+    selections,
+    feedback,
+    wayForward = "",
+    onWayForwardChange,
+}: ReportProps) {
     const [viewType, setViewType] = useState<"radar" | "line">("radar");
     const levelNames = useMemo(() => parseLevels(levelsMarkdown), []);
-    const levelOptions = useMemo(() => [1, 2, 3, 4, 5, 6, 7].map((value) => ({
-        value,
-        label: levelNames[value],
-    })), [levelNames]);
+    const levelOptions = useMemo(
+        () =>
+            [1, 2, 3, 4, 5, 6, 7].map((value) => ({
+                value,
+                label: levelNames[value],
+            })),
+        [levelNames]
+    );
     const categoryLevels = screens.map((category) => {
         const categorySelections = selections[category.title] || {};
         const values = Object.values(categorySelections).filter(
@@ -145,14 +155,16 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                     <div className="space-y-2">
                         <Label
                             htmlFor="baseline-level"
-                            className="text-sm font-medium">
+                            className="text-sm font-medium"
+                        >
                             Aspired goal
                         </Label>
                         <Select
                             value={baselineLevel.toString()}
                             onValueChange={(value) =>
                                 setBaselineLevel(parseInt(value))
-                            }>
+                            }
+                        >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select baseline level" />
                             </SelectTrigger>
@@ -160,7 +172,8 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                 {levelOptions.map((option) => (
                                     <SelectItem
                                         key={option.value}
-                                        value={option.value.toString()}>
+                                        value={option.value.toString()}
+                                    >
                                         {option.label}
                                     </SelectItem>
                                 ))}
@@ -177,14 +190,16 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                         variant={viewType === "radar" ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setViewType("radar")}
-                        className="rounded-md">
+                        className="rounded-md"
+                    >
                         Radar View
                     </Button>
                     <Button
                         variant={viewType === "line" ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setViewType("line")}
-                        className="rounded-md">
+                        className="rounded-md"
+                    >
                         Line View
                     </Button>
                 </div>
@@ -203,7 +218,8 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                         <span
                             className={`text-xl font-semibold ${getPerformanceColor(
                                 overallPerformance
-                            )}`}>
+                            )}`}
+                        >
                             {overallPerformance}
                         </span>
                     </div>
@@ -390,7 +406,7 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                 {category.competencies.map((competence) => {
                                     const areaFeedback =
                                         categoryFeedback[competence.name];
-                                        categoryFeedback[competence.name];
+                                    categoryFeedback[competence.name];
                                     if (
                                         !areaFeedback ||
                                         Object.keys(areaFeedback).length === 0
@@ -400,7 +416,8 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                     return (
                                         <div
                                             key={competence.name}
-                                            className="ml-4 space-y-3">
+                                            className="ml-4 space-y-3"
+                                        >
                                             <h4 className="text-lg font-medium text-foreground">
                                                 {competence.name}
                                                 {competence.name}
@@ -409,7 +426,8 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                                                 ([level, comments]) => (
                                                     <div
                                                         key={level}
-                                                        className="ml-4 space-y-2">
+                                                        className="ml-4 space-y-2"
+                                                    >
                                                         {comments.evidence && (
                                                             <div>
                                                                 <h5 className="text-sm font-medium text-muted-foreground mb-1">
@@ -453,19 +471,25 @@ export function Report({ screens, selections, feedback, wayForward = "", onWayFo
                 <CardHeader>
                     <CardTitle>Way Forward</CardTitle>
                     <CardDescription>
-                        Outline your action plan and next steps based on the assessment results
+                        Outline your action plan and next steps based on the
+                        assessment results
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2">
-                        <Label htmlFor="way-forward" className="text-sm font-medium">
+                        <Label
+                            htmlFor="way-forward"
+                            className="text-sm font-medium"
+                        >
                             Action plan and next steps
                         </Label>
                         <Textarea
                             id="way-forward"
                             placeholder="Describe your planned actions, learning goals, development priorities, and specific next steps based on your assessment results..."
                             value={wayForward}
-                            onChange={(e) => onWayForwardChange?.(e.target.value)}
+                            onChange={(e) =>
+                                onWayForwardChange?.(e.target.value)
+                            }
                             className="min-h-[120px] resize-none"
                         />
                     </div>
