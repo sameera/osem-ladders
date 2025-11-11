@@ -116,3 +116,10 @@ The app implements a multi-step assessment wizard:
 - `@/` resolves to `apps/web/src/` for clean imports within the web app
 
 This application focuses on engineering career development, providing structured assessment tools and visualization of competency progression across technical execution, impact, collaboration, and leadership domains.
+
+## Active Technologies
+- TypeScript 5.5.3 with Node.js 18+ (align with existing web app) (001-dynamodb-setup)
+- DynamoDB (6 tables: Users, Teams, AssessmentPlans, Assessments, AssessmentReports, ConfigVersions) (001-dynamodb-setup)
+
+## Recent Changes
+- 001-dynamodb-setup: Added TypeScript 5.5.3 with Node.js 18+ (align with existing web app)
