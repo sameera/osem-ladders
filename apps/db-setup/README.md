@@ -16,6 +16,7 @@ A CLI tool for creating and managing DynamoDB tables for the OSEM Ladders organi
 - [Table Naming Convention](#table-naming-convention)
 - [Exit Codes](#exit-codes)
 - [Troubleshooting](#troubleshooting)
+- [Manual Setup Alternative](#manual-setup-alternative)
 
 ---
 
@@ -617,6 +618,20 @@ pnpm db-setup create --env dev --verbose
    - Full error output
    - Output of `aws sts get-caller-identity`
    - AWS region and environment
+
+---
+
+## Manual Setup Alternative
+
+If you prefer to create the DynamoDB tables manually through the AWS Console instead of using this CLI tool, see the detailed guide:
+
+**[MANUAL_SETUP.md](MANUAL_SETUP.md)** - Step-by-step AWS Console instructions
+
+This alternative approach is useful when:
+- You prefer visual, point-and-click interfaces
+- You don't have Node.js/pnpm installed
+- You're learning DynamoDB and want to understand each configuration
+- You need a one-time setup for a specific environment
 
 ---
 
