@@ -16,7 +16,7 @@
 ### 1. Navigate to Lambda Function Directory
 
 ```bash
-cd /home/sameera/projects/osem-ladders/apps/lambda-functions/cognito-post-signup
+cd /home/sameera/projects/osem-ladders/backend/cognito-post-signup
 ```
 
 **Note**: This directory will be created during implementation phase (not created by `/speckit.plan`).
@@ -51,7 +51,7 @@ AWS_REGION=us-east-1
 ### Project Structure
 
 ```
-apps/lambda-functions/cognito-post-signup/
+backend/cognito-post-signup/
 ├── src/
 │   ├── index.ts              # Lambda handler
 │   ├── types.ts              # TypeScript interfaces (Cognito event, User)
@@ -342,7 +342,7 @@ export class PostConfirmationStack extends cdk.Stack {
     const postConfirmation = new lambda.Function(this, 'PostConfirmation', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('apps/lambda-functions/cognito-post-signup/dist'),
+      code: lambda.Code.fromAsset('backend/cognito-post-signup/dist'),
       memorySize: 512,
       timeout: cdk.Duration.seconds(10),
       environment: {

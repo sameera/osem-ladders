@@ -16,7 +16,7 @@ Create an AWS Lambda function triggered by Cognito Post Confirmation events to p
 **Storage**: DynamoDB Users table with userId (email) as partition key
 **Testing**: Jest/Vitest for unit tests, AWS SAM Local for integration testing with Cognito events
 **Target Platform**: AWS Lambda (Node.js 18.x runtime)
-**Project Type**: Serverless Lambda function (apps/lambda-functions/cognito-post-signup/)
+**Project Type**: Serverless Lambda function (backend/cognito-post-signup/)
 **Performance Goals**: <1 second execution time for 95% of invocations (both create and update operations)
 **Constraints**:
 - Must complete within Lambda timeout (10 seconds max)

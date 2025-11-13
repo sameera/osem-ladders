@@ -15,9 +15,9 @@
 
 ## Path Conventions
 
-- **Lambda function**: `apps/lambda-functions/cognito-post-signup/`
-- **Source code**: `apps/lambda-functions/cognito-post-signup/src/`
-- **Tests**: `apps/lambda-functions/cognito-post-signup/src/__tests__/`
+- **Lambda function**: `backend/cognito-post-signup/`
+- **Source code**: `backend/cognito-post-signup/src/`
+- **Tests**: `backend/cognito-post-signup/src/__tests__/`
 
 ---
 
@@ -25,15 +25,15 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create Lambda project directory structure at apps/lambda-functions/cognito-post-signup/
-- [ ] T002 Initialize package.json with TypeScript 5.5.3, Node.js 18+ dependencies, and scripts
-- [ ] T003 [P] Configure tsconfig.json for Lambda runtime (ES2022 target, CommonJS module)
-- [ ] T004 [P] Configure vitest.config.ts for unit testing with AWS SDK mocks
-- [ ] T005 [P] Create .env.local template with USERS_TABLE_NAME and AWS_REGION
-- [ ] T006 [P] Add ESLint configuration at apps/lambda-functions/cognito-post-signup/.eslintrc.json
-- [ ] T007 [P] Install AWS SDK v3 dependencies (@aws-sdk/client-dynamodb, @aws-sdk/lib-dynamodb)
-- [ ] T008 [P] Install Vitest and aws-sdk-client-mock for testing
-- [ ] T009 Create .gitignore for node_modules, dist/, and .env.local
+- [x] T001 Create Lambda project directory structure at backend/cognito-post-signup/
+- [x] T002 Initialize package.json with TypeScript 5.5.3, Node.js 18+ dependencies, and scripts
+- [x] T003 [P] Configure tsconfig.json for Lambda runtime (ES2022 target, CommonJS module)
+- [x] T004 [P] Configure vitest.config.ts for unit testing with AWS SDK mocks
+- [x] T005 [P] Create .env.local template with USERS_TABLE_NAME and AWS_REGION
+- [x] T006 [P] Add ESLint configuration at backend/cognito-post-signup/.eslintrc.json
+- [x] T007 [P] Install AWS SDK v3 dependencies (@aws-sdk/client-dynamodb, @aws-sdk/lib-dynamodb)
+- [x] T008 [P] Install Vitest and aws-sdk-client-mock for testing
+- [x] T009 Create .gitignore for node_modules, dist/, and .env.local
 
 ---
 
@@ -43,12 +43,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T010 Create TypeScript type definitions for Cognito Post Confirmation event in apps/lambda-functions/cognito-post-signup/src/types.ts
-- [ ] T011 Create TypeScript interface for User entity in apps/lambda-functions/cognito-post-signup/src/types.ts
-- [ ] T012 [P] Initialize DynamoDB Document Client in apps/lambda-functions/cognito-post-signup/src/utils/dynamodb.ts
-- [ ] T013 [P] Create structured logger utility in apps/lambda-functions/cognito-post-signup/src/utils/logger.ts
-- [ ] T014 [P] Create test setup file with AWS SDK mocks in apps/lambda-functions/cognito-post-signup/src/__tests__/setup.ts
-- [ ] T015 [P] Create mock Cognito event fixtures in apps/lambda-functions/cognito-post-signup/src/__tests__/fixtures/cognito-events.ts
+- [x] T010 Create TypeScript type definitions for Cognito Post Confirmation event in backend/cognito-post-signup/src/types.ts
+- [x] T011 Create TypeScript interface for User entity in backend/cognito-post-signup/src/types.ts
+- [x] T012 [P] Initialize DynamoDB Document Client in backend/cognito-post-signup/src/utils/dynamodb.ts
+- [x] T013 [P] Create structured logger utility in backend/cognito-post-signup/src/utils/logger.ts
+- [x] T014 [P] Create test setup file with AWS SDK mocks in backend/cognito-post-signup/src/__tests__/setup.ts
+- [x] T015 [P] Create mock Cognito event fixtures in backend/cognito-post-signup/src/__tests__/fixtures/cognito-events.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -64,20 +64,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T016 [P] [US1] Unit test: UpdateItem preserves existing roles for pre-created user in apps/lambda-functions/cognito-post-signup/src/__tests__/userService.test.ts
-- [ ] T017 [P] [US1] Unit test: Handler updates cognitoSub for existing user with email jane.doe@company.com in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T018 [P] [US1] Unit test: Handler preserves existing name attribute if present in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T019 [P] [US1] Unit test: Idempotency - repeated signups don't modify existing user in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
+- [x] T016 [P] [US1] Unit test: UpdateItem preserves existing roles for pre-created user in backend/cognito-post-signup/src/__tests__/userService.test.ts
+- [x] T017 [P] [US1] Unit test: Handler updates cognitoSub for existing user with email jane.doe@company.com in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [x] T018 [P] [US1] Unit test: Handler preserves existing name attribute if present in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [x] T019 [P] [US1] Unit test: Idempotency - repeated signups don't modify existing user in backend/cognito-post-signup/src/__tests__/index.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement getExistingUserAttributes helper in apps/lambda-functions/cognito-post-signup/src/services/userService.ts
-- [ ] T021 [US1] Implement upsertUser function with if_not_exists() expressions in apps/lambda-functions/cognito-post-signup/src/services/userService.ts
-- [ ] T022 [US1] Implement Lambda handler extracting Cognito attributes in apps/lambda-functions/cognito-post-signup/src/index.ts
-- [ ] T023 [US1] Add validation for required email and sub attributes in apps/lambda-functions/cognito-post-signup/src/index.ts
-- [ ] T024 [US1] Add error handling for DynamoDB failures with Cognito error response in apps/lambda-functions/cognito-post-signup/src/index.ts
-- [ ] T025 [US1] Add CloudWatch logging for user update operations in apps/lambda-functions/cognito-post-signup/src/index.ts
-- [ ] T026 [US1] Verify all User Story 1 tests pass with implementation
+- [x] T020 [US1] Implement getExistingUserAttributes helper in backend/cognito-post-signup/src/services/userService.ts
+- [x] T021 [US1] Implement upsertUser function with if_not_exists() expressions in backend/cognito-post-signup/src/services/userService.ts
+- [x] T022 [US1] Implement Lambda handler extracting Cognito attributes in backend/cognito-post-signup/src/index.ts
+- [x] T023 [US1] Add validation for required email and sub attributes in backend/cognito-post-signup/src/index.ts
+- [x] T024 [US1] Add error handling for DynamoDB failures with Cognito error response in backend/cognito-post-signup/src/index.ts
+- [x] T025 [US1] Add CloudWatch logging for user update operations in backend/cognito-post-signup/src/index.ts
+- [x] T026 [US1] Verify all User Story 1 tests pass with implementation
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -91,15 +91,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T027 [P] [US2] Unit test: New user created with team_member role in apps/lambda-functions/cognito-post-signup/src/__tests__/userService.test.ts
-- [ ] T028 [P] [US2] Unit test: Handler creates new user when no existing record found in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T029 [P] [US2] Unit test: Default role assignment for auto-provisioned users in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T027 [P] [US2] Unit test: New user created with team_member role in backend/cognito-post-signup/src/__tests__/userService.test.ts
+- [ ] T028 [P] [US2] Unit test: Handler creates new user when no existing record found in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T029 [P] [US2] Unit test: Default role assignment for auto-provisioned users in backend/cognito-post-signup/src/__tests__/index.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T030 [US2] Update upsertUser to handle new user creation with default roles in apps/lambda-functions/cognito-post-signup/src/services/userService.ts
-- [ ] T031 [US2] Add logic to set roles: ['team_member'] for new users using if_not_exists() in apps/lambda-functions/cognito-post-signup/src/services/userService.ts
-- [ ] T032 [US2] Add CloudWatch logging for new user provisioning operations in apps/lambda-functions/cognito-post-signup/src/index.ts
+- [ ] T030 [US2] Update upsertUser to handle new user creation with default roles in backend/cognito-post-signup/src/services/userService.ts
+- [ ] T031 [US2] Add logic to set roles: ['team_member'] for new users using if_not_exists() in backend/cognito-post-signup/src/services/userService.ts
+- [ ] T032 [US2] Add CloudWatch logging for new user provisioning operations in backend/cognito-post-signup/src/index.ts
 - [ ] T033 [US2] Verify all User Story 2 tests pass with implementation
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
@@ -114,16 +114,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] Unit test: Name attribute populated from Microsoft 365 display name in apps/lambda-functions/cognito-post-signup/src/__tests__/userService.test.ts
-- [ ] T035 [P] [US3] Unit test: Name defaults to email prefix when display name missing in apps/lambda-functions/cognito-post-signup/src/__tests__/userService.test.ts
-- [ ] T036 [P] [US3] Unit test: Email stored as both userId and email attribute in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T034 [P] [US3] Unit test: Name attribute populated from Microsoft 365 display name in backend/cognito-post-signup/src/__tests__/userService.test.ts
+- [ ] T035 [P] [US3] Unit test: Name defaults to email prefix when display name missing in backend/cognito-post-signup/src/__tests__/userService.test.ts
+- [ ] T036 [P] [US3] Unit test: Email stored as both userId and email attribute in backend/cognito-post-signup/src/__tests__/index.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Implement extractDisplayName helper with email prefix fallback in apps/lambda-functions/cognito-post-signup/src/utils/userAttributes.ts
-- [ ] T038 [US3] Update upsertUser to populate name with fallback logic in apps/lambda-functions/cognito-post-signup/src/services/userService.ts
-- [ ] T039 [US3] Ensure email is stored in both userId and email attributes in apps/lambda-functions/cognito-post-signup/src/services/userService.ts
-- [ ] T040 [US3] Add CloudWatch logging for profile data sync operations in apps/lambda-functions/cognito-post-signup/src/index.ts
+- [ ] T037 [US3] Implement extractDisplayName helper with email prefix fallback in backend/cognito-post-signup/src/utils/userAttributes.ts
+- [ ] T038 [US3] Update upsertUser to populate name with fallback logic in backend/cognito-post-signup/src/services/userService.ts
+- [ ] T039 [US3] Ensure email is stored in both userId and email attributes in backend/cognito-post-signup/src/services/userService.ts
+- [ ] T040 [US3] Add CloudWatch logging for profile data sync operations in backend/cognito-post-signup/src/index.ts
 - [ ] T041 [US3] Verify all User Story 3 tests pass with implementation
 
 **Checkpoint**: All user stories should now be independently functional
@@ -134,13 +134,13 @@
 
 **Purpose**: Comprehensive error handling for production readiness
 
-- [ ] T042 [P] Unit test: Missing email attribute throws error in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T043 [P] Unit test: Missing sub attribute throws error in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T044 [P] Unit test: DynamoDB timeout error propagates to Cognito in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T045 [P] Unit test: DynamoDB ResourceNotFoundException handled gracefully in apps/lambda-functions/cognito-post-signup/src/__tests__/index.test.ts
-- [ ] T046 Implement validation for required Cognito attributes (email, sub) in apps/lambda-functions/cognito-post-signup/src/index.ts
-- [ ] T047 Implement DynamoDB error handling with proper Cognito error response in apps/lambda-functions/cognito-post-signup/src/index.ts
-- [ ] T048 Add comprehensive CloudWatch logging for all error scenarios in apps/lambda-functions/cognito-post-signup/src/index.ts
+- [ ] T042 [P] Unit test: Missing email attribute throws error in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T043 [P] Unit test: Missing sub attribute throws error in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T044 [P] Unit test: DynamoDB timeout error propagates to Cognito in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T045 [P] Unit test: DynamoDB ResourceNotFoundException handled gracefully in backend/cognito-post-signup/src/__tests__/index.test.ts
+- [ ] T046 Implement validation for required Cognito attributes (email, sub) in backend/cognito-post-signup/src/index.ts
+- [ ] T047 Implement DynamoDB error handling with proper Cognito error response in backend/cognito-post-signup/src/index.ts
+- [ ] T048 Add comprehensive CloudWatch logging for all error scenarios in backend/cognito-post-signup/src/index.ts
 - [ ] T049 Verify error handling tests pass with implementation
 
 ---
@@ -149,11 +149,11 @@
 
 **Purpose**: Prepare Lambda for deployment to AWS
 
-- [ ] T050 [P] Create AWS SAM template.yaml at apps/lambda-functions/cognito-post-signup/template.yaml
-- [ ] T051 [P] Create IAM policy document for DynamoDB UpdateItem permission at apps/lambda-functions/cognito-post-signup/policies/dynamodb-policy.json
-- [ ] T052 [P] Create IAM trust policy for Lambda execution role at apps/lambda-functions/cognito-post-signup/policies/trust-policy.json
+- [ ] T050 [P] Create AWS SAM template.yaml at backend/cognito-post-signup/template.yaml
+- [ ] T051 [P] Create IAM policy document for DynamoDB UpdateItem permission at backend/cognito-post-signup/policies/dynamodb-policy.json
+- [ ] T052 [P] Create IAM trust policy for Lambda execution role at backend/cognito-post-signup/policies/trust-policy.json
 - [ ] T053 [P] Copy GitHub Actions workflow to .github/workflows/deploy-cognito-lambda.yml from contracts/github-workflow-deploy-lambda.yml
-- [ ] T054 [P] Create README.md with deployment instructions at apps/lambda-functions/cognito-post-signup/README.md
+- [ ] T054 [P] Create README.md with deployment instructions at backend/cognito-post-signup/README.md
 - [ ] T055 Update monorepo package.json to include Lambda build scripts
 - [ ] T056 Test TypeScript build output in dist/ directory
 - [ ] T057 Test Lambda deployment package creation (zip file)
@@ -168,7 +168,7 @@
 - [ ] T059 [P] Run pnpm test:coverage and verify 100% coverage for handlers and services
 - [ ] T060 [P] Add JSDoc comments to all public functions in src/index.ts and src/services/userService.ts
 - [ ] T061 [P] Update CLAUDE.md with Lambda project location and testing commands
-- [ ] T062 [P] Create DEPLOYMENT.md with step-by-step deployment guide at apps/lambda-functions/cognito-post-signup/DEPLOYMENT.md
+- [ ] T062 [P] Create DEPLOYMENT.md with step-by-step deployment guide at backend/cognito-post-signup/DEPLOYMENT.md
 - [ ] T063 Run quickstart.md validation: verify all commands work correctly
 - [ ] T064 Performance review: verify Lambda cold start < 500ms, hot invocation < 200ms
 - [ ] T065 Security review: verify no secrets in code, IAM permissions follow least privilege
