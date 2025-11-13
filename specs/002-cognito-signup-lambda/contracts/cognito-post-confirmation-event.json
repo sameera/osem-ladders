@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cognito Post Confirmation Event",
+  "description": "AWS Cognito Post Confirmation Lambda Trigger Event Schema. This is an AWS-defined contract (not user-facing API). Lambda receives this event when a user confirms their account via Cognito.",
+  "type": "object",
+  "required": ["version", "region", "userPoolId", "userName", "triggerSource", "callerContext", "request", "response"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Event version",
+      "example": "1"
+    },
+    "region": {
+      "type": "string",
+      "description": "AWS region where the user pool exists",
+      "example": "us-east-1"
+    },
+    "userPoolId": {
+      "type": "string",
+      "description": "Cognito User Pool ID",
+      "example": "us-east-1_exampleID"
+    },
+    "userName": {
+      "type": "string",
+      "description": "Username (often email for OIDC federation like Microsoft 365)",
+      "example": "user@example.com"
+    },
+    "triggerSource": {
+      "type": "string",
+      "description": "The trigger that invoked this Lambda",
+      "enum": [
+        "PostConfirmation_ConfirmSignUp",
+        "PostConfirmation_ConfirmForgotPassword"
+      ]
+    },
+    "callerContext": {
+      "type": "object",
+      "description": "Context about the client calling Cognito",
+      "required": ["awsSdkVersion", "clientId"],
+      "properties": {
+        "awsSdkVersion": {
+          "type": "string",
+          "description": "AWS SDK version used by the client",
+          "example": "3"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Cognito App Client ID",
+          "example": "example-client-id"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "description": "Request data including user attributes",
+      "required": ["userAttributes"],
+      "properties": {
+        "userAttributes": {
+          "type": "object",
+          "description": "User attributes from Cognito (includes OIDC attributes from Microsoft 365)",
+          "required": ["sub", "email", "email_verified", "cognito:user_status"],
+          "properties": {
+            "sub": {
+              "type": "string",
+              "description": "Cognito's immutable UUID for the user",
+              "example": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "User email address from Microsoft 365",
+              "example": "user@example.com"
+            },
+            "email_verified": {
+              "type": "string",
+              "enum": ["true", "false"],
+              "description": "Whether email is verified (string boolean)",
+              "example": "true"
+            },
+            "cognito:user_status": {
+              "type": "string",
+              "description": "User status in Cognito",
+              "example": "CONFIRMED"
+            },
+            "name": {
+              "type": "string",
+              "description": "Display name from Microsoft 365 (optional, may not be present)",
+              "example": "John Doe"
+            }
+          },
+          "additionalProperties": {
+            "type": "string",
+            "description": "Additional custom attributes from user pool configuration"
+          }
+        },
+        "clientMetadata": {
+          "type": "object",
+          "description": "Custom metadata passed from client (optional)",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "Response object (empty for Post Confirmation trigger)",
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "version": "1",
+      "region": "us-east-1",
+      "userPoolId": "us-east-1_example",
+      "userName": "user@example.com",
+      "callerContext": {
+        "awsSdkVersion": "3",
+        "clientId": "example-client-id"
+      },
+      "triggerSource": "PostConfirmation_ConfirmSignUp",
+      "request": {
+        "userAttributes": {
+          "sub": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+          "email_verified": "true",
+          "cognito:user_status": "CONFIRMED",
+          "email": "user@example.com",
+          "name": "John Doe"
+        },
+        "clientMetadata": {}
+      },
+      "response": {}
+    }
+  ],
+  "notes": {
+    "eventSource": "AWS Cognito (not user-facing API)",
+    "contractOwner": "AWS Cognito service",
+    "lambdaResponse": "Lambda MUST return the entire event object (with optional response modifications) for Cognito to continue the authentication flow. If Lambda throws an error, Cognito will retry up to 3 times and then fail the user authentication.",
+    "idempotency": "Same event may be sent multiple times due to Cognito retries. Lambda must be idempotent.",
+    "security": "This contract is internal between Cognito and Lambda. No user-facing API contract applies.",
+    "references": [
+      "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html",
+      "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-specifying-attribute-mapping.html"
+    ]
+  }
+}

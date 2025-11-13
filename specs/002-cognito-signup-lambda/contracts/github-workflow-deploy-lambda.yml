@@ -1,0 +1,252 @@
+# GitHub Actions Workflow: Deploy Cognito Post-Signup Lambda
+#
+# This workflow automates CI/CD for the Lambda function:
+# 1. Runs unit tests on every push
+# 2. Builds TypeScript to JavaScript
+# 3. Deploys to AWS Lambda on merge to main
+#
+# Setup Instructions:
+# 1. Copy this file to .github/workflows/deploy-cognito-lambda.yml in repository root
+# 2. Configure GitHub Secrets (Settings → Secrets and variables → Actions):
+#    - AWS_ACCESS_KEY_ID
+#    - AWS_SECRET_ACCESS_KEY
+#    - AWS_REGION (e.g., us-east-1)
+#    - LAMBDA_FUNCTION_NAME (e.g., PostConfirmationFunction)
+#    - USERS_TABLE_NAME (e.g., osem-dev-Users or osem-prod-Users)
+# 3. Create Lambda function in AWS (one-time, see quickstart.md)
+# 4. Configure Cognito trigger (one-time, see quickstart.md)
+
+name: Deploy Cognito Post-Signup Lambda
+
+on:
+  push:
+    branches:
+      - main                      # Deploy to production on main branch
+      - 002-cognito-signup-lambda # Deploy to dev on feature branch
+    paths:
+      - 'apps/lambda-functions/cognito-post-signup/**'
+      - '.github/workflows/deploy-cognito-lambda.yml'
+
+  pull_request:
+    paths:
+      - 'apps/lambda-functions/cognito-post-signup/**'
+
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  test:
+    name: Test Lambda Function
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: apps/lambda-functions/cognito-post-signup
+
+      - name: Run ESLint
+        run: pnpm lint
+        working-directory: apps/lambda-functions/cognito-post-signup
+
+      - name: Run unit tests
+        run: pnpm test --coverage
+        working-directory: apps/lambda-functions/cognito-post-signup
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./apps/lambda-functions/cognito-post-signup/coverage/coverage-final.json
+          flags: lambda-cognito-post-signup
+          name: cognito-post-signup-coverage
+
+      - name: Build TypeScript
+        run: pnpm build
+        working-directory: apps/lambda-functions/cognito-post-signup
+
+      - name: Verify dist/ output
+        run: |
+          if [ ! -f "dist/index.js" ]; then
+            echo "Error: dist/index.js not found after build"
+            exit 1
+          fi
+          echo "Build output verified: dist/index.js exists"
+        working-directory: apps/lambda-functions/cognito-post-signup
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: lambda-dist
+          path: apps/lambda-functions/cognito-post-signup/dist
+          retention-days: 7
+
+  deploy:
+    name: Deploy to AWS Lambda
+    needs: test
+    runs-on: ubuntu-latest
+
+    # Only deploy on main branch or manual dispatch (not on PRs)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    # Use GitHub environment for secrets management
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: lambda-dist
+          path: dist
+
+      - name: Create deployment package
+        run: |
+          cd dist
+          zip -r ../function.zip .
+          cd ..
+          echo "Deployment package created: function.zip"
+          ls -lh function.zip
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to AWS Lambda
+        run: |
+          # Update function code
+          aws lambda update-function-code \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://function.zip \
+            --publish
+
+          echo "Lambda function code updated successfully"
+
+      - name: Update Lambda configuration
+        run: |
+          # Update environment variables
+          aws lambda update-function-configuration \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --environment "Variables={USERS_TABLE_NAME=${{ secrets.USERS_TABLE_NAME }}}" \
+            --timeout 10 \
+            --memory-size 512
+
+          echo "Lambda configuration updated"
+
+      - name: Wait for Lambda to be active
+        run: |
+          echo "Waiting for Lambda function to be in Active state..."
+          aws lambda wait function-updated \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
+          echo "Lambda function is ready"
+
+      - name: Invoke Lambda test (smoke test)
+        run: |
+          # Create test event payload (Cognito Post Confirmation format)
+          cat > test-event.json << 'EOF'
+          {
+            "version": "1",
+            "region": "us-east-1",
+            "userPoolId": "test-pool",
+            "userName": "test@example.com",
+            "triggerSource": "PostConfirmation_ConfirmSignUp",
+            "callerContext": {
+              "awsSdkVersion": "3",
+              "clientId": "test-client"
+            },
+            "request": {
+              "userAttributes": {
+                "sub": "test-uuid-12345",
+                "email": "test@example.com",
+                "name": "Test User"
+              }
+            },
+            "response": {}
+          }
+          EOF
+
+          # Invoke Lambda (expect it to fail since DynamoDB may not exist in CI)
+          # This is just a smoke test to verify Lambda is invokable
+          echo "Running smoke test (Lambda invocation)..."
+          aws lambda invoke \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --payload file://test-event.json \
+            --log-type Tail \
+            response.json || echo "Lambda invocation test completed (errors expected without real DynamoDB)"
+
+          # Show response and logs
+          echo "Lambda response:"
+          cat response.json
+
+      - name: Get Lambda function info
+        run: |
+          echo "Deployment complete!"
+          echo "Lambda ARN:"
+          aws lambda get-function \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --query 'Configuration.FunctionArn' \
+            --output text
+
+          echo ""
+          echo "Last modified:"
+          aws lambda get-function \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --query 'Configuration.LastModified' \
+            --output text
+
+          echo ""
+          echo "Runtime:"
+          aws lambda get-function \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --query 'Configuration.Runtime' \
+            --output text
+
+      - name: Post deployment notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+            echo "Lambda function: ${{ secrets.LAMBDA_FUNCTION_NAME }}"
+            echo "Environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}"
+          else
+            echo "❌ Deployment failed!"
+            echo "Check workflow logs for details"
+          fi
+
+# Optional: Add Slack/Discord notification on deployment
+# - name: Notify Slack
+#   if: always()
+#   uses: slackapi/slack-github-action@v1
+#   with:
+#     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+#     payload: |
+#       {
+#         "text": "Lambda deployment ${{ job.status }}: ${{ secrets.LAMBDA_FUNCTION_NAME }}"
+#       }

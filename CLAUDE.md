@@ -120,6 +120,8 @@ This application focuses on engineering career development, providing structured
 ## Active Technologies
 - TypeScript 5.5.3 with Node.js 18+ (align with existing web app) (001-dynamodb-setup)
 - DynamoDB (6 tables: Users, Teams, AssessmentPlans, Assessments, AssessmentReports, ConfigVersions) (001-dynamodb-setup)
+- TypeScript 5.5.3 with Node.js 18+ Lambda runtime + AWS SDK for JavaScript v3 (@aws-sdk/client-dynamodb, @aws-sdk/lib-dynamodb) (002-cognito-signup-lambda)
+- DynamoDB Users table with userId (email) as partition key (002-cognito-signup-lambda)
 
 ## Recent Changes
 - 001-dynamodb-setup: Added TypeScript 5.5.3 with Node.js 18+ (align with existing web app)

@@ -35,7 +35,12 @@ const LoginCallback = () => {
             // Successfully authenticated, redirect to home
             navigate("/", { replace: true });
         }
-    }, [oidcAuth.isLoading, oidcAuth.isAuthenticated, oidcAuth.error, navigate]);
+    }, [
+        oidcAuth.isLoading,
+        oidcAuth.isAuthenticated,
+        oidcAuth.error,
+        navigate,
+    ]);
 
     // Show error state if authentication failed
     if (oidcAuth.error) {
@@ -52,7 +57,8 @@ const LoginCallback = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <p className="text-sm text-muted-foreground text-center">
-                            {oidcAuth.error.message || "An unexpected error occurred"}
+                            {oidcAuth.error.message ||
+                                "An unexpected error occurred"}
                         </p>
                         <p className="text-sm text-muted-foreground text-center">
                             Redirecting to login page...
