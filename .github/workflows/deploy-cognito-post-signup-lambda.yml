@@ -37,8 +37,7 @@ jobs:
                   version: 8
 
             - name: Install dependencies
-              working-directory: backend/cognito-post-signup
-              run: pnpm install --frozen-lockfile
+              run: pnpm install --frozen-lockfile --filter=./backend/cognito-post-signup
 
             - name: Run tests
               working-directory: backend/cognito-post-signup
