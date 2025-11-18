@@ -84,11 +84,10 @@ async function executeLambdaHandler(
     reply.status(result.statusCode);
 
     if (result.body) {
-      const body = JSON.parse(result.body);
-      return body;
+      reply.send(result.body);
+    } else {
+      reply.send();
     }
-
-    return null;
   } catch (error) {
     request.log.error(error, 'Error executing Lambda handler');
     reply.status(500);
@@ -157,7 +156,7 @@ app.setNotFoundHandler((request, reply) => {
 });
 
 // Error handler
-app.setErrorHandler((error, request, reply) => {
+app.setErrorH andler((error, request, reply) => {
   request.log.error(error);
 
   reply.status(error.statusCode || 500).send({
