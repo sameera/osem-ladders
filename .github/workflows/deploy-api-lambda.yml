@@ -2,7 +2,8 @@ name: Deploy API to AWS Lambda
 
 on:
     push:
-        branches: [main]
+        branches:
+            - main
         paths:
             - "apps/api/**"
             - ".github/workflows/deploy-api-lambda.yml"
@@ -30,26 +31,11 @@ jobs:
               with:
                   node-version: ${{ env.NODE_VERSION }}
 
-            - name: Enable Corepack (pnpm)
-              run: corepack enable
-
-            # 🔥 Fix for pnpm 10 blocking build scripts
-            - name: Allow pnpm build scripts in CI
-              run: |
-                  echo "autoInstallPeers=true" >> .npmrc
-                  echo "enable-pre-post-scripts=true" >> .npmrc
-
-            - name: Get pnpm store directory
-              id: pnpm-store
-              run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-            - name: Cache pnpm store
-              uses: actions/cache@v4
+            # 🔥 The FIX: use v3, not v4
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: ${{ steps.pnpm-store.outputs.dir }}
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
+                  version: 10
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
