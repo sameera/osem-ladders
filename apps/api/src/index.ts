@@ -98,14 +98,13 @@ async function executeLambdaHandler(
         }
     } catch (error) {
         request.log.error(error, "Error executing Lambda handler");
-        reply.status(500);
-        return {
+        reply.status(500).send({
             success: false,
             error: {
                 code: "INTERNAL_ERROR",
                 message: "Internal server error",
             },
-        };
+        });
     }
 }
 
