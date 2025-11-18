@@ -1,7 +1,12 @@
 import Fastify from 'fastify';
 import awsLambdaFastify from '@fastify/aws-lambda';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import type {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  APIGatewayProxyHandler,
+  Context
+} from 'aws-lambda';
 
 // Import handlers
 import { handler as healthHandler } from './handlers/health.js';
@@ -43,13 +48,30 @@ function createApiGatewayEvent(
 async function executeLambdaHandler(
   request: FastifyRequest,
   reply: FastifyReply,
-  handler: (event: APIGatewayProxyEvent, context: Context) => Promise<APIGatewayProxyResult>
+  handler: APIGatewayProxyHandler
 ) {
   try {
     const event = createApiGatewayEvent(request) as APIGatewayProxyEvent;
     const context = {} as Context; // Minimal context for local testing
 
-    const result = await handler(event, context);
+    // Call handler with callback (Lambda handlers support both Promise and callback styles)
+    const result = await new Promise<APIGatewayProxyResult>((resolve, reject) => {
+      const callback = (error: any, result?: APIGatewayProxyResult) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result!);
+        }
+      };
+
+      // Call the handler - it might return a Promise or use the callback
+      const handlerResult = handler(event, context, callback);
+
+      // If the handler returns a Promise, use that instead
+      if (handlerResult && typeof handlerResult.then === 'function') {
+        handlerResult.then(resolve).catch(reject);
+      }
+    });
 
     // Set headers
     if (result.headers) {
