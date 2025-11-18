@@ -1,6 +1,5 @@
 import * as esbuild from 'esbuild';
-import { readdirSync, statSync } from 'fs';
-import { join, parse, dirname } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,59 +10,19 @@ const isProduction = args.includes('--production');
 const isDev = args.includes('--dev');
 const isWatch = args.includes('--watch');
 
-const srcDir = join(__dirname, 'src', 'handlers');
+const srcDir = join(__dirname, 'src');
 const outDir = join(__dirname, '..', '..', 'dist', 'apps', 'api');
 
-interface Handler {
-  in: string;
-  out: string;
-}
-
-// Find all handler files
-function findHandlers(dir: string): Handler[] {
-  const handlers: Handler[] = [];
-  const files = readdirSync(dir);
-
-  for (const file of files) {
-    const filePath = join(dir, file);
-    const stat = statSync(filePath);
-
-    if (stat.isDirectory()) {
-      handlers.push(...findHandlers(filePath));
-    } else if (file.endsWith('.ts') && !file.endsWith('.spec.ts')) {
-      // Get relative path from handlers directory
-      const relativePath = filePath.substring(srcDir.length + 1);
-      const { dir: handlerDir, name } = parse(relativePath);
-      const outFile = handlerDir
-        ? `${handlerDir}/${name}.js`
-        : `${name}.js`;
-
-      handlers.push({
-        in: filePath,
-        out: outFile
-      });
-    }
-  }
-
-  return handlers;
-}
-
-const handlers = findHandlers(srcDir);
-
-// Create entry points object
-const entryPoints = handlers.reduce<Record<string, string>>((acc, handler) => {
-  acc[handler.out.replace('.js', '')] = handler.in;
-  return acc;
-}, {});
+// Single entry point for Fastify router
+const entryPoint = join(srcDir, 'index.ts');
 
 const buildOptions: esbuild.BuildOptions = {
-  entryPoints,
+  entryPoints: [entryPoint],
   bundle: true,
   platform: 'node',
   target: 'node18',
   format: 'esm',
-  outdir: outDir,
-  outExtension: { '.js': '.mjs' },
+  outfile: join(outDir, 'index.mjs'),
   sourcemap: !isProduction,
   minify: isProduction,
   keepNames: true,
@@ -100,7 +59,8 @@ async function build(): Promise<void> {
     } else {
       await esbuild.build(buildOptions);
       console.log(`Build complete! Output: ${outDir}`);
-      console.log(`Handlers built: ${Object.keys(entryPoints).length}`);
+      console.log(`Entry point: ${entryPoint}`);
+      console.log(`Output file: index.mjs`);
     }
   } catch (error) {
     console.error('Build failed:', error);
