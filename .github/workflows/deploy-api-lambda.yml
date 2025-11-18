@@ -37,14 +37,17 @@ jobs:
               with:
                   version: 8
 
+            # ← THIS IS THE CRITICAL FIX: make pnpm available for the next step
             - name: Derive appropriate pnpm store directory
               id: pnpm-cache-dir
+              env:
+                  # pnpm/action-setup installs pnpm here, but PATH is not updated until the next step
+                  PATH: /home/runner/setup-pnpm/node_modules/.bin:${{ env.PATH }}
               run: |
                   echo "dir=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
 
             - name: Cache pnpm store
               uses: actions/cache@v4
-              id: pnpm-cache
               with:
                   path: ${{ steps.pnpm-cache-dir.outputs.dir }}
                   key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -63,7 +66,6 @@ jobs:
             - name: Package Lambda deployment
               working-directory: dist/apps/api
               run: |
-                  # Create deployment package with all handler files
                   zip -r lambda-deployment.zip . -x "*.map"
                   echo "Package size: $(du -h lambda-deployment.zip | cut -f1)"
                   echo "Package contents:"
