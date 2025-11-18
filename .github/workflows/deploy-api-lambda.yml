@@ -31,24 +31,18 @@ jobs:
               with:
                   node-version: ${{ env.NODE_VERSION }}
 
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 8
+            - name: Enable Corepack (pnpm)
+              run: corepack enable
 
-            # ← THIS IS THE CRITICAL FIX: make pnpm available for the next step
-            - name: Derive appropriate pnpm store directory
-              id: pnpm-cache-dir
-              env:
-                  # pnpm/action-setup installs pnpm here, but PATH is not updated until the next step
-                  PATH: /home/runner/setup-pnpm/node_modules/.bin:${{ env.PATH }}
-              run: |
-                  echo "dir=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+            # Get pnpm store directory (Corepack guarantees pnpm is available)
+            - name: Get pnpm store directory
+              id: pnpm-store
+              run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
             - name: Cache pnpm store
               uses: actions/cache@v4
               with:
-                  path: ${{ steps.pnpm-cache-dir.outputs.dir }}
+                  path: ${{ steps.pnpm-store.outputs.dir }}
                   key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-pnpm-
@@ -62,7 +56,6 @@ jobs:
             - name: Build Lambda functions
               run: pnpm exec nx build api --configuration=production
 
-            # … rest of your steps unchanged (package, deploy, etc.)
             - name: Package Lambda deployment
               working-directory: dist/apps/api
               run: |
@@ -82,5 +75,3 @@ jobs:
                   aws lambda update-function-code \
                     --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
                     --zip-file fileb://lambda-deployment.zip
-
-            # … (your wait / verify / report steps stay exactly the same)
