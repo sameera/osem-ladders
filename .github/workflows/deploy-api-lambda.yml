@@ -42,16 +42,22 @@ jobs:
               run: |
                   echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-            - name: Setup pnpm cache
+            - name: Derive appropriate pnpm store directory
+              id: pnpm-cache-dir
+              run: |
+                  echo "dir=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+            - name: Cache pnpm store
               uses: actions/cache@v4
+              id: pnpm-cache
               with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  path: ${{ steps.pnpm-cache-dir.outputs.dir }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
                   restore-keys: |
-                      ${{ runner.os }}-pnpm-store-
+                      ${{ runner.os }}-pnpm-
 
             - name: Install dependencies
-              run: pnpm install --frozen-lockfile --filter apps/api
+              run: pnpm install --frozen-lockfile
 
             - name: Run tests
               run: pnpm exec nx test api
