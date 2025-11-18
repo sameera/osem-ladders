@@ -1,0 +1,43 @@
+{
+  "name": "api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/api/src",
+  "tags": ["type:app", "platform:lambda"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/api",
+        "commands": ["tsx apps/api/esbuild.config.ts"],
+        "cwd": "."
+      },
+      "configurations": {
+        "production": {
+          "commands": ["tsx apps/api/esbuild.config.ts --production"]
+        },
+        "development": {
+          "commands": ["tsx apps/api/esbuild.config.ts --dev"]
+        }
+      }
+    },
+    "watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["tsx apps/api/esbuild.config.ts --watch"],
+        "cwd": "."
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/apps/api"],
+      "options": {
+        "config": "apps/api/vitest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

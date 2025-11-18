@@ -1,0 +1,18 @@
+# Build output
+dist/
+*.mjs
+*.mjs.map
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
