@@ -1,0 +1,1160 @@
+openapi: 3.0.3
+info:
+  title: OSEM Ladders Backend API
+  description: Backend API for organizational career ladder assessment platform
+  version: 1.0.0
+  contact:
+    name: OSEM Ladders Team
+
+servers:
+  - url: https://api.osem-ladders.example.com/v1
+    description: Production API (placeholder)
+  - url: https://api-dev.osem-ladders.example.com/v1
+    description: Development API (placeholder)
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Cognito JWT token from Microsoft 365 authentication
+
+  schemas:
+    User:
+      type: object
+      required: [userId, name, roles, team, isActive, createdAt, updatedAt, createdBy]
+      properties:
+        userId:
+          type: string
+          format: email
+          description: User email address (immutable identifier)
+          example: "john.doe@example.com"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: User's full name
+          example: "John Doe"
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [TeamMember, Manager, Admin]
+          minItems: 1
+          description: User roles for authorization
+          example: ["TeamMember", "Manager"]
+        team:
+          type: string
+          description: Team identifier
+          example: "engineering"
+        managerId:
+          type: string
+          format: email
+          nullable: true
+          description: Manager's email address
+          example: "jane.manager@example.com"
+        isActive:
+          type: boolean
+          description: Soft delete flag
+          default: true
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms) when created
+          example: 1700000000000
+        updatedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms) when last updated
+          example: 1700000000000
+        createdBy:
+          type: string
+          format: email
+          description: UserId of creator
+          example: "admin@example.com"
+
+    Team:
+      type: object
+      required: [id, name, managerId, isActive, createdAt, updatedAt, createdBy]
+      properties:
+        id:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          description: Team identifier (lowercase alphanumeric + hyphens)
+          example: "engineering"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Human-readable team name
+          example: "Engineering Team"
+        managerId:
+          type: string
+          format: email
+          description: Manager's email address
+          example: "jane.manager@example.com"
+        activeAssessmentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Currently active assessment UUID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        isActive:
+          type: boolean
+          description: Soft delete flag
+          default: true
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms)
+          example: 1700000000000
+        updatedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms)
+          example: 1700000000000
+        createdBy:
+          type: string
+          format: email
+          description: UserId of creator
+          example: "admin@example.com"
+
+    TeamInfo:
+      type: object
+      required: [id, name, managerId]
+      description: Essential team fields for GET /me response (excludes audit fields)
+      properties:
+        id:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          description: Team identifier
+          example: "engineering"
+        name:
+          type: string
+          description: Team name
+          example: "Engineering Team"
+        managerId:
+          type: string
+          format: email
+          description: Manager's email address
+          example: "jane.manager@example.com"
+        activeAssessmentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Currently active assessment UUID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+
+    UserProfile:
+      type: object
+      required: [userId, name, roles, team]
+      description: User profile with populated team data for GET /me endpoint
+      properties:
+        userId:
+          type: string
+          format: email
+          description: User email address
+          example: "john.doe@example.com"
+        name:
+          type: string
+          description: User's full name
+          example: "John Doe"
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [TeamMember, Manager, Admin]
+          minItems: 1
+          description: User roles for authorization
+          example: ["TeamMember"]
+        team:
+          $ref: '#/components/schemas/TeamInfo'
+
+    Assessment:
+      type: object
+      required: [id, name, version, plan, isActive, createdAt, updatedAt, createdBy]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Assessment template UUID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Assessment name
+          example: "Engineering Career Ladder Q4 2025"
+        version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+          description: Semantic version
+          example: "1.0.0"
+        plan:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+          description: Structured competency data
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Assessment description
+        isActive:
+          type: boolean
+          description: Soft delete flag
+          default: true
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms)
+          example: 1700000000000
+        updatedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms)
+          example: 1700000000000
+        createdBy:
+          type: string
+          format: email
+          description: UserId of creator
+          example: "admin@example.com"
+
+    Category:
+      type: object
+      required: [name, competencies]
+      properties:
+        name:
+          type: string
+          description: Category name
+          example: "Technical Execution"
+        competencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Competency'
+
+    Competency:
+      type: object
+      required: [name, levels]
+      properties:
+        name:
+          type: string
+          description: Competency name
+          example: "Code Quality"
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Level'
+
+    Level:
+      type: object
+      required: [level, title, description]
+      properties:
+        level:
+          type: integer
+          minimum: 1
+          description: Level number
+          example: 3
+        title:
+          type: string
+          description: Level title
+          example: "Senior Engineer"
+        description:
+          type: string
+          description: Level expectations
+          example: "Delivers complex features independently..."
+
+    AssessmentReport:
+      type: object
+      required: [id, type, userId, assessmentId, assessorId, responses, status, isActive, createdAt, updatedAt, createdBy]
+      properties:
+        id:
+          type: string
+          pattern: '^[^|]+\|[0-9a-f-]+\|(self|manager)$'
+          description: Content-addressed key (userId|assessmentId|type)
+          example: "john.doe@example.com|123e4567-e89b-12d3-a456-426614174000|self"
+        type:
+          type: string
+          enum: [self, manager]
+          description: Assessment type
+        userId:
+          type: string
+          format: email
+          description: User being assessed
+          example: "john.doe@example.com"
+        assessmentId:
+          type: string
+          format: uuid
+          description: Assessment template UUID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        assessorId:
+          type: string
+          format: email
+          description: Person who completed assessment (userId for self, managerId for manager)
+          example: "john.doe@example.com"
+        responses:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CompetencyResponse'
+          description: Assessment responses keyed by competency ID
+        status:
+          type: string
+          enum: [not_started, in_progress, submitted]
+          description: Workflow status
+        submittedAt:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp (ms) when submitted
+          example: 1700000000000
+        isActive:
+          type: boolean
+          description: Soft delete flag
+          default: true
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms)
+          example: 1700000000000
+        updatedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms)
+          example: 1700000000000
+        createdBy:
+          type: string
+          format: email
+          description: UserId of creator
+          example: "john.doe@example.com"
+
+    CompetencyResponse:
+      type: object
+      required: [selectedLevel]
+      properties:
+        selectedLevel:
+          type: integer
+          minimum: 1
+          description: Selected level number
+          example: 3
+        feedback:
+          type: string
+          maxLength: 5000
+          nullable: true
+          description: Optional text feedback
+          example: "Strong technical skills, demonstrates leadership..."
+
+    Error:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Invalid email format"
+            details:
+              type: object
+              additionalProperties: true
+
+    SuccessResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          type: object
+
+paths:
+  /me:
+    get:
+      summary: Get authenticated user's profile
+      operationId: getCurrentUser
+      tags: [Users]
+      description: Returns the current user's profile with populated team information (essential fields only, excluding audit fields)
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/UserProfile'
+              example:
+                success: true
+                data:
+                  user:
+                    userId: "john.doe@example.com"
+                    name: "John Doe"
+                    roles: ["TeamMember"]
+                    team:
+                      id: "engineering"
+                      name: "Engineering Team"
+                      managerId: "jane.manager@example.com"
+                      activeAssessmentId: "123e4567-e89b-12d3-a456-426614174000"
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found (authenticated user does not exist in system)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users:
+    get:
+      summary: List all users (admin only)
+      operationId: listUsers
+      tags: [Users]
+      parameters:
+        - name: team
+          in: query
+          schema:
+            type: string
+          description: Filter by team identifier
+        - name: managerId
+          in: query
+          schema:
+            type: string
+            format: email
+          description: Filter by manager email
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          users:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/User'
+        '403':
+          description: Unauthorized (requires Admin role)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new user (admin only)
+      operationId: createUser
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, name, roles, team]
+              properties:
+                userId:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    enum: [TeamMember, Manager, Admin]
+                team:
+                  type: string
+                managerId:
+                  type: string
+                  format: email
+                  nullable: true
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    get:
+      summary: Get user by email
+      operationId: getUser
+      tags: [Users]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: email
+          description: User email address
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/User'
+        '403':
+          description: Unauthorized (can only view own profile or managed team members)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update user (admin or self for limited fields)
+      operationId: updateUser
+      tags: [Users]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    enum: [TeamMember, Manager, Admin]
+                team:
+                  type: string
+                managerId:
+                  type: string
+                  format: email
+                  nullable: true
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error (e.g., cannot change userId)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teams:
+    get:
+      summary: List all teams
+      operationId: listTeams
+      tags: [Teams]
+      parameters:
+        - name: managerId
+          in: query
+          schema:
+            type: string
+            format: email
+          description: Filter by manager email
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          teams:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Team'
+
+    post:
+      summary: Create new team (admin or manager)
+      operationId: createTeam
+      tags: [Teams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, name, managerId]
+              properties:
+                id:
+                  type: string
+                  pattern: '^[a-z0-9-]+$'
+                name:
+                  type: string
+                managerId:
+                  type: string
+                  format: email
+                activeAssessmentId:
+                  type: string
+                  format: uuid
+                  nullable: true
+      responses:
+        '201':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          team:
+                            $ref: '#/components/schemas/Team'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Team already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teams/{teamId}:
+    get:
+      summary: Get team by ID
+      operationId: getTeam
+      tags: [Teams]
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Team identifier
+      responses:
+        '200':
+          description: Team details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          team:
+                            $ref: '#/components/schemas/Team'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update team (admin or team manager)
+      operationId: updateTeam
+      tags: [Teams]
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                managerId:
+                  type: string
+                  format: email
+                activeAssessmentId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          team:
+                            $ref: '#/components/schemas/Team'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /assessments:
+    get:
+      summary: List all assessments
+      operationId: listAssessments
+      tags: [Assessments]
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: Filter by assessment name
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of assessments
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          assessments:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Assessment'
+
+    post:
+      summary: Create new assessment template (admin only)
+      operationId: createAssessment
+      tags: [Assessments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, version, plan]
+              properties:
+                name:
+                  type: string
+                version:
+                  type: string
+                  pattern: '^\d+\.\d+\.\d+$'
+                plan:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Category'
+                description:
+                  type: string
+                  maxLength: 1000
+      responses:
+        '201':
+          description: Assessment created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          assessment:
+                            $ref: '#/components/schemas/Assessment'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized (requires Admin role)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /assessments/{assessmentId}:
+    get:
+      summary: Get assessment by ID
+      operationId: getAssessment
+      tags: [Assessments]
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Assessment UUID
+      responses:
+        '200':
+          description: Assessment details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          assessment:
+                            $ref: '#/components/schemas/Assessment'
+        '404':
+          description: Assessment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reports:
+    get:
+      summary: List assessment reports
+      operationId: listReports
+      tags: [Reports]
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: email
+          description: Filter by user being assessed
+        - name: assessmentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by assessment template
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [self, manager]
+          description: Filter by report type
+      responses:
+        '200':
+          description: List of reports (filtered by authorization)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          reports:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AssessmentReport'
+
+    post:
+      summary: Create new assessment report
+      operationId: createReport
+      tags: [Reports]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, userId, assessmentId, responses]
+              properties:
+                type:
+                  type: string
+                  enum: [self, manager]
+                userId:
+                  type: string
+                  format: email
+                  description: User being assessed
+                assessmentId:
+                  type: string
+                  format: uuid
+                responses:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/CompetencyResponse'
+      responses:
+        '201':
+          description: Report created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          report:
+                            $ref: '#/components/schemas/AssessmentReport'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized (must be user for self, manager for manager reports)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reports/{reportId}:
+    get:
+      summary: Get report by content-addressed ID
+      operationId: getReport
+      tags: [Reports]
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Content-addressed key (userId|assessmentId|type)
+          example: "john.doe@example.com|123e4567-e89b-12d3-a456-426614174000|self"
+      responses:
+        '200':
+          description: Report details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          report:
+                            $ref: '#/components/schemas/AssessmentReport'
+        '403':
+          description: Unauthorized (must be user, manager, or admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update assessment report (only if status != submitted)
+      operationId: updateReport
+      tags: [Reports]
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                responses:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/CompetencyResponse'
+                status:
+                  type: string
+                  enum: [not_started, in_progress, submitted]
+      responses:
+        '200':
+          description: Report updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          report:
+                            $ref: '#/components/schemas/AssessmentReport'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Unauthorized or report already submitted (immutable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Users
+    description: User management endpoints
+  - name: Teams
+    description: Team management endpoints
+  - name: Assessments
+    description: Assessment template management
+  - name: Reports
+    description: Assessment report endpoints

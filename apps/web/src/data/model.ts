@@ -13,3 +13,5 @@ export interface Category {
     title: string;
     competencies: Competence[];
 }
+
+export type AssessmentType = "self" | "manager";
