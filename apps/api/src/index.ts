@@ -7,9 +7,10 @@ async function getProxy() {
     if (proxy) return proxy;
 
     const app = buildApp(false);
+    proxy = awsLambdaFastify(app);
+
     await app.ready();
 
-    proxy = awsLambdaFastify(app);
     return proxy;
 }
 
