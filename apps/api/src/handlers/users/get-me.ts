@@ -17,10 +17,7 @@ export const getMeHandler: RouteHandler = async (
 ): Promise<void> => {
     try {
         console.log("request", JSON.stringify(request));
-        // Get authenticated user email from Cognito authorizer claims
-        // In Fastify with @fastify/aws-lambda, the original Lambda event is available at request.awsLambda.event
-        const awsEvent = (request as any).awsLambda?.event;
-        const userEmail = awsEvent?.requestContext?.authorizer?.claims?.email;
+        const userEmail = request.user?.email;
 
         if (!userEmail) {
             const errorResponse: ApiResponse = {

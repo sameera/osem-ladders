@@ -15,6 +15,20 @@ export function buildApp(enableLogging = true) {
         allowedHeaders: ["Content-Type", "Authorization"],
     });
 
+    // Decorate Fastify request so we can attach user info later
+    app.decorateRequest("user", null);
+    app.addHook("preHandler", async (request, reply) => {
+        if (
+            "event" in request &&
+            typeof request.event === "object" &&
+            request.event &&
+            "user" in request.event &&
+            request.event.user
+        ) {
+            request.user = (request as any).event.user;
+        }
+    });
+
     app.get("/growth/health", async () => ({ success: true }));
     app.get("/growth/users/me", getMeHandler);
 
