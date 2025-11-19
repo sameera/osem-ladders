@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import { getMeHandler } from "./handlers/users/get-me";
 
 export function buildApp(enableLogging = true) {
     const app = Fastify({
@@ -19,8 +20,8 @@ export function buildApp(enableLogging = true) {
         reply.header("Access-Control-Allow-Credentials", "true");
     });
 
-    app.get("/health", async () => ({ success: true }));
     app.get("/growth/health", async () => ({ success: true }));
+    app.get("/growth/users/me", getMeHandler);
 
     app.setErrorHandler(
         (error: { message: string; statusCode: number }, request, reply) => {

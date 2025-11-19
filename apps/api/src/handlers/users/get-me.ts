@@ -1,8 +1,8 @@
-import type { APIGatewayProxyHandler } from 'aws-lambda';
-import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { docClient, TableNames } from '../../utils/dynamodb-client.js';
-import { successResponse, errorResponse, errors } from '../../utils/lambda-response.js';
-import type { User } from '../../types/index.js';
+import type { FastifyRequest, FastifyReply, RouteHandler } from "fastify";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient, TableNames } from "../../utils/dynamodb-client.js";
+import { errors } from "../../utils/lambda-response.js";
+import type { User, ApiResponse } from "../../types/index.js";
 
 /**
  * Get current authenticated user's profile
@@ -11,51 +11,68 @@ import type { User } from '../../types/index.js';
  *
  * @returns Current user object or 404 if not found
  */
-export const handler: APIGatewayProxyHandler = async (event) => {
-  try {
-    // Get authenticated user email from Cognito authorizer claims
-    const userEmail = event.requestContext.authorizer?.claims?.email;
+export const getMeHandler: RouteHandler = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+): Promise<void> => {
+    try {
+        // Get authenticated user email from Cognito authorizer claims
+        // In Fastify with @fastify/aws-lambda, the original Lambda event is available at request.awsLambda.event
+        const awsEvent = (request as any).awsLambda?.event;
+        const userEmail = awsEvent?.requestContext?.authorizer?.claims?.email;
 
-    if (!userEmail) {
-      return errorResponse(errors.unauthorized('No authenticated user found'), 401);
+        if (!userEmail) {
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: errors.unauthorized("No authenticated user found"),
+            };
+            return reply.status(401).send(errorResponse);
+        }
+
+        const result = await docClient.send(
+            new GetCommand({
+                TableName: TableNames.Users,
+                Key: { userId: userEmail },
+            })
+        );
+
+        if (!result.Item) {
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: errors.notFound("User", userEmail),
+            };
+            return reply.status(404).send(errorResponse);
+        }
+
+        const user = result.Item as User;
+
+        // Check if user is active
+        if (!user.isActive) {
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: errors.forbidden("User account is inactive"),
+            };
+            return reply.status(403).send(errorResponse);
+        }
+
+        // Convert roles Set to Array for JSON serialization
+        const userResponse = {
+            ...user,
+            roles: Array.from(user.roles),
+        };
+
+        const successResponse: ApiResponse<typeof userResponse> = {
+            success: true,
+            data: userResponse,
+        };
+
+        return reply.status(200).send(successResponse);
+    } catch (error) {
+        request.log.error({ error }, "Error fetching current user");
+        const errorResponse: ApiResponse = {
+            success: false,
+            error: errors.internal("Failed to fetch user profile"),
+        };
+        return reply.status(500).send(errorResponse);
     }
-
-    const result = await docClient.send(
-      new GetCommand({
-        TableName: TableNames.Users,
-        Key: { userId: userEmail }
-      })
-    );
-
-    if (!result.Item) {
-      return errorResponse(
-        errors.notFound('User', userEmail),
-        404
-      );
-    }
-
-    const user = result.Item as User;
-
-    // Check if user is active
-    if (!user.isActive) {
-      return errorResponse(
-        errors.forbidden('User account is inactive'),
-        403
-      );
-    }
-
-    // Convert roles Set to Array for JSON serialization
-    const userResponse = {
-      ...user,
-      roles: Array.from(user.roles)
-    };
-
-    return successResponse(userResponse);
-  } catch (error) {
-    console.error('Error fetching current user:', error);
-    return errorResponse(
-      errors.internal('Failed to fetch user profile'),
-      500
-    );
-  }
 };
