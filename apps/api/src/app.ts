@@ -20,6 +20,7 @@ export function buildApp(enableLogging = true) {
     });
 
     app.get("/health", async () => ({ success: true }));
+    app.get("/growth/health", async () => ({ success: true }));
 
     app.setErrorHandler(
         (error: { message: string; statusCode: number }, request, reply) => {
