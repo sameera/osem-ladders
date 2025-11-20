@@ -32,14 +32,6 @@ export const handler: Handler<
     ExtendedAPIGatewayProxyEvent,
     APIGatewayProxyResult
 > = async (event, context, callback) => {
-    const claims = event?.requestContext?.authorizer?.jwt?.claims;
-    const email = claims?.email as string | undefined;
-    console.log("Email", email);
-
-    if (email) {
-        event.user = { email, claims: claims as Record<string, unknown> };
-    }
-
     const p = await getProxy();
     return p(event, context, callback) as Promise<APIGatewayProxyResult>;
 };
