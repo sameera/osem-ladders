@@ -30,6 +30,7 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (
     const jwks = createRemoteJWKSet(new URL(`${issuer}/.well-known/jwks.json`));
 
     fastify.addHook("onRequest", async (request, reply) => {
+        console.log("Authenticating request:", request.method, request.url);
         const url = request.url;
 
         // Skip auth for public routes
