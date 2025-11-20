@@ -8,6 +8,20 @@ async function getProxy() {
 
     const app = buildApp(false);
 
+    // Decorate Fastify request so we can attach user info later
+    app.decorateRequest("user", null);
+    app.addHook("preHandler", async (request, reply) => {
+        if (
+            "event" in request &&
+            typeof request.event === "object" &&
+            request.event &&
+            "user" in request.event &&
+            request.event.user
+        ) {
+            request.user = (request as any).event.user;
+        }
+    });
+
     proxy = awsLambdaFastify(app);
 
     await app.ready();
