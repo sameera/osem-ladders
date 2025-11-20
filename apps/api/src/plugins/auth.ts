@@ -63,7 +63,6 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (
                 groups: (payload["cognito:groups"] as string[]) || [],
                 claims: payload,
             };
-            console.log(request.user);
         } catch (err) {
             fastify.log.error(err);
             reply.code(401);

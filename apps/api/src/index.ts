@@ -20,7 +20,7 @@ let proxy: any = null;
 async function getProxy(): Promise<any> {
     if (proxy) return proxy;
 
-    const app = buildApp(false);
+    const app = buildApp();
     proxy = awsLambdaFastify(app);
 
     await app.ready();

@@ -3,9 +3,9 @@ import cors from "@fastify/cors";
 import { getMeHandler } from "./handlers/users/get-me";
 import authPlugin from "./plugins/auth";
 
-export function buildApp(enableLogging = true): FastifyInstance {
+export function buildApp(disableLogging?: boolean): FastifyInstance {
     const app = Fastify({
-        logger: enableLogging ? { level: "info" } : false,
+        logger: disableLogging ? false : { level: "info" },
     });
 
     // CORS configuration

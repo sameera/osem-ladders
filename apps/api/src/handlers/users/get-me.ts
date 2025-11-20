@@ -17,7 +17,6 @@ export const getMeHandler: RouteHandler = async (
 ): Promise<void> => {
     try {
         const userEmail = request.user?.email;
-        console.log("getMeHandler - userEmail:", userEmail);
 
         if (!userEmail) {
             const errorResponse: ApiResponse = {
