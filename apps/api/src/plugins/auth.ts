@@ -1,5 +1,6 @@
 // src/plugins/auth.ts
 import { FastifyPluginAsync } from "fastify";
+import fp from "fastify-plugin";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
 declare module "fastify" {
@@ -71,4 +72,7 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (
     });
 };
 
-export default authPlugin;
+export default fp(authPlugin, {
+    name: "auth-plugin",
+    fastify: ">=4.0.0",
+});
