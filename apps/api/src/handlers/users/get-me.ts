@@ -16,7 +16,6 @@ export const getMeHandler: RouteHandler = async (
     reply: FastifyReply
 ): Promise<void> => {
     try {
-        console.log("request", JSON.stringify(request));
         const userEmail = request.user?.email;
 
         if (!userEmail) {

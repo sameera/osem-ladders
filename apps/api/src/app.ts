@@ -1,8 +1,9 @@
-import Fastify from "fastify";
+import Fastify, { type FastifyInstance, type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import { getMeHandler } from "./handlers/users/get-me";
+import authPlugin from "./plugins/auth";
 
-export function buildApp(enableLogging = true) {
+export function buildApp(enableLogging = true): FastifyInstance {
     const app = Fastify({
         logger: enableLogging ? { level: "info" } : false,
     });
@@ -15,21 +16,32 @@ export function buildApp(enableLogging = true) {
         allowedHeaders: ["Content-Type", "Authorization"],
     });
 
+    const issuer = process.env.AUTH_ISSUER;
+    const audience = process.env.AUTH_AUDIENCE;
+
+    if (!issuer || !audience) {
+        throw new Error("Missing required environment variables");
+    }
+
+    app.register(authPlugin, {
+        issuer,
+        audience,
+        publicRoutes: ["/growth/health"],
+    });
+
     app.get("/growth/health", async () => ({ success: true }));
     app.get("/growth/users/me", getMeHandler);
 
-    app.setErrorHandler(
-        (error: { message: string; statusCode: number }, request, reply) => {
-            request.log.error(error);
-            reply.status(error.statusCode || 500).send({
-                success: false,
-                error: {
-                    code: "INTERNAL_ERROR",
-                    message: error.message || "Internal server error",
-                },
-            });
-        }
-    );
+    app.setErrorHandler((error: FastifyError, request, reply) => {
+        request.log.error(error);
+        reply.status(error.statusCode || 500).send({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: error.message || "Internal server error",
+            },
+        });
+    });
 
     return app;
 }

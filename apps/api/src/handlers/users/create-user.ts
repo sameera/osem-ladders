@@ -18,9 +18,8 @@ export const createUserHandler: RouteHandler = async (
   reply: FastifyReply
 ): Promise<void> => {
   try {
-    // Get authenticated user email from Cognito authorizer claims
-    const awsEvent = (request as any).awsLambda?.event;
-    const userEmail = awsEvent?.requestContext?.authorizer?.claims?.email;
+    // Get authenticated user email from request.user (populated by auth middleware)
+    const userEmail = request.user?.email;
 
     if (!userEmail) {
       const errorResponse: ApiResponse = {

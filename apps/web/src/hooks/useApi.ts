@@ -66,7 +66,7 @@ export interface UseApiReturn {
  */
 export function useApi(): UseApiReturn {
     const oidcAuth = useOidcAuth();
-    const accessToken = oidcAuth.user?.access_token;
+    const idToken = oidcAuth.user?.id_token;
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
     const apiCall = useCallback(
@@ -74,7 +74,7 @@ export function useApi(): UseApiReturn {
             url: string,
             options: ApiRequestOptions = {}
         ): Promise<Response> => {
-            if (!accessToken) {
+            if (!idToken) {
                 throw new Error(
                     "No access token available. User may not be authenticated."
                 );
@@ -82,7 +82,7 @@ export function useApi(): UseApiReturn {
 
             // Merge custom headers with Authorization header
             const headers = new Headers(options.headers);
-            headers.set("Authorization", `Bearer ${accessToken}`);
+            headers.set("Authorization", `Bearer ${idToken}`);
 
             const response = await fetch(baseUrl + url, {
                 ...options,
@@ -91,7 +91,7 @@ export function useApi(): UseApiReturn {
 
             return response;
         },
-        [accessToken]
+        [idToken]
     );
 
     const get = useCallback(
@@ -206,6 +206,6 @@ export function useApi(): UseApiReturn {
         post,
         put,
         del,
-        accessToken,
+        accessToken: idToken,
     };
 }
