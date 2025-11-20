@@ -32,6 +32,7 @@ async function getProxy() {
 export const handler = async (event: any, context: any) => {
     const claims = event?.requestContext?.authorizer?.jwt?.claims;
     const email = claims?.email;
+    console.log("Email", email);
 
     if (email) {
         event.user = { email, claims };
