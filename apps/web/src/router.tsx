@@ -1,9 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import LoginCallback from "./pages/LoginCallback";
 import NotFound from "./pages/NotFound";
+import AdminUsersPage from "./pages/AdminUsersPage";
 
 export const AppRoutes = () => {
     return (
@@ -16,6 +18,14 @@ export const AppRoutes = () => {
                     <ProtectedRoute>
                         <Index />
                     </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/users"
+                element={
+                    <AdminRoute>
+                        <AdminUsersPage />
+                    </AdminRoute>
                 }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

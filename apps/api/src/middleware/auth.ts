@@ -1,11 +1,12 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient, TableNames } from '../utils/dynamodb-client.js';
 import type { User, UserRole } from '../types/index.js';
 import { errorResponse, errors } from '../utils/lambda-response.js';
 
 /**
- * Extract authenticated user email from Cognito authorizer
+ * Extract authenticated user email from Cognito authorizer (Lambda)
  */
 export function getAuthenticatedUserEmail(
   event: APIGatewayProxyEvent
@@ -14,7 +15,21 @@ export function getAuthenticatedUserEmail(
 }
 
 /**
- * Fetch the current authenticated user from DynamoDB
+ * Fetch user from DynamoDB by email
+ */
+async function fetchUserFromDB(email: string): Promise<User | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableNames.Users,
+      Key: { userId: email }
+    })
+  );
+
+  return result.Item ? (result.Item as User) : null;
+}
+
+/**
+ * Fetch the current authenticated user from DynamoDB (Lambda)
  */
 export async function getCurrentUser(
   event: APIGatewayProxyEvent
@@ -25,28 +40,25 @@ export async function getCurrentUser(
     return null;
   }
 
-  const result = await docClient.send(
-    new GetCommand({
-      TableName: TableNames.Users,
-      Key: { userId: userEmail }
-    })
-  );
-
-  return result.Item ? (result.Item as User) : null;
+  return fetchUserFromDB(userEmail);
 }
 
 /**
- * Check if user has a specific role
+ * Check if user has a specific role (works with array or Set)
  */
 export function hasRole(user: User, role: UserRole): boolean {
-  return user.roles.has(role);
+  if (Array.isArray(user.roles)) {
+    return user.roles.includes(role);
+  }
+  // Support legacy Set-based roles
+  return (user.roles as any).has(role);
 }
 
 /**
  * Check if user has any of the specified roles
  */
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {
-  return roles.some((role) => user.roles.has(role));
+  return roles.some((role) => hasRole(user, role));
 }
 
 /**
@@ -103,4 +115,61 @@ export async function requireAnyRole(
   }
 
   return null; // No error, user is authorized
+}
+
+/**
+ * Fastify middleware: Require admin role
+ * Uses request.user populated by auth plugin
+ */
+export async function requireAdmin(
+  request: FastifyRequest,
+  reply: FastifyReply
+): Promise<void> {
+  const userEmail = request.user?.email;
+
+  if (!userEmail) {
+    return reply.status(401).send({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Authentication required'
+      }
+    });
+  }
+
+  // Fetch full user record from DynamoDB to check roles and status
+  const user = await fetchUserFromDB(userEmail);
+
+  if (!user) {
+    return reply.status(403).send({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'User not found'
+      }
+    });
+  }
+
+  if (!user.isActive) {
+    return reply.status(403).send({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'User account is inactive'
+      }
+    });
+  }
+
+  if (!hasRole(user, 'admin')) {
+    return reply.status(403).send({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Admin access required'
+      }
+    });
+  }
+
+  // Attach full user object to request for use in handlers
+  (request as any).currentUser = user;
 }

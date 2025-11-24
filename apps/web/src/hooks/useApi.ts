@@ -39,6 +39,15 @@ export interface UseApiReturn {
     ) => Promise<T>;
 
     /**
+     * Convenience method for PATCH requests with JSON parsing
+     */
+    patch: <T = any>(
+        url: string,
+        body?: any,
+        options?: ApiRequestOptions
+    ) => Promise<T>;
+
+    /**
      * Convenience method for DELETE requests with JSON parsing
      */
     del: <T = any>(url: string, options?: ApiRequestOptions) => Promise<T>;
@@ -177,6 +186,37 @@ export function useApi(): UseApiReturn {
         [apiCall]
     );
 
+    const patch = useCallback(
+        async <T = any>(
+            url: string,
+            body?: any,
+            options: ApiRequestOptions = {}
+        ): Promise<T> => {
+            const headers = new Headers(options.headers);
+
+            // Set Content-Type to JSON if body is provided and not already set
+            if (body !== undefined && !headers.has("Content-Type")) {
+                headers.set("Content-Type", "application/json");
+            }
+
+            const response = await apiCall(url, {
+                ...options,
+                method: "PATCH",
+                headers,
+                body: body !== undefined ? JSON.stringify(body) : undefined,
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `PATCH ${url} failed: ${response.status} ${response.statusText}`
+                );
+            }
+
+            return response.json();
+        },
+        [apiCall]
+    );
+
     const del = useCallback(
         async <T = any>(
             url: string,
@@ -205,6 +245,7 @@ export function useApi(): UseApiReturn {
         get,
         post,
         put,
+        patch,
         del,
         accessToken: idToken,
     };
