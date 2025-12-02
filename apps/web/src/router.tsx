@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import LoginCallback from "./pages/LoginCallback";
 import NotFound from "./pages/NotFound";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import AdminTeamsPage from "./pages/AdminTeamsPage";
 
 export const AppRoutes = () => {
     return (
@@ -25,6 +26,14 @@ export const AppRoutes = () => {
                 element={
                     <AdminRoute>
                         <AdminUsersPage />
+                    </AdminRoute>
+                }
+            />
+            <Route
+                path="/admin/teams"
+                element={
+                    <AdminRoute>
+                        <AdminTeamsPage />
                     </AdminRoute>
                 }
             />

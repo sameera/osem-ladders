@@ -10,6 +10,12 @@ import {
     updateUserRolesHandler,
     deactivateUserHandler,
 } from "./handlers/admin-users";
+import {
+    createTeamHandler,
+    getTeamHandler,
+    listTeamsHandler,
+    updateManagerHandler,
+} from "./handlers/admin-teams";
 
 export function buildApp(disableLogging?: boolean): FastifyInstance {
     const app = Fastify({
@@ -52,6 +58,12 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         adminRoutes.get("/growth/admin/users/:userId", getUserHandler);
         adminRoutes.patch("/growth/admin/users/:userId", updateUserRolesHandler);
         adminRoutes.delete("/growth/admin/users/:userId", deactivateUserHandler);
+
+        // Team management routes (T011, T045)
+        adminRoutes.get("/growth/admin/teams", listTeamsHandler);
+        adminRoutes.post("/growth/admin/teams", createTeamHandler);
+        adminRoutes.get("/growth/admin/teams/:teamId", getTeamHandler);
+        adminRoutes.patch("/growth/admin/teams/:teamId/manager", updateManagerHandler);
     });
 
     app.setErrorHandler((error: FastifyError, request, reply) => {

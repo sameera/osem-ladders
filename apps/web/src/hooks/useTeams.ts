@@ -1,0 +1,82 @@
+/**
+ * Team Management React Query Hooks
+ * Hooks for team data fetching and mutations with cache management
+ */
+
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApi } from './useApi';
+import { createTeamApi } from '@/services/team-api';
+import type {
+  Team,
+  CreateTeamRequest,
+  ListTeamsQuery,
+} from '@/types/teams';
+
+/**
+ * T014: Hook for fetching team list with infinite scroll support
+ */
+export function useTeams(query?: ListTeamsQuery) {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+
+  return useInfiniteQuery({
+    queryKey: ['teams', query],
+    queryFn: async () => {
+      const response = await teamApi.fetchTeams(query);
+      return response;
+    },
+    getNextPageParam: () => undefined, // No pagination yet, will add in Phase 4
+    initialPageParam: undefined,
+    staleTime: 60 * 1000, // 1 minute cache per constitution
+  });
+}
+
+/**
+ * T015: Hook for fetching a single team by ID
+ */
+export function useTeam(teamId: string) {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+
+  return useQuery({
+    queryKey: ['team', teamId],
+    queryFn: () => teamApi.fetchTeam(teamId),
+    enabled: !!teamId,
+    staleTime: 60 * 1000, // 1 minute cache
+  });
+}
+
+/**
+ * T016: Hook for creating a new team with cache invalidation
+ */
+export function useCreateTeam() {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: CreateTeamRequest) => teamApi.createTeam(request),
+    onSuccess: () => {
+      // Invalidate team list queries to refetch with new team
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+    },
+  });
+}
+
+/**
+ * T047: Hook for updating team manager with cache invalidation
+ */
+export function useUpdateTeamManager() {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, managerId }: { teamId: string; managerId: string | null }) =>
+      teamApi.updateTeamManager(teamId, managerId),
+    onSuccess: () => {
+      // Invalidate team list queries to refetch with updated manager
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+    },
+  });
+}

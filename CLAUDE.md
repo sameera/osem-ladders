@@ -124,6 +124,7 @@ This application focuses on engineering career development, providing structured
 - DynamoDB Users table with userId (email) as partition key (002-cognito-signup-lambda)
 - TypeScript 5.5.3 with Node.js 18+ (aligns with existing web app and Lambda projects) (003-backend-data-model)
 - DynamoDB with 4 tables (Users, Teams, Assessments, AssessmentReports) using single-table design patterns where appropriate (003-backend-data-model)
+- DynamoDB with Teams table (teamId PK, managerId GSI from 001-dynamodb-setup) (005-team-management)
 
 ## Recent Changes
 - 001-dynamodb-setup: Added TypeScript 5.5.3 with Node.js 18+ (align with existing web app)
