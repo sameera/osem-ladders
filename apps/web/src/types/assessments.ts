@@ -1,17 +1,24 @@
 /**
+ * Assessment Plan types for frontend
+ * Uses the existing Category/Competence/Expectation types from data/model.ts
+ */
+
+import type { Category } from '@/data/model';
+
+/**
  * Assessment plan - represents a team's career ladder framework for a specific season
  */
 export interface AssessmentPlan {
   /** Team ID (partition key) */
   teamId: string;
 
-  /** Season identifier (sort key), e.g., "2024-Q1", "2025-H1", "2024-Annual" */
+  /** Season identifier (sort key), e.g., "2024-Q1", "FY25", "Spring 2025" - any string */
   season: string;
 
   /** Assessment plan name, e.g., "Engineering Ladder Q4 2025" */
   name: string;
 
-  /** Structured competency data */
+  /** Structured competency data using frontend Category type */
   planConfig: Category[];
 
   /** Assessment plan description */
@@ -28,45 +35,6 @@ export interface AssessmentPlan {
 
   /** Email of user who created this record */
   createdBy: string;
-}
-
-/**
- * Category - top-level grouping of competencies
- */
-export interface Category {
-  /** Category title, e.g., "Technical Execution" */
-  title: string;
-
-  /** Array of competencies in this category */
-  competencies: Competency[];
-}
-
-/**
- * Competency - specific skill area with multiple levels
- */
-export interface Competency {
-  /** Competency name, e.g., "Code Quality" */
-  name: string;
-
-  /** Array of expectations for this competency */
-  levels: Expectation[];
-}
-
-/**
- * Expectation - specific proficiency level within a competency
- */
-export interface Expectation {
-  /** Level number (e.g., 1-5) */
-  level: number;
-
-  /** Level title, e.g., "Junior", "Mid", "Senior" */
-  title: string;
-
-  /** Expectation text describing this level */
-  content: string;
-
-  /** Optional additional description */
-  description?: string;
 }
 
 /**
@@ -93,4 +61,31 @@ export interface UpdateAssessmentPlanInput {
  */
 export interface ListPlansQuery {
   includeInactive?: boolean;
+}
+
+/**
+ * API response for listing assessment plans
+ */
+export interface ListPlansResponse {
+  success: boolean;
+  data: {
+    plans: AssessmentPlan[];
+    total: number;
+  };
+}
+
+/**
+ * API response for single assessment plan
+ */
+export interface GetPlanResponse {
+  success: boolean;
+  data: AssessmentPlan;
+}
+
+/**
+ * API response for create/update
+ */
+export interface CreatePlanResponse {
+  success: boolean;
+  data: AssessmentPlan;
 }

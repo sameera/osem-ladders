@@ -7,22 +7,7 @@ import { GetCommand, QueryCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient, TableNames } from '../utils/dynamodb-client';
 import type { AssessmentPlan, CreateAssessmentPlanInput, Category } from '../types/assessments';
 
-/**
- * Season validation regex
- * Supports formats: YYYY-Q1 to Q4, YYYY-H1 to H2, YYYY-Annual
- */
-const SEASON_REGEX = /^(20\d{2})-(Q[1-4]|H[1-2]|Annual)$/;
-
-/**
- * Validate season format
- */
-export function validateSeason(season: string): void {
-  if (!SEASON_REGEX.test(season)) {
-    throw new Error(
-      'INVALID_SEASON: Season must match format YYYY-Q1, YYYY-H1, or YYYY-Annual'
-    );
-  }
-}
+// Season validation removed - any string is acceptable as season identifier
 
 /**
  * Validate plan configuration structure
@@ -36,9 +21,15 @@ export function validatePlanConfig(planConfig: Category[]): void {
 
   // Validate each category has required fields
   for (const category of planConfig) {
-    if (!category.name || !Array.isArray(category.competencies)) {
+    if (!category.title || !Array.isArray(category.competencies)) {
       throw new Error(
-        'INVALID_PLAN_CONFIG: Each category must have a name and competencies array'
+        'INVALID_PLAN_CONFIG: Each category must have a title and competencies array'
+      );
+    }
+
+    if (category.competencies.length === 0) {
+      throw new Error(
+        'INVALID_PLAN_CONFIG: Each category must have at least one competency'
       );
     }
 
@@ -50,15 +41,21 @@ export function validatePlanConfig(planConfig: Category[]): void {
         );
       }
 
-      // Validate each level
-      for (const level of competency.levels) {
+      if (competency.levels.length === 0) {
+        throw new Error(
+          'INVALID_PLAN_CONFIG: Each competency must have at least one expectation'
+        );
+      }
+
+      // Validate each expectation
+      for (const expectation of competency.levels) {
         if (
-          typeof level.level !== 'number' ||
-          !level.title ||
-          !level.description
+          typeof expectation.level !== 'number' ||
+          !expectation.title ||
+          !expectation.content
         ) {
           throw new Error(
-            'INVALID_PLAN_CONFIG: Each level must have a level number, title, and description'
+            'INVALID_PLAN_CONFIG: Each expectation must have a level number, title, and content'
           );
         }
       }
@@ -117,7 +114,6 @@ export async function createOrUpdatePlan(
   userId: string
 ): Promise<AssessmentPlan> {
   // Validate inputs
-  validateSeason(input.season);
   validatePlanConfig(input.planConfig);
 
   // Check if plan already exists

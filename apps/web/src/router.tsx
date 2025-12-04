@@ -7,6 +7,7 @@ import LoginCallback from "./pages/LoginCallback";
 import NotFound from "./pages/NotFound";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminTeamsPage from "./pages/AdminTeamsPage";
+import { AssessmentPlansPage } from "./pages/manager/AssessmentPlansPage";
 
 export const AppRoutes = () => {
     return (
@@ -26,6 +27,14 @@ export const AppRoutes = () => {
                 element={
                     <AdminRoute>
                         <AdminTeamsPage />
+                    </AdminRoute>
+                }
+            />
+            <Route
+                path="/manager/assessment-plans"
+                element={
+                    <AdminRoute>
+                        <AssessmentPlansPage />
                     </AdminRoute>
                 }
             />

@@ -43,6 +43,7 @@ export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProp
   });
 
   const isAdmin = currentUser?.roles.includes('admin') ?? false;
+  const isManager = currentUser?.roles.includes('manager') ?? false;
 
   const handleOpenClick = () => {
     fileInputRef.current?.click();
@@ -83,14 +84,21 @@ export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProp
             <MenubarItem onClick={handleOpenClick}>
               Open assessment...
             </MenubarItem>
-            {isAdmin && (
+            {(isAdmin || isManager) && (
               <>
                 <MenubarSeparator />
-                <MenubarItem onClick={() => navigate('/admin/users')}>
-                  Admin: Users
-                </MenubarItem>
-                <MenubarItem onClick={() => navigate('/admin/teams')}>
-                  Admin: Teams
+                {isAdmin && (
+                  <>
+                    <MenubarItem onClick={() => navigate('/admin/users')}>
+                      Admin: Users
+                    </MenubarItem>
+                    <MenubarItem onClick={() => navigate('/admin/teams')}>
+                      Admin: Teams
+                    </MenubarItem>
+                  </>
+                )}
+                <MenubarItem onClick={() => navigate('/manager/assessment-plans')}>
+                  {isAdmin ? 'Admin: ' : ''}Assessment Plans
                 </MenubarItem>
               </>
             )}
