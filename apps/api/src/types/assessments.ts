@@ -1,20 +1,20 @@
 /**
- * Assessment template - represents a career ladder framework
+ * Assessment plan - represents a team's career ladder framework for a specific season
  */
-export interface Assessment {
-  /** Assessment UUID (partition key) */
-  id: string;
+export interface AssessmentPlan {
+  /** Team ID (partition key) */
+  teamId: string;
 
-  /** Assessment name, e.g., "Engineering Ladder Q4 2025" */
+  /** Season identifier (sort key), e.g., "2024-Q1", "2025-H1", "2024-Annual" */
+  season: string;
+
+  /** Assessment plan name, e.g., "Engineering Ladder Q4 2025" */
   name: string;
 
-  /** Semantic version */
-  version: string;
-
   /** Structured competency data */
-  plan: Category[];
+  planConfig: Category[];
 
-  /** Assessment description */
+  /** Assessment plan description */
   description?: string;
 
   /** Soft delete flag */
@@ -67,19 +67,27 @@ export interface Level {
 }
 
 /**
- * Assessment creation input
+ * Assessment plan creation input
  */
-export interface CreateAssessmentInput {
+export interface CreateAssessmentPlanInput {
+  season: string;
   name: string;
-  version: string;
-  plan: Category[];
+  planConfig: Category[];
   description?: string;
 }
 
 /**
- * Assessment update input
+ * Assessment plan update input
  */
-export interface UpdateAssessmentInput {
+export interface UpdateAssessmentPlanInput {
   name?: string;
+  planConfig?: Category[];
   description?: string;
+}
+
+/**
+ * Query parameters for listing assessment plans
+ */
+export interface ListPlansQuery {
+  includeInactive?: boolean;
 }

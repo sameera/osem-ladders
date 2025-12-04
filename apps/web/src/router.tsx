@@ -14,14 +14,6 @@ export const AppRoutes = () => {
             <Route path="/login/callback" element={<LoginCallback />} />
             <Route path="/login" element={<Login />} />
             <Route
-                path="/"
-                element={
-                    <ProtectedRoute>
-                        <Index />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
                 path="/admin/users"
                 element={
                     <AdminRoute>
@@ -35,6 +27,14 @@ export const AppRoutes = () => {
                     <AdminRoute>
                         <AdminTeamsPage />
                     </AdminRoute>
+                }
+            />
+            <Route
+                path="/"
+                element={
+                    <ProtectedRoute>
+                        <Index />
+                    </ProtectedRoute>
                 }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

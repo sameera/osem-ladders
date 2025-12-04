@@ -44,6 +44,6 @@ function getTableName(baseName: string): string {
 export const TableNames = {
   Users: getTableName('Users'),
   Teams: getTableName('Teams'),
-  Assessments: getTableName('Assessments'),
+  AssessmentPlans: getTableName('AssessmentPlans'),
   AssessmentReports: getTableName('AssessmentReports')
 } as const;

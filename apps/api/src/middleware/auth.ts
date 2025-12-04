@@ -173,3 +173,75 @@ export async function requireAdmin(
   // Attach full user object to request for use in handlers
   (request as any).currentUser = user;
 }
+
+/**
+ * Check if user is the manager of a specific team
+ */
+export async function isTeamManager(user: User, teamId: string): Promise<boolean> {
+  // Import here to avoid circular dependencies
+  const { getTeamById } = await import('../services/team-service.js');
+  const team = await getTeamById(teamId);
+  return team?.managerId === user.userId;
+}
+
+/**
+ * Fastify middleware: Require team manager or admin role
+ * Returns a middleware function that checks if user is admin OR manager of the specified team
+ */
+export function requireTeamManagerOrAdmin(
+  teamId: string
+): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const userEmail = request.user?.email;
+
+    if (!userEmail) {
+      return reply.status(401).send({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required'
+        }
+      });
+    }
+
+    // Fetch full user record from DynamoDB to check roles and status
+    const user = await fetchUserFromDB(userEmail);
+
+    if (!user) {
+      return reply.status(403).send({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'User not found'
+        }
+      });
+    }
+
+    if (!user.isActive) {
+      return reply.status(403).send({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'User account is inactive'
+        }
+      });
+    }
+
+    // Check if admin or team manager
+    const isAdmin = hasRole(user, 'admin');
+    const isManager = await isTeamManager(user, teamId);
+
+    if (!isAdmin && !isManager) {
+      return reply.status(403).send({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'This action requires admin role or team manager access'
+        }
+      });
+    }
+
+    // Attach full user object to request for use in handlers
+    (request as any).currentUser = user;
+  };
+}

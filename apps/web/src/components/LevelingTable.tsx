@@ -32,6 +32,8 @@ export function LevelingTable({
 }: LevelingTableProps) {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
+    const [scrollLeftFn, setScrollLeftFn] = useState<(() => void) | null>(null);
+    const [scrollRightFn, setScrollRightFn] = useState<(() => void) | null>(null);
 
     // Get all unique levels across all competencies
     const allLevels = Array.from(
@@ -47,18 +49,24 @@ export function LevelingTable({
         setCanScrollRight(canRight);
     };
 
+    const handleGetScrollFunctions = (scrollLeft: () => void, scrollRight: () => void) => {
+        setScrollLeftFn(() => scrollLeft);
+        setScrollRightFn(() => scrollRight);
+    };
+
     return (
         <div className="relative">
             <ScrollableTableContainer
                 onScrollStateChange={handleScrollStateChange}
+                onGetScrollFunctions={handleGetScrollFunctions}
             >
                 <table className="w-full border-collapse bg-card rounded-lg shadow-sm">
                     <TableHeader
                         allLevels={allLevels}
                         canScrollLeft={canScrollLeft}
                         canScrollRight={canScrollRight}
-                        onScrollLeft={() => {}}
-                        onScrollRight={() => {}}
+                        onScrollLeft={() => scrollLeftFn?.()}
+                        onScrollRight={() => scrollRightFn?.()}
                     />
                     <tbody>
                         {competencies.map((competence, areaIndex) => (

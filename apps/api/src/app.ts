@@ -2,7 +2,7 @@ import Fastify, { type FastifyInstance, type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import { getMeHandler } from "./handlers/users/get-me";
 import authPlugin from "./plugins/auth";
-import { requireAdmin } from "./middleware/auth";
+import { requireAdmin, requireTeamManagerOrAdmin } from "./middleware/auth";
 import {
     createUserHandler,
     getUserHandler,
@@ -16,6 +16,11 @@ import {
     listTeamsHandler,
     updateManagerHandler,
 } from "./handlers/admin-teams";
+import {
+    listPlansHandler,
+    getPlanHandler,
+    createOrUpdatePlanHandler,
+} from "./handlers/assessment-plans";
 
 export function buildApp(disableLogging?: boolean): FastifyInstance {
     const app = Fastify({
@@ -64,6 +69,31 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         adminRoutes.post("/growth/admin/teams", createTeamHandler);
         adminRoutes.get("/growth/admin/teams/:teamId", getTeamHandler);
         adminRoutes.patch("/growth/admin/teams/:teamId/manager", updateManagerHandler);
+    });
+
+    // Assessment plan routes (team manager or admin access)
+    app.get("/growth/teams/:teamId/plans", async (request, reply) => {
+        const { teamId } = request.params as { teamId: string };
+        await requireTeamManagerOrAdmin(teamId)(request, reply);
+        if (!reply.sent) {
+            return listPlansHandler(request as any, reply);
+        }
+    });
+
+    app.get("/growth/teams/:teamId/plan/:season", async (request, reply) => {
+        const { teamId } = request.params as { teamId: string };
+        await requireTeamManagerOrAdmin(teamId)(request, reply);
+        if (!reply.sent) {
+            return getPlanHandler(request as any, reply);
+        }
+    });
+
+    app.put("/growth/teams/:teamId/plans", async (request, reply) => {
+        const { teamId } = request.params as { teamId: string };
+        await requireTeamManagerOrAdmin(teamId)(request, reply);
+        if (!reply.sent) {
+            return createOrUpdatePlanHandler(request as any, reply);
+        }
     });
 
     app.setErrorHandler((error: FastifyError, request, reply) => {

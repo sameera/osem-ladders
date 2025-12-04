@@ -29,6 +29,13 @@
         "cwd": "."
       }
     },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["pnpm run dev"],
+        "cwd": "apps/api"
+      }
+    },
     "test": {
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/apps/api"],

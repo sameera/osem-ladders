@@ -1,13 +1,20 @@
 
 import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Menubar,
   MenubarContent,
   MenubarItem,
   MenubarMenu,
+  MenubarSeparator,
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { Menu } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useApi } from '@/hooks/useApi';
+import type { User } from '@/types/users';
+import type { ApiResponse } from '@/types/teams';
 
 interface AppMenuBarProps {
   onNewAssessment: () => void;
@@ -16,6 +23,26 @@ interface AppMenuBarProps {
 
 export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const { get } = useApi();
+
+  // Fetch current user to check admin status
+  const { data: currentUser } = useQuery<User>({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const response = await get<ApiResponse<User>>('/users/me');
+      if (!response.data) {
+        throw new Error('User data not found in response');
+      }
+      return response.data;
+    },
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: false,
+  });
+
+  const isAdmin = currentUser?.roles.includes('admin') ?? false;
 
   const handleOpenClick = () => {
     fileInputRef.current?.click();
@@ -56,6 +83,17 @@ export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProp
             <MenubarItem onClick={handleOpenClick}>
               Open assessment...
             </MenubarItem>
+            {isAdmin && (
+              <>
+                <MenubarSeparator />
+                <MenubarItem onClick={() => navigate('/admin/users')}>
+                  Admin: Users
+                </MenubarItem>
+                <MenubarItem onClick={() => navigate('/admin/teams')}>
+                  Admin: Teams
+                </MenubarItem>
+              </>
+            )}
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

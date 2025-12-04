@@ -4,9 +4,10 @@ import React, { useRef, useState, useEffect } from 'react';
 interface ScrollableTableContainerProps {
   children: React.ReactNode;
   onScrollStateChange: (canScrollLeft: boolean, canScrollRight: boolean) => void;
+  onGetScrollFunctions?: (scrollLeft: () => void, scrollRight: () => void) => void;
 }
 
-export function ScrollableTableContainer({ children, onScrollStateChange }: ScrollableTableContainerProps) {
+export function ScrollableTableContainer({ children, onScrollStateChange, onGetScrollFunctions }: ScrollableTableContainerProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, scrollLeft: 0 });
@@ -81,24 +82,29 @@ export function ScrollableTableContainer({ children, onScrollStateChange }: Scro
     }
   };
 
-  // Set up scroll event listener
+  // Set up scroll event listener and expose scroll functions
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
       checkScrollPosition();
       container.addEventListener('scroll', checkScrollPosition);
-      
+
       // Set initial cursor
       container.style.cursor = 'grab';
-      
+
+      // Expose scroll functions to parent
+      if (onGetScrollFunctions) {
+        onGetScrollFunctions(scrollLeft, scrollRight);
+      }
+
       return () => {
         container.removeEventListener('scroll', checkScrollPosition);
       };
     }
-  }, []);
+  }, [onGetScrollFunctions]);
 
   return (
-    <div 
+    <div
       ref={scrollContainerRef}
       className="overflow-x-auto scrollbar-hide select-none"
       onMouseDown={handleMouseDown}
@@ -107,10 +113,7 @@ export function ScrollableTableContainer({ children, onScrollStateChange }: Scro
       onMouseLeave={handleMouseLeave}
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
-      {React.cloneElement(children as React.ReactElement, {
-        scrollLeft,
-        scrollRight
-      })}
+      {children}
     </div>
   );
 }
