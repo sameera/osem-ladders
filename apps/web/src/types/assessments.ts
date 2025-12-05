@@ -67,11 +67,8 @@ export interface ListPlansQuery {
  * API response for listing assessment plans
  */
 export interface ListPlansResponse {
-  success: boolean;
-  data: {
-    plans: AssessmentPlan[];
-    total: number;
-  };
+  plans: AssessmentPlan[];
+  total: number;
 }
 
 /**

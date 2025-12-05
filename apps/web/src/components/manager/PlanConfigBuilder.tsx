@@ -38,7 +38,7 @@ export function PlanConfigBuilder({ planConfig, onChange }: PlanConfigBuilderPro
       ...updated[categoryIndex],
       competencies: [
         ...updated[categoryIndex].competencies,
-        { name: '', levels: [{ level: 1, title: '', content: '' }] },
+        { name: '', levels: [{ level: 1, content: '' }] },
       ],
     };
     onChange(updated);
@@ -79,7 +79,6 @@ export function PlanConfigBuilder({ planConfig, onChange }: PlanConfigBuilderPro
 
     updated[categoryIndex].competencies[competencyIndex].levels.push({
       level: nextLevel,
-      title: '',
       content: '',
     });
     onChange(updated);
@@ -117,10 +116,10 @@ export function PlanConfigBuilder({ planConfig, onChange }: PlanConfigBuilderPro
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Plan Configuration <span className="text-red-500">*</span>
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {planConfig.length} categor{planConfig.length === 1 ? 'y' : 'ies'}
           </p>
         </div>
@@ -150,8 +149,8 @@ export function PlanConfigBuilder({ planConfig, onChange }: PlanConfigBuilderPro
           ))}
         </div>
       ) : (
-        <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500 mb-4">No categories yet. Click "Add Category" to get started.</p>
+        <div className="text-center p-8 border-2 border-dashed border-border rounded-lg">
+          <p className="text-muted-foreground mb-4">No categories yet. Click "Add Category" to get started.</p>
         </div>
       )}
 

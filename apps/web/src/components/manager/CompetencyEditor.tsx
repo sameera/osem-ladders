@@ -32,9 +32,9 @@ export function CompetencyEditor({
   canRemove = true,
 }: CompetencyEditorProps) {
   return (
-    <div className="border rounded-lg p-4 space-y-4 bg-white">
+    <div className="border border-border rounded-lg p-4 space-y-4 bg-card dark:bg-card/50">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-gray-800">
+        <h4 className="text-sm font-semibold text-foreground">
           Competency {competencyIndex + 1}
         </h4>
         {canRemove && (
@@ -68,7 +68,7 @@ export function CompetencyEditor({
 
       {/* Expectations */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-foreground">
           Expectations (Levels) <span className="text-red-500">*</span>
         </Label>
         <div className="space-y-3">

@@ -7,12 +7,11 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AssessmentPlanForm } from './AssessmentPlanForm';
 import { AssessmentPlanTable } from './AssessmentPlanTable';
-import { useCreateAssessmentPlan } from '@/hooks/useAssessmentPlans';
+import { useCreateAssessmentPlan, useMultiTeamAssessmentPlans } from '@/hooks/useAssessmentPlans';
 import { useTeams } from '@/hooks/useTeams';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import type { CreateAssessmentPlanInput } from '@/types/assessments';
-import type { AssessmentPlan } from '@/types/assessments';
 import type { User } from '@/types/users';
 import type { ApiResponse } from '@/types/teams';
 
@@ -58,14 +57,12 @@ export function AssessmentPlanManagement() {
   }, [currentUser, allTeams]);
 
   // Fetch all plans for accessible teams
-  // Note: In a production environment, you'd want a more efficient endpoint
-  // that fetches all plans for a user's accessible teams in one request
-  const allPlans = useMemo(() => {
-    const plans: AssessmentPlan[] = [];
-    // For now, we'll show plans as they're fetched per team
-    // This is a simplified approach - in production you'd use a different strategy
-    return plans;
-  }, []);
+  const teamIds = useMemo(() => accessibleTeams.map(t => t.id), [accessibleTeams]);
+  const {
+    plans: allPlans,
+    isLoading: isLoadingPlans,
+    errors: planErrors
+  } = useMultiTeamAssessmentPlans(teamIds);
 
   const handleCreatePlan = (data: { teamId: string; input: CreateAssessmentPlanInput }) => {
     setFormError(null);
@@ -122,26 +119,28 @@ export function AssessmentPlanManagement() {
           </div>
         </div>
 
-        {/*
-          Note: This is a simplified view showing plans.
-          In production, you would:
-          1. Create a backend endpoint to fetch all plans for user's accessible teams
-          2. Implement search/filter functionality
-          3. Add pagination
-          For MVP, we'll show a message to guide users
-        */}
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> Assessment plans are organized by team. Select a team above to create a plan.
-            Plans can be cloned across teams and seasons.
-          </p>
-        </div>
+        {/* Show errors for teams that failed to load */}
+        {planErrors.length > 0 && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              <strong>Warning:</strong> Could not load plans for {planErrors.length} team{planErrors.length !== 1 ? 's' : ''}
+              {planErrors.length <= 3 && `: ${planErrors.map(e => e.teamId).join(', ')}`}
+            </p>
+          </div>
+        )}
 
-        {/* Placeholder table - in production this would show aggregated plans */}
+        {/* Assessment Plans Table */}
         <AssessmentPlanTable
           plans={allPlans}
-          isLoading={false}
-          emptyMessage="Create your first assessment plan using the form above"
+          isLoading={isLoadingPlans}
+          emptyMessage={
+            accessibleTeams.length === 0
+              ? "You don't have access to any teams. Contact an administrator to be added to a team."
+              : "No assessment plans found. Create your first plan using the form above."
+          }
+          onEdit={() => {
+            // React Query cache will auto-invalidate on mutation
+          }}
         />
       </div>
     </div>

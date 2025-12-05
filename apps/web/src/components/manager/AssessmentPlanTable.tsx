@@ -7,8 +7,9 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Copy } from 'lucide-react';
+import { Loader2, Copy, Pencil } from 'lucide-react';
 import { ClonePlanDialog } from './ClonePlanDialog';
+import { EditPlanDialog } from './EditPlanDialog';
 import type { AssessmentPlan } from '@/types/assessments';
 
 interface AssessmentPlanTableProps {
@@ -16,6 +17,7 @@ interface AssessmentPlanTableProps {
   isLoading?: boolean;
   emptyMessage?: string;
   onClone?: (plan: AssessmentPlan) => void;
+  onEdit?: (plan: AssessmentPlan) => void;
 }
 
 export function AssessmentPlanTable({
@@ -23,8 +25,10 @@ export function AssessmentPlanTable({
   isLoading = false,
   emptyMessage = 'No assessment plans found',
   onClone,
+  onEdit,
 }: AssessmentPlanTableProps) {
   const [cloningPlan, setCloningPlan] = useState<AssessmentPlan | null>(null);
+  const [editingPlan, setEditingPlan] = useState<AssessmentPlan | null>(null);
 
   // Empty state
   if (!isLoading && plans.length === 0) {
@@ -133,15 +137,26 @@ export function AssessmentPlanTable({
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setCloningPlan(plan)}
-                          aria-label={`Clone ${plan.name}`}
-                        >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Clone
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingPlan(plan)}
+                            aria-label={`Edit ${plan.name}`}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCloningPlan(plan)}
+                            aria-label={`Clone ${plan.name}`}
+                          >
+                            <Copy className="h-4 w-4 mr-1" />
+                            Clone
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -183,22 +198,47 @@ export function AssessmentPlanTable({
                     <div>By: {plan.createdBy}</div>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCloningPlan(plan)}
-                    className="w-full"
-                    aria-label={`Clone ${plan.name}`}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Clone Plan
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingPlan(plan)}
+                      className="flex-1"
+                      aria-label={`Edit ${plan.name}`}
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCloningPlan(plan)}
+                      className="flex-1"
+                      aria-label={`Clone ${plan.name}`}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Clone
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Dialog */}
+      {editingPlan && (
+        <EditPlanDialog
+          plan={editingPlan}
+          open={!!editingPlan}
+          onOpenChange={(open) => !open && setEditingPlan(null)}
+          onEdit={(data) => {
+            onEdit?.(editingPlan);
+            setEditingPlan(null);
+          }}
+        />
+      )}
 
       {/* Clone Dialog */}
       {cloningPlan && (

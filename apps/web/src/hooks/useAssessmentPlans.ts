@@ -3,7 +3,7 @@
  * Hooks for assessment plan data fetching and mutations with cache management
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useQueries } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { createAssessmentPlanApi } from '@/services/assessment-plan-api';
 import type {
@@ -68,4 +68,49 @@ export function useCreateAssessmentPlan() {
       });
     },
   });
+}
+
+/**
+ * Hook for fetching assessment plans for multiple teams in parallel
+ * @param teamIds - Array of team IDs to fetch plans for
+ * @param query - Optional query parameters
+ * @returns Aggregated plans, loading state, and per-team errors
+ */
+export function useMultiTeamAssessmentPlans(teamIds: string[], query?: ListPlansQuery) {
+  const api = useApi();
+  const planApi = createAssessmentPlanApi(api);
+
+  const queries = useQueries({
+    queries: teamIds.map((teamId) => ({
+      queryKey: ['assessmentPlans', teamId, query],
+      queryFn: () => planApi.fetchPlans(teamId, query),
+      staleTime: 60 * 1000, // 1 minute cache
+      // Don't fail the whole query if one team fails
+      retry: 1,
+    })),
+  });
+
+  // Aggregate results
+  const allPlans = queries
+    .filter((q) => q.isSuccess && q.data)
+    .flatMap((q) => q.data as AssessmentPlan[])
+    .sort((a, b) => b.createdAt - a.createdAt); // Most recent first
+
+  // Check if any queries are still loading
+  const isLoading = queries.some((q) => q.isLoading);
+
+  // Collect errors from failed queries
+  const errors = queries
+    .filter((q) => q.isError)
+    .map((q) => ({
+      teamId: teamIds[queries.indexOf(q)],
+      error: q.error as Error,
+    }));
+
+  return {
+    plans: allPlans,
+    isLoading,
+    errors,
+    isSuccess: queries.every((q) => q.isSuccess),
+  };
 }

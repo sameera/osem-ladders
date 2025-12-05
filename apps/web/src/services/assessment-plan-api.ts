@@ -54,7 +54,7 @@ export function createAssessmentPlanApi(api: UseApiReturn) {
                     response.error?.message || "Failed to fetch plans"
                 );
             }
-            return response.data;
+            return response.data.plans;
         },
 
         /**

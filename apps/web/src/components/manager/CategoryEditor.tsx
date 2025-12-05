@@ -49,9 +49,9 @@ export function CategoryEditor({
   canRemove = true,
 }: CategoryEditorProps) {
   return (
-    <div className="border-2 border-gray-300 rounded-lg p-4 space-y-4 bg-gray-50">
+    <div className="border-2 border-border rounded-lg p-4 space-y-4 bg-muted/50 dark:bg-muted/20">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-gray-900">
+        <h3 className="text-base font-bold text-foreground">
           Category {categoryIndex + 1}
         </h3>
         {canRemove && (
@@ -81,14 +81,14 @@ export function CategoryEditor({
           required
           aria-required="true"
         />
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {category.competencies.length} competenc{category.competencies.length === 1 ? 'y' : 'ies'}
         </p>
       </div>
 
       {/* Competencies */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-foreground">
           Competencies <span className="text-red-500">*</span>
         </Label>
         {category.competencies.length > 0 ? (
@@ -98,7 +98,7 @@ export function CategoryEditor({
                 <AccordionTrigger className="px-4 hover:no-underline">
                   <span className="text-sm font-medium">
                     {competency.name || `Competency ${compIdx + 1}`}
-                    <span className="text-gray-500 ml-2 text-xs">
+                    <span className="text-muted-foreground ml-2 text-xs">
                       ({competency.levels.length} level{competency.levels.length === 1 ? '' : 's'})
                     </span>
                   </span>
@@ -121,7 +121,7 @@ export function CategoryEditor({
             ))}
           </Accordion>
         ) : (
-          <p className="text-sm text-gray-500 italic">No competencies yet. Click "Add Competency" below.</p>
+          <p className="text-sm text-muted-foreground italic">No competencies yet. Click "Add Competency" below.</p>
         )}
         <Button
           type="button"
