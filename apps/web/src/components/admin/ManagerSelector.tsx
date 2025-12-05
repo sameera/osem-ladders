@@ -42,7 +42,7 @@ export function ManagerSelector({ team, onUpdate }: ManagerSelectorProps) {
     setIsUpdating(true);
 
     updateManager(
-      { teamId: team.teamId, managerId: newManagerId },
+      { teamId: team.id, managerId: newManagerId },
       {
         onSuccess: () => {
           // T052: Success toast notification

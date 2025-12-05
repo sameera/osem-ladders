@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ManagerSelectorInput } from '@/components/admin/ManagerSelectorInput';
 import type { CreateTeamRequest } from '@/types/teams';
 import { TEAM_ID_REGEX, MIN_TEAM_NAME_LENGTH, MAX_TEAM_NAME_LENGTH } from '@/types/teams';
 
@@ -20,8 +21,19 @@ interface TeamFormProps {
 export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) {
   const [teamId, setTeamId] = useState('');
   const [name, setName] = useState('');
+  const [managerId, setManagerId] = useState('');
   const [teamIdError, setTeamIdError] = useState('');
   const [nameError, setNameError] = useState('');
+  const [managerError, setManagerError] = useState('');
+
+  // Generate team ID from team name
+  const generateTeamId = (teamName: string): string => {
+    return teamName
+      .toLowerCase()
+      .replace(/\s+/g, '-')           // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '')     // Remove invalid characters
+      .substring(0, 50);              // Truncate to max length
+  };
 
   const validateTeamId = (value: string): boolean => {
     if (!value) {
@@ -49,19 +61,30 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
     return true;
   };
 
+  const validateManager = (value: string): boolean => {
+    if (!value || value.trim().length === 0) {
+      setManagerError('Team manager is required');
+      return false;
+    }
+    setManagerError('');
+    return true;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const isTeamIdValid = validateTeamId(teamId);
     const isNameValid = validateName(name);
+    const isManagerValid = validateManager(managerId);
 
-    if (!isTeamIdValid || !isNameValid) {
+    if (!isTeamIdValid || !isNameValid || !isManagerValid) {
       return;
     }
 
     onSubmit({
       teamId: teamId.trim(),
       name: name.trim(),
+      managerId: managerId.trim(),
     });
 
     // Clear form will be handled by parent component after successful submit
@@ -70,8 +93,10 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
   const handleClear = () => {
     setTeamId('');
     setName('');
+    setManagerId('');
     setTeamIdError('');
     setNameError('');
+    setManagerError('');
   };
 
   return (
@@ -79,40 +104,11 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
       <CardHeader>
         <CardTitle>Create New Team</CardTitle>
         <CardDescription>
-          Create a new team by entering a unique team ID and name. Teams organize users for assessments and management.
+          Create a new team by entering a team name. The team ID will be automatically generated from the name.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Team ID Field */}
-          <div className="space-y-2">
-            <Label htmlFor="teamId" className="text-sm font-medium">
-              Team ID <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="teamId"
-              type="text"
-              value={teamId}
-              onChange={(e) => {
-                setTeamId(e.target.value);
-                if (teamIdError) validateTeamId(e.target.value);
-              }}
-              onBlur={() => validateTeamId(teamId)}
-              placeholder="engineering-platform"
-              className={teamIdError ? 'border-red-500' : ''}
-              disabled={isLoading}
-              required
-            />
-            {teamIdError && (
-              <p className="text-sm text-red-500" role="alert" aria-live="polite">
-                {teamIdError}
-              </p>
-            )}
-            <p className="text-sm text-gray-500">
-              2-50 characters, lowercase letters, numbers, and hyphens only
-            </p>
-          </div>
-
           {/* Team Name Field */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
@@ -123,8 +119,13 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
               type="text"
               value={name}
               onChange={(e) => {
-                setName(e.target.value);
-                if (nameError) validateName(e.target.value);
+                const newName = e.target.value;
+                setName(newName);
+                // Auto-generate team ID from name
+                const generatedId = generateTeamId(newName);
+                setTeamId(generatedId);
+                if (nameError) validateName(newName);
+                if (teamIdError && generatedId) validateTeamId(generatedId);
               }}
               onBlur={() => validateName(name)}
               placeholder="Engineering - Platform Team"
@@ -138,6 +139,39 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
               </p>
             )}
           </div>
+
+          {/* Team ID Field (Auto-generated, readonly) */}
+          <div className="space-y-2">
+            <Label htmlFor="teamId" className="text-sm font-medium">
+              Team ID <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="teamId"
+              type="text"
+              value={teamId}
+              readOnly
+              placeholder="auto-generated-from-team-name"
+              className={`bg-muted ${teamIdError ? 'border-red-500' : ''}`}
+              disabled={isLoading}
+              required
+            />
+            {teamIdError && (
+              <p className="text-sm text-red-500" role="alert" aria-live="polite">
+                {teamIdError}
+              </p>
+            )}
+            <p className="text-sm text-gray-500">
+              Auto-generated from team name (2-50 characters, lowercase letters, numbers, and hyphens)
+            </p>
+          </div>
+
+          {/* Team Manager Field */}
+          <ManagerSelectorInput
+            value={managerId}
+            onChange={setManagerId}
+            error={managerError}
+            disabled={isLoading}
+          />
 
           {/* Error Display */}
           {error && (

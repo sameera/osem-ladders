@@ -72,3 +72,10 @@ This project is a full-stack application for assessing and tracking engineering 
 *   **Testing**: Both the web and API applications use Vitest for testing. Test files are located in the `tests` directory within each application.
 *   **Authentication**: Authentication is handled via AWS Cognito with Microsoft 365 OIDC. See `apps/web/AUTHENTICATION_SETUP.md` for more details.
 *   **Database**: The backend uses AWS DynamoDB for data storage. There is a `db-setup` script in the root `package.json` that can be run with `pnpm db-setup`.
+
+## Deployment
+
+The web application is deployed to GitHub Pages. The following commands are available:
+
+*   `pnpm predeploy`: Builds the web app for production.
+*   `pnpm deploy`: Deploys the web app to GitHub Pages.

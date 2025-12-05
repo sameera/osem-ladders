@@ -4,18 +4,17 @@
  */
 
 import { AssessmentPlanManagement } from '@/components/manager/AssessmentPlanManagement';
+import { PageLayout } from '@/components/PageLayout';
 
 export function AssessmentPlansPage() {
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Assessment Plans</h1>
-        <p className="text-gray-600 mt-2">
-          Create and manage career ladder frameworks for your teams
-        </p>
+    <PageLayout
+      title="Assessment Plans"
+      subtitle="Create and manage career ladder frameworks for your teams"
+    >
+      <div className="max-w-7xl mx-auto">
+        <AssessmentPlanManagement />
       </div>
-
-      <AssessmentPlanManagement />
-    </div>
+    </PageLayout>
   );
 }

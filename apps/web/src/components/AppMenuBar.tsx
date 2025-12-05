@@ -17,8 +17,8 @@ import type { User } from '@/types/users';
 import type { ApiResponse } from '@/types/teams';
 
 interface AppMenuBarProps {
-  onNewAssessment: () => void;
-  onOpenAssessment: (data: any) => void;
+  onNewAssessment?: () => void;
+  onOpenAssessment?: (data: any) => void;
 }
 
 export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProps) {
@@ -78,15 +78,19 @@ export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProp
             <Menu className="h-4 w-4" />
           </MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={onNewAssessment}>
-              New assessment...
-            </MenubarItem>
-            <MenubarItem onClick={handleOpenClick}>
-              Open assessment...
-            </MenubarItem>
+            {onNewAssessment && onOpenAssessment && (
+              <>
+                <MenubarItem onClick={onNewAssessment}>
+                  New assessment...
+                </MenubarItem>
+                <MenubarItem onClick={handleOpenClick}>
+                  Open assessment...
+                </MenubarItem>
+              </>
+            )}
             {(isAdmin || isManager) && (
               <>
-                <MenubarSeparator />
+                {onNewAssessment && onOpenAssessment && <MenubarSeparator />}
                 {isAdmin && (
                   <>
                     <MenubarItem onClick={() => navigate('/admin/users')}>
@@ -105,13 +109,15 @@ export function AppMenuBar({ onNewAssessment, onOpenAssessment }: AppMenuBarProp
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json"
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
+      {onOpenAssessment && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+      )}
     </>
   );
 }

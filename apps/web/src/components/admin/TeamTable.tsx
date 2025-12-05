@@ -81,14 +81,14 @@ export function TeamTable({
               <tbody className="bg-white divide-y divide-gray-200">
                 {teams.map((team) => (
                   <tr
-                    key={team.teamId}
+                    key={team.id}
                     className={`hover:bg-gray-50 transition-colors ${
                       !team.isActive ? 'opacity-60' : ''
                     }`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">
-                        {team.teamId}
+                        {team.id}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -123,14 +123,14 @@ export function TeamTable({
           <div className="md:hidden divide-y divide-gray-200" role="list" aria-label="Team list">
             {teams.map((team) => (
               <div
-                key={team.teamId}
+                key={team.id}
                 className={`p-4 ${!team.isActive ? 'opacity-60' : ''}`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <div className="font-medium text-gray-900">{team.name}</div>
                     <div className="text-sm font-mono text-gray-500 mt-1">
-                      {team.teamId}
+                      {team.id}
                     </div>
                   </div>
                   <TeamBadge isActive={team.isActive} />

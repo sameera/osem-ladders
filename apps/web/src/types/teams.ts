@@ -7,7 +7,7 @@
  * Team entity stored in DynamoDB
  */
 export interface Team {
-  teamId: string;              // Partition key, unique identifier (e.g., "engineering-team")
+  id: string;                  // Partition key, unique identifier (e.g., "engineering-team")
   name: string;                // Human-readable team name
   managerId?: string | null;   // Optional user ID (email) of team manager
   isActive: boolean;           // Soft delete flag (NEW - from research.md)
@@ -31,6 +31,7 @@ export interface TeamWithDetails extends Team {
 export interface CreateTeamRequest {
   teamId: string;    // 2-50 chars, lowercase alphanumeric + hyphens
   name: string;      // 2-100 chars, any printable characters
+  managerId: string; // REQUIRED - User ID (email) of team manager
 }
 
 /**

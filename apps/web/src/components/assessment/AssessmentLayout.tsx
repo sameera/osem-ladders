@@ -25,8 +25,9 @@ export function AssessmentLayout({
 }: AssessmentLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader 
-        teamMemberName={teamMemberName}
+      <AppHeader
+        title={teamMemberName}
+        subtitle={import.meta.env.VITE_BRANDING_APP_NAME || 'Career Growth Plan'}
         onNewAssessment={onNewAssessment}
         onOpenAssessment={onOpenAssessment}
       />

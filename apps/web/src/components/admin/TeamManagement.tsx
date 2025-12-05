@@ -55,7 +55,7 @@ export function TeamManagement() {
         // T028: Success toast notification
         toast({
           title: 'Team created successfully',
-          description: `${newTeam.name} (${newTeam.teamId}) has been created.`,
+          description: `${newTeam.name} (${newTeam.id}) has been created.`,
           variant: 'default',
         });
 
@@ -68,6 +68,12 @@ export function TeamManagement() {
 
         if (err.message.includes('TEAM_EXISTS') || err.message.includes('409')) {
           errorMessage = 'A team with this ID already exists. Please choose a different team ID.';
+        } else if (err.message.includes('MANAGER_NOT_FOUND')) {
+          errorMessage = 'The selected manager no longer exists.';
+        } else if (err.message.includes('INVALID_MANAGER_ROLE')) {
+          errorMessage = 'The selected user does not have manager role.';
+        } else if (err.message.includes('MANAGER_DEACTIVATED')) {
+          errorMessage = 'The selected manager is deactivated and cannot be assigned.';
         } else if (err.message.includes('INVALID_TEAM_ID') || err.message.includes('INVALID_TEAM_NAME') || err.message.includes('400')) {
           // Use the error message from the server (already user-friendly)
           errorMessage = err.message.split(': ')[1] || err.message;

@@ -12,8 +12,10 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.928.0",
-    "@aws-sdk/lib-dynamodb": "^3.928.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.943.0",
+    "@aws-sdk/client-dynamodb": "^3.943.0",
+    "@aws-sdk/lib-dynamodb": "^3.943.0",
+    "@aws-sdk/util-dynamodb": "^3.943.0",
     "@fastify/aws-lambda": "^6.1.1",
     "@fastify/cors": "^11.1.0",
     "fastify": "^5.6.2",
