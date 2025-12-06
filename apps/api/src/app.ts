@@ -15,6 +15,7 @@ import {
     getTeamHandler,
     listTeamsHandler,
     updateManagerHandler,
+    getTeamMembersHandler,
 } from "./handlers/admin-teams";
 import {
     listPlansHandler,
@@ -61,14 +62,27 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         adminRoutes.get("/growth/admin/users", listUsersHandler);
         adminRoutes.post("/growth/admin/users", createUserHandler);
         adminRoutes.get("/growth/admin/users/:userId", getUserHandler);
-        adminRoutes.patch("/growth/admin/users/:userId", updateUserRolesHandler);
-        adminRoutes.delete("/growth/admin/users/:userId", deactivateUserHandler);
+        adminRoutes.patch(
+            "/growth/admin/users/:userId",
+            updateUserRolesHandler
+        );
+        adminRoutes.delete(
+            "/growth/admin/users/:userId",
+            deactivateUserHandler
+        );
 
         // Team management routes (T011, T045)
+        adminRoutes.patch(
+            "/growth/admin/teams/:teamId/manager",
+            updateManagerHandler
+        );
+        adminRoutes.get(
+            "/growth/admin/teams/:teamId/members",
+            getTeamMembersHandler
+        );
+        adminRoutes.get("/growth/admin/teams/:teamId", getTeamHandler);
         adminRoutes.get("/growth/admin/teams", listTeamsHandler);
         adminRoutes.post("/growth/admin/teams", createTeamHandler);
-        adminRoutes.get("/growth/admin/teams/:teamId", getTeamHandler);
-        adminRoutes.patch("/growth/admin/teams/:teamId/manager", updateManagerHandler);
     });
 
     // Assessment plan routes (team manager or admin access)

@@ -94,5 +94,20 @@ export function createTeamApi(api: UseApiReturn) {
             }
             return response.data;
         },
+
+        /**
+         * Fetch team members
+         */
+        async fetchTeamMembers(teamId: string): Promise<any[]> {
+            const response = await api.get<ApiResponse<{ members: any[] }>>(
+                `/admin/teams/${teamId}/members`
+            );
+            if (!response.success || !response.data) {
+                throw new Error(
+                    response.error?.message || "Failed to fetch team members"
+                );
+            }
+            return response.data.members;
+        },
     };
 }

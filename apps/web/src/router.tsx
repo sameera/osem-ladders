@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
+import ManagerRoute from "@/components/ManagerRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import LoginCallback from "./pages/LoginCallback";
@@ -8,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminTeamsPage from "./pages/AdminTeamsPage";
 import { AssessmentPlansPage } from "./pages/manager/AssessmentPlansPage";
+import { MyTeamsPage } from "./pages/manager/MyTeamsPage";
 
 export const AppRoutes = () => {
     return (
@@ -28,6 +30,14 @@ export const AppRoutes = () => {
                     <AdminRoute>
                         <AdminTeamsPage />
                     </AdminRoute>
+                }
+            />
+            <Route
+                path="/manager/my-teams"
+                element={
+                    <ManagerRoute>
+                        <MyTeamsPage />
+                    </ManagerRoute>
                 }
             />
             <Route

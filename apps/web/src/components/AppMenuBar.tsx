@@ -98,6 +98,12 @@ export function AppMenuBar({
                                 </div>
                                 <MenubarItem
                                     inset
+                                    onClick={() => navigate("/manager/my-teams")}
+                                >
+                                    My Teams
+                                </MenubarItem>
+                                <MenubarItem
+                                    inset
                                     onClick={() =>
                                         navigate("/manager/assessment-plans")
                                     }

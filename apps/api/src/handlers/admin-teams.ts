@@ -9,6 +9,7 @@ import {
   getTeamById,
   listTeamsWithDetails,
   updateTeamManager,
+  getTeamMembers,
 } from '../services/team-service';
 import type {
   CreateTeamRequest,
@@ -227,6 +228,48 @@ export async function updateManagerHandler(
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to update team manager',
+      },
+    } as ApiResponse<never>);
+  }
+}
+
+/**
+ * Get team members handler
+ * GET /growth/admin/teams/:teamId/members
+ */
+export async function getTeamMembersHandler(
+  request: FastifyRequest<{ Params: { teamId: string } }>,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    const { teamId } = request.params;
+
+    // Check if team exists
+    const team = await getTeamById(teamId);
+    if (!team) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'TEAM_NOT_FOUND',
+          message: `Team '${teamId}' not found`,
+        },
+      } as ApiResponse<never>);
+    }
+
+    // Get team members
+    const members = await getTeamMembers(teamId);
+
+    return reply.status(200).send({
+      success: true,
+      data: { members },
+    } as ApiResponse<{ members: any[] }>);
+  } catch (error: any) {
+    console.error('Error fetching team members:', error);
+    return reply.status(500).send({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to fetch team members',
       },
     } as ApiResponse<never>);
   }
