@@ -3,7 +3,7 @@
  * Create plan form with visual builder
  */
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useRef, ChangeEvent } from "react";
 import {
     Card,
     CardContent,
@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 import { TeamSelector } from "./TeamSelector";
 import { PlanConfigBuilder } from "./PlanConfigBuilder";
+import { parseConfig } from "@/utils/configParser";
 import type { Category } from "@/data/model";
 import type { CreateAssessmentPlanInput, AssessmentPlan } from "@/types/assessments";
 
@@ -44,6 +46,7 @@ export function AssessmentPlanForm({
     const [description, setDescription] = useState("");
     const [planConfig, setPlanConfig] = useState<Category[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Initialize form from initialData when in edit mode
     useEffect(() => {
@@ -127,6 +130,67 @@ export function AssessmentPlanForm({
         setDescription("");
         setPlanConfig([]);
         setErrors({});
+    };
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file extension
+        if (!file.name.endsWith('.md')) {
+            setErrors({
+                ...errors,
+                planConfig: "Please select a Markdown (.md) file."
+            });
+            return;
+        }
+
+        // Read file content
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target?.result as string;
+            try {
+                // Parse using existing utility
+                const parsed = parseConfig(content);
+
+                // Validate parsed result
+                if (parsed.length === 0) {
+                    setErrors({
+                        ...errors,
+                        planConfig: "The configuration file is empty or invalid. Please check the format."
+                    });
+                    return;
+                }
+
+                // Update planConfig state
+                setPlanConfig(parsed);
+
+                // Clear any previous planConfig errors
+                setErrors({ ...errors, planConfig: "" });
+            } catch (error) {
+                // Show parsing error
+                setErrors({
+                    ...errors,
+                    planConfig: "Failed to parse configuration file. Please check the format."
+                });
+            }
+        };
+
+        reader.onerror = () => {
+            setErrors({
+                ...errors,
+                planConfig: "Failed to read file. Please try again."
+            });
+        };
+
+        reader.readAsText(file);
+
+        // Reset input so same file can be selected again
+        event.target.value = '';
     };
 
     return (
@@ -283,22 +347,50 @@ export function AssessmentPlanForm({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-end gap-3">
-                        {mode === 'create' && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleClear}
-                                disabled={isLoading}
-                            >
-                                Clear
+                    <div className="flex items-center justify-between gap-3">
+                        {/* Left side - Import button */}
+                        <div>
+                            {mode === 'create' && (
+                                <>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept=".md"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        aria-label="Import configuration file"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleImportClick}
+                                        disabled={isLoading}
+                                    >
+                                        <Upload className="h-4 w-4 mr-2" />
+                                        Import from .md
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Right side - Clear and Submit buttons */}
+                        <div className="flex items-center gap-3">
+                            {mode === 'create' && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleClear}
+                                    disabled={isLoading}
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                            <Button type="submit" disabled={isLoading}>
+                                {isLoading
+                                    ? (mode === 'edit' ? "Updating..." : "Creating...")
+                                    : (mode === 'edit' ? "Update Assessment Plan" : "Create Assessment Plan")}
                             </Button>
-                        )}
-                        <Button type="submit" disabled={isLoading}>
-                            {isLoading
-                                ? (mode === 'edit' ? "Updating..." : "Creating...")
-                                : (mode === 'edit' ? "Update Assessment Plan" : "Create Assessment Plan")}
-                        </Button>
+                        </div>
                     </div>
                 </form>
             </CardContent>
