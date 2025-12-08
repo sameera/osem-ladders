@@ -16,6 +16,7 @@ import {
     Team,
     TeamWithDetails,
     CreateTeamRequest,
+    UpdateTeamRequest,
     TEAM_ID_REGEX,
     MIN_TEAM_NAME_LENGTH,
     MAX_TEAM_NAME_LENGTH,
@@ -304,6 +305,48 @@ export async function listTeamsWithDetails(options?: {
     );
 
     return teamsWithDetails;
+}
+
+/**
+ * Update team details (Phase 1: name only)
+ * Team ID is immutable and cannot be changed
+ */
+export async function updateTeam(
+    teamId: string,
+    request: UpdateTeamRequest
+): Promise<Team> {
+    // Check if team exists
+    const team = await getTeamById(teamId);
+    if (!team) {
+        throw new Error(`TEAM_NOT_FOUND: Team '${teamId}' not found`);
+    }
+
+    // Validate team name
+    validateTeamName(request.name);
+
+    // Update team with new name
+    const now = Date.now();
+    const result = await client.send(
+        new UpdateItemCommand({
+            TableName: TableNames.Teams,
+            Key: marshall({ id: teamId }),
+            UpdateExpression: "SET #name = :name, updatedAt = :updatedAt",
+            ExpressionAttributeNames: {
+                "#name": "name", // Use attribute name placeholder to avoid reserved keyword issues
+            },
+            ExpressionAttributeValues: marshall({
+                ":name": request.name.trim(),
+                ":updatedAt": now,
+            }),
+            ReturnValues: "ALL_NEW",
+        })
+    );
+
+    if (!result.Attributes) {
+        throw new Error("Failed to update team");
+    }
+
+    return unmarshall(result.Attributes) as Team;
 }
 
 /**

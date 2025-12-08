@@ -19,6 +19,7 @@ interface ManagerSelectorInputProps {
   onChange: (managerId: string) => void;
   error?: string;
   disabled?: boolean;
+  required?: boolean;
 }
 
 export function ManagerSelectorInput({
@@ -26,6 +27,7 @@ export function ManagerSelectorInput({
   onChange,
   error,
   disabled = false,
+  required = true,
 }: ManagerSelectorInputProps) {
   // Fetch all active users
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
@@ -41,7 +43,7 @@ export function ManagerSelectorInput({
     return (
       <div className="space-y-2">
         <Label htmlFor="managerId" className="text-sm font-medium">
-          Team Manager <span className="text-red-500">*</span>
+          Team Manager {required && <span className="text-red-500">*</span>}
         </Label>
         <div className="flex items-center gap-2 text-sm text-gray-500 p-2">
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -56,7 +58,7 @@ export function ManagerSelectorInput({
     return (
       <div className="space-y-2">
         <Label htmlFor="managerId" className="text-sm font-medium">
-          Team Manager <span className="text-red-500">*</span>
+          Team Manager {required && <span className="text-red-500">*</span>}
         </Label>
         <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
           <p className="text-sm text-amber-800">
@@ -70,9 +72,13 @@ export function ManagerSelectorInput({
   return (
     <div className="space-y-2">
       <Label htmlFor="managerId" className="text-sm font-medium">
-        Team Manager <span className="text-red-500">*</span>
+        Team Manager {required && <span className="text-red-500">*</span>}
       </Label>
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <Select
+        value={value || 'none'}
+        onValueChange={(val) => onChange(val === 'none' ? '' : val)}
+        disabled={disabled}
+      >
         <SelectTrigger
           id="managerId"
           className={error ? 'border-red-500' : ''}
@@ -80,6 +86,11 @@ export function ManagerSelectorInput({
           <SelectValue placeholder="Select a manager" />
         </SelectTrigger>
         <SelectContent>
+          {!required && (
+            <SelectItem value="none">
+              <span className="italic text-gray-500">None</span>
+            </SelectItem>
+          )}
           {managers.map((manager) => (
             <SelectItem key={manager.userId} value={manager.userId}>
               {manager.name}

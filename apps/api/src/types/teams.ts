@@ -35,6 +35,13 @@ export interface CreateTeamRequest {
 }
 
 /**
+ * Request to update team details (Phase 1: name only)
+ */
+export interface UpdateTeamRequest {
+    name: string; // 2-100 chars, any printable characters
+}
+
+/**
  * Request to assign or unassign team manager (User Story 3)
  */
 export interface AssignManagerRequest {
@@ -99,6 +106,7 @@ export enum TeamErrorCode {
     TEAM_EXISTS = "TEAM_EXISTS", // 409: Team ID already exists
     TEAM_NOT_FOUND = "TEAM_NOT_FOUND", // 404: Team not found
     INVALID_TEAM_ID = "INVALID_TEAM_ID", // 400: Invalid team ID format
+    INVALID_TEAM_NAME = "INVALID_TEAM_NAME", // 400: Invalid team name format
     INVALID_MANAGER_ROLE = "INVALID_MANAGER_ROLE", // 400: User doesn't have manager role
     MANAGER_DEACTIVATED = "MANAGER_DEACTIVATED", // 400: Manager user is deactivated
     MANAGER_IS_MEMBER = "MANAGER_IS_MEMBER", // 400: Cannot remove team manager

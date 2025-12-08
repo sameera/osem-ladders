@@ -9,6 +9,7 @@ import { createTeamApi } from '@/services/team-api';
 import type {
   Team,
   CreateTeamRequest,
+  UpdateTeamRequest,
   ListTeamsQuery,
 } from '@/types/teams';
 
@@ -58,6 +59,24 @@ export function useCreateTeam() {
     mutationFn: (request: CreateTeamRequest) => teamApi.createTeam(request),
     onSuccess: () => {
       // Invalidate team list queries to refetch with new team
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+    },
+  });
+}
+
+/**
+ * Hook for updating team details with cache invalidation
+ */
+export function useUpdateTeam() {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, request }: { teamId: string; request: UpdateTeamRequest }) =>
+      teamApi.updateTeam(teamId, request),
+    onSuccess: () => {
+      // Invalidate team list queries to refetch with updated team
       queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
   });

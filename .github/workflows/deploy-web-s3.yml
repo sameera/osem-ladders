@@ -1,0 +1,106 @@
+name: Deploy Web App to S3
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "apps/web/**"
+            - ".github/workflows/deploy-web-s3.yml"
+    workflow_dispatch:
+
+env:
+    AWS_REGION: ${{ vars.AWS_REGION }}
+    NODE_VERSION: 18
+
+permissions:
+    id-token: write
+    contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 10
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build web application
+              env:
+                  VITE_BRANDING_APP_NAME: ${{ secrets.VITE_BRANDING_APP_NAME }}
+                  VITE_COGNITO_REGION: ${{ secrets.VITE_COGNITO_REGION }}
+                  VITE_COGNITO_USER_POOL_ID: ${{ secrets.VITE_COGNITO_USER_POOL_ID }}
+                  VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+                  VITE_COGNITO_DOMAIN: ${{ secrets.VITE_COGNITO_DOMAIN }}
+              run: pnpm exec nx build web --configuration=production
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Sync to S3 bucket
+              run: |
+                  echo "Syncing build to S3 bucket: ${{ vars.S3_BUCKET_NAME }}"
+
+                  # Upload all files except HTML with long cache
+                  aws s3 sync dist/apps/web/ s3://${{ vars.S3_BUCKET_NAME }}/ \
+                    --delete \
+                    --cache-control "public,max-age=31536000,immutable" \
+                    --exclude "index.html" \
+                    --exclude "*.html"
+
+                  # Upload HTML files with no cache
+                  aws s3 sync dist/apps/web/ s3://${{ vars.S3_BUCKET_NAME }}/ \
+                    --exclude "*" \
+                    --include "*.html" \
+                    --cache-control "public,max-age=0,must-revalidate"
+
+                  echo "S3 sync completed successfully"
+
+            - name: Invalidate CloudFront cache
+              run: |
+                  echo "Creating CloudFront invalidation for distribution: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
+
+                  INVALIDATION_ID=$(aws cloudfront create-invalidation \
+                    --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+                    --paths "/*" \
+                    --query 'Invalidation.Id' \
+                    --output text)
+
+                  echo "CloudFront invalidation created: $INVALIDATION_ID"
+                  echo "Waiting for invalidation to complete..."
+
+                  aws cloudfront wait invalidation-completed \
+                    --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+                    --id $INVALIDATION_ID
+
+                  echo "✅ CloudFront cache invalidation completed successfully"
+
+            - name: Deployment summary
+              run: |
+                  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                  echo "✅ Deployment Completed Successfully!"
+                  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                  echo "S3 Bucket: s3://${{ vars.S3_BUCKET_NAME }}"
+                  echo "CloudFront Distribution: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
+                  echo ""
+                  echo "Build size:"
+                  du -sh dist/apps/web/
+                  echo ""
+                  echo "Files deployed:"
+                  find dist/apps/web -type f | wc -l

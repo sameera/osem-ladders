@@ -7,6 +7,7 @@ import type {
     Team,
     TeamWithDetails,
     CreateTeamRequest,
+    UpdateTeamRequest,
     AssignManagerRequest,
     ListTeamsQuery,
     ListTeamsResponse,
@@ -71,6 +72,25 @@ export function createTeamApi(api: UseApiReturn) {
             if (!response.success || !response.data) {
                 throw new Error(
                     response.error?.message || "Failed to create team"
+                );
+            }
+            return response.data;
+        },
+
+        /**
+         * Update team details (name only in Phase 1)
+         */
+        async updateTeam(
+            teamId: string,
+            request: UpdateTeamRequest
+        ): Promise<Team> {
+            const response = await api.patch<ApiResponse<Team>>(
+                `/admin/teams/${teamId}`,
+                request
+            );
+            if (!response.success || !response.data) {
+                throw new Error(
+                    response.error?.message || "Failed to update team"
                 );
             }
             return response.data;

@@ -1,30 +1,47 @@
 /**
  * TeamForm Component
- * Form for creating teams with teamId and name inputs
+ * Form for creating and editing teams with teamId and name inputs
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ManagerSelectorInput } from '@/components/admin/ManagerSelectorInput';
-import type { CreateTeamRequest } from '@/types/teams';
+import type { CreateTeamRequest, TeamWithDetails } from '@/types/teams';
 import { TEAM_ID_REGEX, MIN_TEAM_NAME_LENGTH, MAX_TEAM_NAME_LENGTH } from '@/types/teams';
 
 interface TeamFormProps {
   onSubmit: (data: CreateTeamRequest) => void;
   isLoading?: boolean;
   error?: Error | null;
+  mode?: 'create' | 'edit';
+  initialData?: TeamWithDetails;
 }
 
-export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) {
+export function TeamForm({
+  onSubmit,
+  isLoading = false,
+  error,
+  mode = 'create',
+  initialData
+}: TeamFormProps) {
   const [teamId, setTeamId] = useState('');
   const [name, setName] = useState('');
   const [managerId, setManagerId] = useState('');
   const [teamIdError, setTeamIdError] = useState('');
   const [nameError, setNameError] = useState('');
   const [managerError, setManagerError] = useState('');
+
+  // Initialize form from initialData in edit mode
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      setName(initialData.name);
+      setTeamId(initialData.id);
+      setManagerId(initialData.managerId || '');
+    }
+  }, [mode, initialData]);
 
   // Generate team ID from team name
   const generateTeamId = (teamName: string): string => {
@@ -62,10 +79,14 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
   };
 
   const validateManager = (value: string): boolean => {
-    if (!value || value.trim().length === 0) {
-      setManagerError('Team manager is required');
-      return false;
+    // In create mode, manager is required
+    if (mode === 'create') {
+      if (!value || value.trim().length === 0) {
+        setManagerError('Team manager is required');
+        return false;
+      }
     }
+    // In edit mode, manager is optional (can be empty to remove assignment)
     setManagerError('');
     return true;
   };
@@ -73,7 +94,7 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isTeamIdValid = validateTeamId(teamId);
+    const isTeamIdValid = mode === 'edit' ? true : validateTeamId(teamId);
     const isNameValid = validateName(name);
     const isManagerValid = validateManager(managerId);
 
@@ -84,7 +105,7 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
     onSubmit({
       teamId: teamId.trim(),
       name: name.trim(),
-      managerId: managerId.trim(),
+      ...(managerId && { managerId: managerId.trim() }),
     });
 
     // Clear form will be handled by parent component after successful submit
@@ -102,9 +123,13 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create New Team</CardTitle>
+        <CardTitle>
+          {mode === 'edit' ? 'Edit Team' : 'Create New Team'}
+        </CardTitle>
         <CardDescription>
-          Create a new team by entering a team name. The team ID will be automatically generated from the name.
+          {mode === 'edit'
+            ? 'Update team name and manager assignment'
+            : 'Create a new team by entering a team name. The team ID will be automatically generated from the name.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -121,11 +146,13 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
               onChange={(e) => {
                 const newName = e.target.value;
                 setName(newName);
-                // Auto-generate team ID from name
-                const generatedId = generateTeamId(newName);
-                setTeamId(generatedId);
+                // Auto-generate team ID from name only in create mode
+                if (mode === 'create') {
+                  const generatedId = generateTeamId(newName);
+                  setTeamId(generatedId);
+                  if (teamIdError && generatedId) validateTeamId(generatedId);
+                }
                 if (nameError) validateName(newName);
-                if (teamIdError && generatedId) validateTeamId(generatedId);
               }}
               onBlur={() => validateName(name)}
               placeholder="Engineering - Platform Team"
@@ -150,9 +177,9 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
               type="text"
               value={teamId}
               readOnly
-              placeholder="auto-generated-from-team-name"
+              placeholder={mode === 'edit' ? teamId : "auto-generated-from-team-name"}
               className={`bg-muted ${teamIdError ? 'border-red-500' : ''}`}
-              disabled={isLoading}
+              disabled={isLoading || mode === 'edit'}
               required
             />
             {teamIdError && (
@@ -160,18 +187,32 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
                 {teamIdError}
               </p>
             )}
-            <p className="text-sm text-gray-500">
-              Auto-generated from team name (2-50 characters, lowercase letters, numbers, and hyphens)
-            </p>
+            {mode === 'edit' ? (
+              <p className="text-sm text-gray-500">
+                Team ID cannot be changed
+              </p>
+            ) : (
+              <p className="text-sm text-gray-500">
+                Auto-generated from team name (2-50 characters, lowercase letters, numbers, and hyphens)
+              </p>
+            )}
           </div>
 
           {/* Team Manager Field */}
-          <ManagerSelectorInput
-            value={managerId}
-            onChange={setManagerId}
-            error={managerError}
-            disabled={isLoading}
-          />
+          <div className="space-y-2">
+            <ManagerSelectorInput
+              value={managerId}
+              onChange={setManagerId}
+              error={managerError}
+              disabled={isLoading}
+              required={mode === 'create'}
+            />
+            {mode === 'edit' && (
+              <p className="text-sm text-gray-500">
+                Leave empty to remove manager assignment
+              </p>
+            )}
+          </div>
 
           {/* Error Display */}
           {error && (
@@ -182,16 +223,20 @@ export function TeamForm({ onSubmit, isLoading = false, error }: TeamFormProps) 
 
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClear}
-              disabled={isLoading}
-            >
-              Clear
-            </Button>
+            {mode === 'create' && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClear}
+                disabled={isLoading}
+              >
+                Clear
+              </Button>
+            )}
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Team'}
+              {isLoading
+                ? (mode === 'edit' ? 'Updating...' : 'Creating...')
+                : (mode === 'edit' ? 'Update Team' : 'Create Team')}
             </Button>
           </div>
         </form>

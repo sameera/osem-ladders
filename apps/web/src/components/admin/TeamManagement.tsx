@@ -4,11 +4,11 @@
  */
 
 import { useState } from 'react';
-import { TeamForm } from './TeamForm';
 import { TeamTable } from './TeamTable';
-import { useTeams, useCreateTeam } from '@/hooks/useTeams';
-import { useToast } from '@/hooks/use-toast';
+import { TeamEditDialog } from './TeamEditDialog';
+import { useTeams } from '@/hooks/useTeams';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -18,13 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search } from 'lucide-react';
-import type { CreateTeamRequest } from '@/types/teams';
+import { Search, Plus } from 'lucide-react';
+import type { TeamWithDetails } from '@/types/teams';
 
 export function TeamManagement() {
-  const { mutate: createTeam, isPending, error } = useCreateTeam();
-  const { toast } = useToast();
-  const [formError, setFormError] = useState<Error | null>(null);
+  // Unified dialog state
+  const [selectedTeam, setSelectedTeam] = useState<TeamWithDetails | null>(null);
+  const [isTeamDialogOpen, setIsTeamDialogOpen] = useState(false);
 
   // T035: Search state with debounce (300ms)
   const [searchInput, setSearchInput] = useState('');
@@ -47,61 +47,25 @@ export function TeamManagement() {
 
   const teams = data?.pages.flatMap((page) => page.teams) || [];
 
-  const handleCreateTeam = (data: CreateTeamRequest) => {
-    setFormError(null);
+  const handleCreateTeam = () => {
+    setSelectedTeam(null);
+    setIsTeamDialogOpen(true);
+  };
 
-    createTeam(data, {
-      onSuccess: (newTeam) => {
-        // T028: Success toast notification
-        toast({
-          title: 'Team created successfully',
-          description: `${newTeam.name} (${newTeam.id}) has been created.`,
-          variant: 'default',
-        });
-
-        // T029: Form will be cleared by parent (handled in TeamForm via key reset)
-      },
-      onError: (err: Error) => {
-        // T026: Parse error message for duplicate team ID (409)
-        // T027: Parse error message for validation failures (400)
-        let errorMessage = err.message;
-
-        if (err.message.includes('TEAM_EXISTS') || err.message.includes('409')) {
-          errorMessage = 'A team with this ID already exists. Please choose a different team ID.';
-        } else if (err.message.includes('MANAGER_NOT_FOUND')) {
-          errorMessage = 'The selected manager no longer exists.';
-        } else if (err.message.includes('INVALID_MANAGER_ROLE')) {
-          errorMessage = 'The selected user does not have manager role.';
-        } else if (err.message.includes('MANAGER_DEACTIVATED')) {
-          errorMessage = 'The selected manager is deactivated and cannot be assigned.';
-        } else if (err.message.includes('INVALID_TEAM_ID') || err.message.includes('INVALID_TEAM_NAME') || err.message.includes('400')) {
-          // Use the error message from the server (already user-friendly)
-          errorMessage = err.message.split(': ')[1] || err.message;
-        } else if (err.message.includes('FORBIDDEN') || err.message.includes('403')) {
-          errorMessage = 'You do not have permission to create teams.';
-        } else if (err.message.includes('UNAUTHORIZED') || err.message.includes('401')) {
-          errorMessage = 'Authentication required. Please log in again.';
-        }
-
-        setFormError(new Error(errorMessage));
-
-        toast({
-          title: 'Failed to create team',
-          description: errorMessage,
-          variant: 'destructive',
-        });
-      },
-    });
+  const handleEditTeam = (team: TeamWithDetails) => {
+    setSelectedTeam(team);
+    setIsTeamDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
-      {/* Team Creation Form */}
-      <TeamForm
-        onSubmit={handleCreateTeam}
-        isLoading={isPending}
-        error={formError}
-      />
+      {/* Create Team Button */}
+      <div className="flex justify-end">
+        <Button onClick={handleCreateTeam}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Team
+        </Button>
+      </div>
 
       {/* T035/T036: Search and Filter Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -144,11 +108,19 @@ export function TeamManagement() {
         isFetchingNextPage={isFetchingNextPage}
         hasNextPage={hasNextPage}
         onLoadMore={() => fetchNextPage()}
+        onEditTeam={handleEditTeam}
         emptyMessage={
           searchInput || statusFilter !== 'active'
             ? 'No teams match your search criteria'
             : 'No teams created yet'
         }
+      />
+
+      {/* Team Dialog (handles both Create and Edit modes) */}
+      <TeamEditDialog
+        team={selectedTeam}
+        open={isTeamDialogOpen}
+        onOpenChange={setIsTeamDialogOpen}
       />
     </div>
   );

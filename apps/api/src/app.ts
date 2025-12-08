@@ -14,6 +14,7 @@ import {
     createTeamHandler,
     getTeamHandler,
     listTeamsHandler,
+    updateTeamHandler,
     updateManagerHandler,
     getTeamMembersHandler,
 } from "./handlers/admin-teams";
@@ -72,6 +73,10 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         );
 
         // Team management routes (T011, T045)
+        adminRoutes.patch(
+            "/growth/admin/teams/:teamId",
+            updateTeamHandler
+        );
         adminRoutes.patch(
             "/growth/admin/teams/:teamId/manager",
             updateManagerHandler

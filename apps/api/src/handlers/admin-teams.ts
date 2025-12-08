@@ -8,11 +8,13 @@ import {
   createTeam,
   getTeamById,
   listTeamsWithDetails,
+  updateTeam,
   updateTeamManager,
   getTeamMembers,
 } from '../services/team-service';
 import type {
   CreateTeamRequest,
+  UpdateTeamRequest,
   AssignManagerRequest,
   Team,
   TeamWithDetails,
@@ -151,6 +153,59 @@ export async function listTeamsHandler(
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to list teams',
+      },
+    } as ApiResponse<never>);
+  }
+}
+
+/**
+ * Update team handler
+ * PATCH /growth/admin/teams/:teamId
+ */
+export async function updateTeamHandler(
+  request: FastifyRequest<{
+    Params: { teamId: string };
+    Body: UpdateTeamRequest;
+  }>,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    const { teamId } = request.params;
+    const team = await updateTeam(teamId, request.body);
+
+    return reply.status(200).send({
+      success: true,
+      data: team,
+    } as ApiResponse<Team>);
+  } catch (error: any) {
+    // Parse error codes
+    if (error.message.includes('TEAM_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'TEAM_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message.includes('INVALID_TEAM_NAME')) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'INVALID_TEAM_NAME',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    // Generic error
+    console.error('Error updating team:', error);
+    return reply.status(500).send({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to update team',
       },
     } as ApiResponse<never>);
   }
