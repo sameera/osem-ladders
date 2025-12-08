@@ -11,11 +11,14 @@ import {
   updateTeam,
   updateTeamManager,
   getTeamMembers,
+  addMembersToTeam,
+  removeMemberFromTeam,
 } from '../services/team-service';
 import type {
   CreateTeamRequest,
   UpdateTeamRequest,
   AssignManagerRequest,
+  AddMembersRequest,
   Team,
   TeamWithDetails,
   ListTeamsQuery,
@@ -325,6 +328,144 @@ export async function getTeamMembersHandler(
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to fetch team members',
+      },
+    } as ApiResponse<never>);
+  }
+}
+
+/**
+ * Add team members handler
+ * POST /growth/admin/teams/:teamId/members
+ */
+export async function addTeamMembersHandler(
+  request: FastifyRequest<{
+    Params: { teamId: string };
+    Body: AddMembersRequest;
+  }>,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    const { teamId } = request.params;
+    const { userIds } = request.body;
+
+    await addMembersToTeam(teamId, userIds);
+
+    return reply.status(200).send({
+      success: true,
+      data: undefined,
+    } as ApiResponse<void>);
+  } catch (error: any) {
+    // Parse error codes
+    if (error.message.includes('TEAM_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'TEAM_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message.includes('USER_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message.includes('USER_DEACTIVATED')) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'USER_DEACTIVATED',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    // Generic error
+    console.error('Error adding team members:', error);
+    return reply.status(500).send({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to add team members',
+      },
+    } as ApiResponse<never>);
+  }
+}
+
+/**
+ * Remove team member handler
+ * DELETE /growth/admin/teams/:teamId/members/:userId
+ */
+export async function removeTeamMemberHandler(
+  request: FastifyRequest<{
+    Params: { teamId: string; userId: string };
+  }>,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    const { teamId, userId } = request.params;
+
+    await removeMemberFromTeam(teamId, userId);
+
+    return reply.status(200).send({
+      success: true,
+      data: undefined,
+    } as ApiResponse<void>);
+  } catch (error: any) {
+    // Parse error codes
+    if (error.message.includes('TEAM_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'TEAM_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message.includes('USER_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message.includes('MANAGER_IS_MEMBER')) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'MANAGER_IS_MEMBER',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message.includes('USER_NOT_IN_TEAM')) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'USER_NOT_IN_TEAM',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    // Generic error
+    console.error('Error removing team member:', error);
+    return reply.status(500).send({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to remove team member',
       },
     } as ApiResponse<never>);
   }

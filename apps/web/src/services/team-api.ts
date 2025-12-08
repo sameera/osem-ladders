@@ -129,5 +129,40 @@ export function createTeamApi(api: UseApiReturn) {
             }
             return response.data.members;
         },
+
+        /**
+         * Add members to team
+         */
+        async addTeamMembers(
+            teamId: string,
+            userIds: string[]
+        ): Promise<void> {
+            const response = await api.post<ApiResponse<void>>(
+                `/admin/teams/${teamId}/members`,
+                { userIds }
+            );
+            if (!response.success) {
+                throw new Error(
+                    response.error?.message || "Failed to add team members"
+                );
+            }
+        },
+
+        /**
+         * Remove member from team
+         */
+        async removeTeamMember(
+            teamId: string,
+            userId: string
+        ): Promise<void> {
+            const response = await api.delete<ApiResponse<void>>(
+                `/admin/teams/${teamId}/members/${encodeURIComponent(userId)}`
+            );
+            if (!response.success) {
+                throw new Error(
+                    response.error?.message || "Failed to remove team member"
+                );
+            }
+        },
     };
 }

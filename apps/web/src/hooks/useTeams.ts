@@ -99,3 +99,43 @@ export function useUpdateTeamManager() {
     },
   });
 }
+
+/**
+ * Hook for adding members to team with cache invalidation
+ */
+export function useAddTeamMembers() {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, userIds }: { teamId: string; userIds: string[] }) =>
+      teamApi.addTeamMembers(teamId, userIds),
+    onSuccess: (_, { teamId }) => {
+      // Invalidate team details, team list, and team members
+      queryClient.invalidateQueries({ queryKey: ['team', teamId] });
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.invalidateQueries({ queryKey: ['teamMembers', teamId] });
+    },
+  });
+}
+
+/**
+ * Hook for removing member from team with cache invalidation
+ */
+export function useRemoveTeamMember() {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, userId }: { teamId: string; userId: string }) =>
+      teamApi.removeTeamMember(teamId, userId),
+    onSuccess: (_, { teamId }) => {
+      // Invalidate team details, team list, and team members
+      queryClient.invalidateQueries({ queryKey: ['team', teamId] });
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.invalidateQueries({ queryKey: ['teamMembers', teamId] });
+    },
+  });
+}

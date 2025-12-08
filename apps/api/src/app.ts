@@ -17,6 +17,8 @@ import {
     updateTeamHandler,
     updateManagerHandler,
     getTeamMembersHandler,
+    addTeamMembersHandler,
+    removeTeamMemberHandler,
 } from "./handlers/admin-teams";
 import {
     listPlansHandler,
@@ -84,6 +86,14 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         adminRoutes.get(
             "/growth/admin/teams/:teamId/members",
             getTeamMembersHandler
+        );
+        adminRoutes.post(
+            "/growth/admin/teams/:teamId/members",
+            addTeamMembersHandler
+        );
+        adminRoutes.delete(
+            "/growth/admin/teams/:teamId/members/:userId",
+            removeTeamMemberHandler
         );
         adminRoutes.get("/growth/admin/teams/:teamId", getTeamHandler);
         adminRoutes.get("/growth/admin/teams", listTeamsHandler);

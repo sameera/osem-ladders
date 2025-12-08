@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { TeamTable } from './TeamTable';
 import { TeamEditDialog } from './TeamEditDialog';
+import { TeamMembersDialog } from './TeamMembersDialog';
 import { useTeams } from '@/hooks/useTeams';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
@@ -22,9 +23,10 @@ import { Search, Plus } from 'lucide-react';
 import type { TeamWithDetails } from '@/types/teams';
 
 export function TeamManagement() {
-  // Unified dialog state
+  // Dialog state
   const [selectedTeam, setSelectedTeam] = useState<TeamWithDetails | null>(null);
   const [isTeamDialogOpen, setIsTeamDialogOpen] = useState(false);
+  const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
 
   // T035: Search state with debounce (300ms)
   const [searchInput, setSearchInput] = useState('');
@@ -55,6 +57,11 @@ export function TeamManagement() {
   const handleEditTeam = (team: TeamWithDetails) => {
     setSelectedTeam(team);
     setIsTeamDialogOpen(true);
+  };
+
+  const handleManageMembers = (team: TeamWithDetails) => {
+    setSelectedTeam(team);
+    setIsMembersDialogOpen(true);
   };
 
   return (
@@ -109,6 +116,7 @@ export function TeamManagement() {
         hasNextPage={hasNextPage}
         onLoadMore={() => fetchNextPage()}
         onEditTeam={handleEditTeam}
+        onManageMembers={handleManageMembers}
         emptyMessage={
           searchInput || statusFilter !== 'active'
             ? 'No teams match your search criteria'
@@ -121,6 +129,13 @@ export function TeamManagement() {
         team={selectedTeam}
         open={isTeamDialogOpen}
         onOpenChange={setIsTeamDialogOpen}
+      />
+
+      {/* Team Members Dialog */}
+      <TeamMembersDialog
+        team={selectedTeam}
+        open={isMembersDialogOpen}
+        onOpenChange={setIsMembersDialogOpen}
       />
     </div>
   );

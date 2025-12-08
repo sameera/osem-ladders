@@ -6,7 +6,7 @@
 import { TeamBadge } from './TeamBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Pencil } from 'lucide-react';
+import { Loader2, Pencil, Users } from 'lucide-react';
 import type { TeamWithDetails } from '@/types/teams';
 
 interface TeamTableProps {
@@ -17,6 +17,7 @@ interface TeamTableProps {
   onLoadMore?: () => void;
   emptyMessage?: string;
   onEditTeam?: (team: TeamWithDetails) => void;
+  onManageMembers?: (team: TeamWithDetails) => void;
 }
 
 export function TeamTable({
@@ -27,6 +28,7 @@ export function TeamTable({
   onLoadMore,
   emptyMessage = 'No teams found',
   onEditTeam,
+  onManageMembers,
 }: TeamTableProps) {
   // T040: Loading skeleton
   if (isLoading) {
@@ -113,6 +115,17 @@ export function TeamTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
+                        {/* Members button */}
+                        {onManageMembers && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onManageMembers(team)}
+                            aria-label={`Manage members for team ${team.name}`}
+                          >
+                            <Users className="h-4 w-4" />
+                          </Button>
+                        )}
                         {/* Edit button */}
                         {onEditTeam && (
                           <Button
@@ -161,17 +174,30 @@ export function TeamTable({
                   </div>
                 </div>
                 {/* Actions section for mobile */}
-                {onEditTeam && (
-                  <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEditTeam(team)}
-                      className="w-full"
-                    >
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Edit Team
-                    </Button>
+                {(onManageMembers || onEditTeam) && (
+                  <div className="mt-4 flex gap-2">
+                    {onManageMembers && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onManageMembers(team)}
+                        className="flex-1"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Members
+                      </Button>
+                    )}
+                    {onEditTeam && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEditTeam(team)}
+                        className="flex-1"
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

@@ -389,3 +389,110 @@ export async function updateTeamManager(
 
     return unmarshall(result.Attributes) as Team;
 }
+
+/**
+ * Add members to a team
+ * Updates the team field for multiple users
+ */
+export async function addMembersToTeam(
+    teamId: string,
+    userIds: string[]
+): Promise<void> {
+    // Check if team exists
+    const team = await getTeamById(teamId);
+    if (!team) {
+        throw new Error(`TEAM_NOT_FOUND: Team '${teamId}' not found`);
+    }
+
+    // Validate all users exist and are active, then update them
+    const now = Date.now();
+    for (const userId of userIds) {
+        const userResult = await client.send(
+            new GetItemCommand({
+                TableName: TableNames.Users,
+                Key: marshall({ userId }),
+            })
+        );
+
+        if (!userResult.Item) {
+            throw new Error(`USER_NOT_FOUND: User '${userId}' not found`);
+        }
+
+        const user = unmarshall(userResult.Item);
+        if (!user.isActive) {
+            throw new Error(
+                `USER_DEACTIVATED: User '${userId}' is deactivated and cannot be added to team`
+            );
+        }
+
+        // Update user's team field
+        await client.send(
+            new UpdateItemCommand({
+                TableName: TableNames.Users,
+                Key: marshall({ userId }),
+                UpdateExpression: "SET team = :team, updatedAt = :updatedAt",
+                ExpressionAttributeValues: marshall({
+                    ":team": teamId,
+                    ":updatedAt": now,
+                }),
+            })
+        );
+    }
+}
+
+/**
+ * Remove a member from a team
+ * Sets the team field to null for the user
+ */
+export async function removeMemberFromTeam(
+    teamId: string,
+    userId: string
+): Promise<void> {
+    // Check if team exists
+    const team = await getTeamById(teamId);
+    if (!team) {
+        throw new Error(`TEAM_NOT_FOUND: Team '${teamId}' not found`);
+    }
+
+    // Check if user exists
+    const userResult = await client.send(
+        new GetItemCommand({
+            TableName: TableNames.Users,
+            Key: marshall({ userId }),
+        })
+    );
+
+    if (!userResult.Item) {
+        throw new Error(`USER_NOT_FOUND: User '${userId}' not found`);
+    }
+
+    const user = unmarshall(userResult.Item);
+
+    // Prevent removing the team manager
+    if (team.managerId === userId) {
+        throw new Error(
+            `MANAGER_IS_MEMBER: Cannot remove team manager from the team. Change the manager first.`
+        );
+    }
+
+    // Check if user is actually a member of this team
+    if (user.team !== teamId) {
+        throw new Error(
+            `USER_NOT_IN_TEAM: User '${userId}' is not a member of team '${teamId}'`
+        );
+    }
+
+    // Update user's team field to null
+    const now = Date.now();
+    await client.send(
+        new UpdateItemCommand({
+            TableName: TableNames.Users,
+            Key: marshall({ userId }),
+            UpdateExpression: "SET team = :team, updatedAt = :updatedAt",
+            ExpressionAttributeValues: marshall({
+                ":team": null,
+                ":updatedAt": now,
+            }),
+        })
+    );
+}
