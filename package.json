@@ -13,6 +13,8 @@
     "test": "nx test web",
     "predeploy": "nx build web",
     "deploy": "nx deploy web",
+    "deploy:s3": "./scripts/deploy-web-s3.sh",
+    "deploy:s3:help": "./scripts/deploy-web-s3.sh --help",
     "db-setup": "node apps/db-setup/dist/main.js"
   },
   "dependencies": {
