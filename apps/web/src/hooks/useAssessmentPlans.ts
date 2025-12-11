@@ -114,3 +114,25 @@ export function useMultiTeamAssessmentPlans(teamIds: string[], query?: ListPlans
     isSuccess: queries.every((q) => q.isSuccess),
   };
 }
+
+/**
+ * Hook for toggling assessment plan active status with cache invalidation
+ */
+export function useTogglePlanStatus() {
+  const api = useApi();
+  const planApi = createAssessmentPlanApi(api);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, season }: { teamId: string; season: string }) =>
+      planApi.togglePlanStatus(teamId, season),
+    onSuccess: (_, variables) => {
+      // Invalidate plans list for the specific team
+      queryClient.invalidateQueries({ queryKey: ['assessmentPlans', variables.teamId] });
+      // Also invalidate the specific plan
+      queryClient.invalidateQueries({
+        queryKey: ['assessmentPlan', variables.teamId, variables.season]
+      });
+    },
+  });
+}

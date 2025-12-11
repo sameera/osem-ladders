@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Competence } from "@/data/model";
 import { ScrollableTableContainer } from "./ScrollableTableContainer";
@@ -49,10 +49,10 @@ export function LevelingTable({
         setCanScrollRight(canRight);
     };
 
-    const handleGetScrollFunctions = (scrollLeft: () => void, scrollRight: () => void) => {
+    const handleGetScrollFunctions = useCallback((scrollLeft: () => void, scrollRight: () => void) => {
         setScrollLeftFn(() => scrollLeft);
         setScrollRightFn(() => scrollRight);
-    };
+    }, []);
 
     return (
         <div className="relative">

@@ -24,6 +24,7 @@ import {
     listPlansHandler,
     getPlanHandler,
     createOrUpdatePlanHandler,
+    togglePlanStatusHandler,
 } from "./handlers/assessment-plans";
 
 export function buildApp(disableLogging?: boolean): FastifyInstance {
@@ -122,6 +123,14 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         await requireTeamManagerOrAdmin(teamId)(request, reply);
         if (!reply.sent) {
             return createOrUpdatePlanHandler(request as any, reply);
+        }
+    });
+
+    app.patch("/growth/teams/:teamId/plan/:season/status", async (request, reply) => {
+        const { teamId } = request.params as { teamId: string };
+        await requireTeamManagerOrAdmin(teamId)(request, reply);
+        if (!reply.sent) {
+            return togglePlanStatusHandler(request as any, reply);
         }
     });
 

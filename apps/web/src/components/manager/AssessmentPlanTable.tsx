@@ -36,7 +36,6 @@ export function AssessmentPlanTable({
       <Card>
         <CardContent className="py-12 text-center">
           <p className="text-muted-foreground">{emptyMessage}</p>
-          <p className="text-sm text-muted-foreground/70 mt-2">Create your first plan using the form above</p>
         </CardContent>
       </Card>
     );

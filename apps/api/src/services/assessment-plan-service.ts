@@ -3,7 +3,7 @@
  * Handles CRUD operations for team-based assessment plans
  */
 
-import { GetCommand, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, TableNames } from "../utils/dynamodb-client";
 import type {
     AssessmentPlan,
@@ -145,4 +145,37 @@ export async function createOrUpdatePlan(
     );
 
     return plan;
+}
+
+/**
+ * Toggle the active status of an assessment plan (soft delete/restore)
+ */
+export async function togglePlanStatus(
+    teamId: string,
+    season: string
+): Promise<AssessmentPlan> {
+    // First get the current plan to check if it exists
+    const existing = await getPlanByTeamAndSeason(teamId, season);
+    if (!existing) {
+        throw new Error(`PLAN_NOT_FOUND: Assessment plan for team '${teamId}' and season '${season}' not found`);
+    }
+
+    const now = Date.now();
+    const newStatus = !existing.isActive;
+
+    // Update only the isActive field and updatedAt
+    const result = await docClient.send(
+        new UpdateCommand({
+            TableName: TableNames.AssessmentPlans,
+            Key: { teamId, season },
+            UpdateExpression: "SET isActive = :status, updatedAt = :updatedAt",
+            ExpressionAttributeValues: {
+                ":status": newStatus,
+                ":updatedAt": now,
+            },
+            ReturnValues: "ALL_NEW",
+        })
+    );
+
+    return result.Attributes as AssessmentPlan;
 }

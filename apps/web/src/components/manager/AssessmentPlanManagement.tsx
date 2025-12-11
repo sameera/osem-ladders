@@ -5,20 +5,18 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AssessmentPlanForm } from './AssessmentPlanForm';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { EditPlanDialog } from './EditPlanDialog';
 import { AssessmentPlanTable } from './AssessmentPlanTable';
-import { useCreateAssessmentPlan, useMultiTeamAssessmentPlans } from '@/hooks/useAssessmentPlans';
+import { useMultiTeamAssessmentPlans } from '@/hooks/useAssessmentPlans';
 import { useTeams } from '@/hooks/useTeams';
 import { useApi } from '@/hooks/useApi';
-import { useToast } from '@/hooks/use-toast';
-import type { CreateAssessmentPlanInput } from '@/types/assessments';
 import type { User } from '@/types/users';
 import type { ApiResponse } from '@/types/teams';
 
 export function AssessmentPlanManagement() {
-  const { mutate: createPlan, isPending, error } = useCreateAssessmentPlan();
-  const { toast } = useToast();
-  const [formError, setFormError] = useState<Error | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { get } = useApi();
 
   // Fetch current user profile
@@ -64,58 +62,20 @@ export function AssessmentPlanManagement() {
     errors: planErrors
   } = useMultiTeamAssessmentPlans(teamIds);
 
-  const handleCreatePlan = (data: { teamId: string; input: CreateAssessmentPlanInput }) => {
-    setFormError(null);
-
-    createPlan(data, {
-      onSuccess: (newPlan) => {
-        toast({
-          title: 'Assessment plan created successfully',
-          description: `${newPlan.name} has been created for ${newPlan.teamId}.`,
-          variant: 'default',
-        });
-      },
-      onError: (err: Error) => {
-        let errorMessage = err.message;
-
-        if (err.message.includes('INVALID_PLAN_CONFIG')) {
-          errorMessage = 'Invalid plan configuration. Each category must have at least one competency, and each competency must have at least one expectation.';
-        } else if (err.message.includes('409')) {
-          errorMessage = 'A plan already exists for this team and season.';
-        } else if (err.message.includes('TEAM_NOT_FOUND')) {
-          errorMessage = 'Selected team does not exist.';
-        } else if (err.message.includes('FORBIDDEN') || err.message.includes('403')) {
-          errorMessage = 'You do not have permission to create plans for this team.';
-        } else if (err.message.includes('UNAUTHORIZED') || err.message.includes('401')) {
-          errorMessage = 'Authentication required. Please log in again.';
-        }
-
-        setFormError(new Error(errorMessage));
-
-        toast({
-          title: 'Failed to create plan',
-          description: errorMessage,
-          variant: 'destructive',
-        });
-      },
-    });
-  };
-
   return (
     <div className="space-y-6">
-      {/* Plan Creation Form */}
-      <AssessmentPlanForm
-        onSubmit={handleCreatePlan}
-        isLoading={isPending}
-        error={formError}
-      />
-
       {/* Plan List Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">Assessment Plans</h2>
-          <div className="text-sm text-gray-500">
-            {accessibleTeams.length} team{accessibleTeams.length !== 1 ? 's' : ''} accessible
+          <div className="flex items-center gap-3">
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Assessment Plan
+            </Button>
+            <div className="text-sm text-gray-500">
+              {accessibleTeams.length} team{accessibleTeams.length !== 1 ? 's' : ''} accessible
+            </div>
           </div>
         </div>
 
@@ -136,13 +96,23 @@ export function AssessmentPlanManagement() {
           emptyMessage={
             accessibleTeams.length === 0
               ? "You don't have access to any teams. Contact an administrator to be added to a team."
-              : "No assessment plans found. Create your first plan using the form above."
+              : "No assessment plans found. Click 'New Assessment Plan' to create one."
           }
           onEdit={() => {
             // React Query cache will auto-invalidate on mutation
           }}
         />
       </div>
+
+      {/* Create Plan Dialog */}
+      <EditPlanDialog
+        mode="create"
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onEdit={() => {
+          // React Query cache will auto-invalidate on mutation in EditPlanDialog
+        }}
+      />
     </div>
   );
 }

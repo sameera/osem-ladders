@@ -31,6 +31,7 @@ interface AssessmentPlanFormProps {
     error?: Error | null;
     initialData?: AssessmentPlan;
     mode?: 'create' | 'edit';
+    leftActions?: React.ReactNode; // Optional left-side actions (e.g., Deactivate button)
 }
 
 export function AssessmentPlanForm({
@@ -39,6 +40,7 @@ export function AssessmentPlanForm({
     error,
     initialData,
     mode = 'create',
+    leftActions,
 }: AssessmentPlanFormProps) {
     const [teamId, setTeamId] = useState("");
     const [season, setSeason] = useState("");
@@ -348,8 +350,9 @@ export function AssessmentPlanForm({
 
                     {/* Actions */}
                     <div className="flex items-center justify-between gap-3">
-                        {/* Left side - Import button */}
-                        <div>
+                        {/* Left side - Import button or custom actions */}
+                        <div className="flex items-center gap-3">
+                            {leftActions}
                             {mode === 'create' && (
                                 <>
                                     <input

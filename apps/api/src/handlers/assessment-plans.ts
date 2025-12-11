@@ -8,6 +8,7 @@ import {
   listPlansByTeam,
   getPlanByTeamAndSeason,
   createOrUpdatePlan,
+  togglePlanStatus,
 } from '../services/assessment-plan-service';
 import type {
   AssessmentPlan,
@@ -169,6 +170,47 @@ export async function createOrUpdatePlanHandler(
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to create or update assessment plan',
+      },
+    } as ApiResponse<never>);
+  }
+}
+
+/**
+ * PATCH /growth/teams/:teamId/plan/:season/status
+ * Toggle the active status of an assessment plan (soft delete/restore)
+ */
+export async function togglePlanStatusHandler(
+  request: FastifyRequest<{
+    Params: { teamId: string; season: string };
+  }>,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    const { teamId, season } = request.params;
+
+    const plan = await togglePlanStatus(teamId, season);
+
+    return reply.status(200).send({
+      success: true,
+      data: plan,
+    } as ApiResponse<AssessmentPlan>);
+  } catch (error: any) {
+    if (error.message.includes('PLAN_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'PLAN_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    console.error('Error toggling plan status:', error);
+    return reply.status(500).send({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to toggle plan status',
       },
     } as ApiResponse<never>);
   }

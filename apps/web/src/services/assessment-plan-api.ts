@@ -93,5 +93,23 @@ export function createAssessmentPlanApi(api: UseApiReturn) {
             }
             return response.data;
         },
+
+        /**
+         * Toggle the active status of an assessment plan
+         */
+        async togglePlanStatus(
+            teamId: string,
+            season: string
+        ): Promise<AssessmentPlan> {
+            const response = await api.patch<ApiResponse<AssessmentPlan>>(
+                `/teams/${teamId}/plan/${encodeURIComponent(season)}/status`
+            );
+            if (!response.success || !response.data) {
+                throw new Error(
+                    response.error?.message || "Failed to toggle plan status"
+                );
+            }
+            return response.data;
+        },
     };
 }
