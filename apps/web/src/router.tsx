@@ -10,6 +10,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminTeamsPage from "./pages/AdminTeamsPage";
 import { AssessmentPlansPage } from "./pages/manager/AssessmentPlansPage";
 import { MyTeamsPage } from "./pages/manager/MyTeamsPage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 export const AppRoutes = () => {
     return (
@@ -46,6 +47,14 @@ export const AppRoutes = () => {
                     <AdminRoute>
                         <AssessmentPlansPage />
                     </AdminRoute>
+                }
+            />
+            <Route
+                path="/user/:userId"
+                element={
+                    <ProtectedRoute>
+                        <UserProfilePage />
+                    </ProtectedRoute>
                 }
             />
             <Route

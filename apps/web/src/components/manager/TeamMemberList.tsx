@@ -3,6 +3,7 @@
  * Displays team members in a responsive table/card layout
  */
 
+import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -59,7 +60,14 @@ export function TeamMemberList({ teamId, isExpanded }: TeamMemberListProps) {
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {members.map((member) => (
               <tr key={member.userId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{member.name}</td>
+                <td className="px-4 py-3 text-sm">
+                  <Link
+                    to={`/user/${encodeURIComponent(member.userId)}`}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {member.name}
+                  </Link>
+                </td>
                 <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{member.userId}</td>
                 <td className="px-4 py-3">
                   {member.roles.length > 0 ? (
@@ -89,7 +97,12 @@ export function TeamMemberList({ teamId, isExpanded }: TeamMemberListProps) {
           <div key={member.userId} className="p-4">
             <div className="flex justify-between items-start mb-2">
               <div>
-                <div className="font-medium text-gray-900 dark:text-gray-100">{member.name}</div>
+                <Link
+                  to={`/user/${encodeURIComponent(member.userId)}`}
+                  className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {member.name}
+                </Link>
                 <div className="text-sm text-gray-500 dark:text-gray-400">{member.userId}</div>
               </div>
               <Badge variant={member.isActive ? 'default' : 'destructive'}>

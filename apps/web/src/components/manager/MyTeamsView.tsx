@@ -11,8 +11,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { TeamSection } from './TeamSection';
 import { useTeams } from '@/hooks/useTeams';
 import { useApi } from '@/hooks/useApi';
+import { useMultiTeamAssessmentPlans } from '@/hooks/useAssessmentPlans';
 import type { User } from '@/types/users';
 import type { ApiResponse } from '@/types/teams';
+import type { AssessmentPlan } from '@/types/assessments';
 
 export function MyTeamsView() {
   const { get } = useApi();
@@ -39,6 +41,28 @@ export function MyTeamsView() {
   const teams = useMemo(() => {
     return teamsData?.pages.flatMap((page) => page.teams) || [];
   }, [teamsData]);
+
+  // Extract team IDs for fetching assessment plans
+  const teamIds = useMemo(() => teams.map(t => t.id), [teams]);
+
+  // Fetch assessment plans for all teams
+  const { plans: allPlans } = useMultiTeamAssessmentPlans(teamIds, {
+    includeInactive: false
+  });
+
+  // Create map of teamId to most recent active plan
+  const activePlansByTeam = useMemo(() => {
+    const map = new Map<string, AssessmentPlan>();
+    allPlans
+      .filter(plan => plan.isActive)
+      .forEach(plan => {
+        const existing = map.get(plan.teamId);
+        if (!existing || plan.createdAt > existing.createdAt) {
+          map.set(plan.teamId, plan);
+        }
+      });
+    return map;
+  }, [allPlans]);
 
   // Loading state
   if (userLoading || teamsLoading) {
@@ -90,7 +114,7 @@ export function MyTeamsView() {
         </p>
       </div>
       {teams.map((team) => (
-        <TeamSection key={team.id} team={team} />
+        <TeamSection key={team.id} team={team} activePlan={activePlansByTeam.get(team.id)} />
       ))}
     </div>
   );

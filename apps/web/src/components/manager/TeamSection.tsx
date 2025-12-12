@@ -4,17 +4,20 @@
  */
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, ChevronRight, Users, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TeamMemberList } from './TeamMemberList';
 import type { TeamWithDetails } from '@/types/teams';
+import type { AssessmentPlan } from '@/types/assessments';
 
 interface TeamSectionProps {
   team: TeamWithDetails;
+  activePlan?: AssessmentPlan;
 }
 
-export function TeamSection({ team }: TeamSectionProps) {
+export function TeamSection({ team, activePlan }: TeamSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -42,11 +45,23 @@ export function TeamSection({ team }: TeamSectionProps) {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <Users className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              {team.memberCount} member{team.memberCount !== 1 ? 's' : ''}
-            </span>
+          <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+            {activePlan && (
+              <Link
+                to={`/manager/assessment-plans?team=${team.id}&season=${activePlan.season}`}
+                className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FileText className="h-3 w-3" />
+                <span>{activePlan.name}</span>
+              </Link>
+            )}
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {team.memberCount} member{team.memberCount !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
         </div>
       </CardHeader>
