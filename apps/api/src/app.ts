@@ -26,6 +26,13 @@ import {
     createOrUpdatePlanHandler,
     togglePlanStatusHandler,
 } from "./handlers/assessment-plans";
+import {
+    getReportHandler,
+    createReportHandler,
+    updateReportHandler,
+    submitReportHandler,
+    deleteReportHandler,
+} from "./handlers/assessment-reports";
 
 export function buildApp(disableLogging?: boolean): FastifyInstance {
     const app = Fastify({
@@ -133,6 +140,13 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
             return togglePlanStatusHandler(request as any, reply);
         }
     });
+
+    // Assessment report routes (authenticated users)
+    app.get("/growth/reports/:reportId", getReportHandler);
+    app.post("/growth/reports", createReportHandler);
+    app.patch("/growth/reports/:reportId", updateReportHandler);
+    app.put("/growth/reports/:reportId/submit", submitReportHandler);
+    app.delete("/growth/reports/:reportId", deleteReportHandler);
 
     app.setErrorHandler((error: FastifyError, request, reply) => {
         request.log.error(error);

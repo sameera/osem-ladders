@@ -11,6 +11,8 @@ import AdminTeamsPage from "./pages/AdminTeamsPage";
 import { AssessmentPlansPage } from "./pages/manager/AssessmentPlansPage";
 import { MyTeamsPage } from "./pages/manager/MyTeamsPage";
 import UserProfilePage from "./pages/UserProfilePage";
+import SelfReviewPage from "./pages/review/SelfReviewPage";
+import ManagerReviewPage from "./pages/review/ManagerReviewPage";
 
 export const AppRoutes = () => {
     return (
@@ -54,6 +56,22 @@ export const AppRoutes = () => {
                 element={
                     <ProtectedRoute>
                         <UserProfilePage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/users/:userId/review/self"
+                element={
+                    <ProtectedRoute>
+                        <SelfReviewPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/users/:userId/review/manager"
+                element={
+                    <ProtectedRoute>
+                        <ManagerReviewPage />
                     </ProtectedRoute>
                 }
             />
