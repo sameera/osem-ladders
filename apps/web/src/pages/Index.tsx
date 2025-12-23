@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { AssessmentContainer } from "@/components/assessment/AssessmentContainer";
 import { useApi } from "@/hooks/useApi";
 import { useEffect, useRef } from "react";
@@ -6,7 +5,7 @@ import { useAuth } from "react-oidc-context";
 
 /**
  * Main entry point for the career ladder assessment application.
- * Provides theme context and renders the assessment container.
+ * Renders the assessment container.
  */
 const Index = () => {
     const wasInit = useRef(false);
@@ -25,11 +24,7 @@ const Index = () => {
         }
     }, [isAuthenticated, user]);
 
-    return (
-        <ThemeProvider>
-            <AssessmentContainer />
-        </ThemeProvider>
-    );
+    return <AssessmentContainer />;
 };
 
 export default Index;

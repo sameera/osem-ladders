@@ -1,5 +1,6 @@
 import { useAuth as useOidcAuth } from "react-oidc-context";
 import { useCallback } from "react";
+import { createErrorFromResponse, NetworkError, isApiError } from "@/services/errors";
 
 export interface ApiRequestOptions extends RequestInit {
     // Allow custom headers to be merged with auth headers
@@ -108,18 +109,30 @@ export function useApi(): UseApiReturn {
             url: string,
             options: ApiRequestOptions = {}
         ): Promise<T> => {
-            const response = await apiCall(url, {
-                ...options,
-                method: "GET",
-            });
+            try {
+                const response = await apiCall(url, {
+                    ...options,
+                    method: "GET",
+                });
 
-            if (!response.ok) {
-                throw new Error(
-                    `GET ${url} failed: ${response.status} ${response.statusText}`
-                );
+                if (!response.ok) {
+                    const error = await createErrorFromResponse(response, url, "GET");
+                    throw error;
+                }
+
+                return response.json();
+            } catch (error) {
+                // If it's already an ApiError, re-throw
+                if (isApiError(error)) {
+                    throw error;
+                }
+                // Otherwise wrap as NetworkError
+                throw new NetworkError({
+                    message: error instanceof Error ? error.message : "Network request failed",
+                    url,
+                    method: "GET",
+                });
             }
-
-            return response.json();
         },
         [apiCall]
     );
@@ -130,27 +143,39 @@ export function useApi(): UseApiReturn {
             body?: any,
             options: ApiRequestOptions = {}
         ): Promise<T> => {
-            const headers = new Headers(options.headers);
+            try {
+                const headers = new Headers(options.headers);
 
-            // Set Content-Type to JSON if body is provided and not already set
-            if (body !== undefined && !headers.has("Content-Type")) {
-                headers.set("Content-Type", "application/json");
+                // Set Content-Type to JSON if body is provided and not already set
+                if (body !== undefined && !headers.has("Content-Type")) {
+                    headers.set("Content-Type", "application/json");
+                }
+
+                const response = await apiCall(url, {
+                    ...options,
+                    method: "POST",
+                    headers,
+                    body: body !== undefined ? JSON.stringify(body) : undefined,
+                });
+
+                if (!response.ok) {
+                    const error = await createErrorFromResponse(response, url, "POST");
+                    throw error;
+                }
+
+                return response.json();
+            } catch (error) {
+                // If it's already an ApiError, re-throw
+                if (isApiError(error)) {
+                    throw error;
+                }
+                // Otherwise wrap as NetworkError
+                throw new NetworkError({
+                    message: error instanceof Error ? error.message : "Network request failed",
+                    url,
+                    method: "POST",
+                });
             }
-
-            const response = await apiCall(url, {
-                ...options,
-                method: "POST",
-                headers,
-                body: body !== undefined ? JSON.stringify(body) : undefined,
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `POST ${url} failed: ${response.status} ${response.statusText}`
-                );
-            }
-
-            return response.json();
         },
         [apiCall]
     );
@@ -161,27 +186,39 @@ export function useApi(): UseApiReturn {
             body?: any,
             options: ApiRequestOptions = {}
         ): Promise<T> => {
-            const headers = new Headers(options.headers);
+            try {
+                const headers = new Headers(options.headers);
 
-            // Set Content-Type to JSON if body is provided and not already set
-            if (body !== undefined && !headers.has("Content-Type")) {
-                headers.set("Content-Type", "application/json");
+                // Set Content-Type to JSON if body is provided and not already set
+                if (body !== undefined && !headers.has("Content-Type")) {
+                    headers.set("Content-Type", "application/json");
+                }
+
+                const response = await apiCall(url, {
+                    ...options,
+                    method: "PUT",
+                    headers,
+                    body: body !== undefined ? JSON.stringify(body) : undefined,
+                });
+
+                if (!response.ok) {
+                    const error = await createErrorFromResponse(response, url, "PUT");
+                    throw error;
+                }
+
+                return response.json();
+            } catch (error) {
+                // If it's already an ApiError, re-throw
+                if (isApiError(error)) {
+                    throw error;
+                }
+                // Otherwise wrap as NetworkError
+                throw new NetworkError({
+                    message: error instanceof Error ? error.message : "Network request failed",
+                    url,
+                    method: "PUT",
+                });
             }
-
-            const response = await apiCall(url, {
-                ...options,
-                method: "PUT",
-                headers,
-                body: body !== undefined ? JSON.stringify(body) : undefined,
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `PUT ${url} failed: ${response.status} ${response.statusText}`
-                );
-            }
-
-            return response.json();
         },
         [apiCall]
     );
@@ -192,27 +229,39 @@ export function useApi(): UseApiReturn {
             body?: any,
             options: ApiRequestOptions = {}
         ): Promise<T> => {
-            const headers = new Headers(options.headers);
+            try {
+                const headers = new Headers(options.headers);
 
-            // Set Content-Type to JSON if body is provided and not already set
-            if (body !== undefined && !headers.has("Content-Type")) {
-                headers.set("Content-Type", "application/json");
+                // Set Content-Type to JSON if body is provided and not already set
+                if (body !== undefined && !headers.has("Content-Type")) {
+                    headers.set("Content-Type", "application/json");
+                }
+
+                const response = await apiCall(url, {
+                    ...options,
+                    method: "PATCH",
+                    headers,
+                    body: body !== undefined ? JSON.stringify(body) : undefined,
+                });
+
+                if (!response.ok) {
+                    const error = await createErrorFromResponse(response, url, "PATCH");
+                    throw error;
+                }
+
+                return response.json();
+            } catch (error) {
+                // If it's already an ApiError, re-throw
+                if (isApiError(error)) {
+                    throw error;
+                }
+                // Otherwise wrap as NetworkError
+                throw new NetworkError({
+                    message: error instanceof Error ? error.message : "Network request failed",
+                    url,
+                    method: "PATCH",
+                });
             }
-
-            const response = await apiCall(url, {
-                ...options,
-                method: "PATCH",
-                headers,
-                body: body !== undefined ? JSON.stringify(body) : undefined,
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `PATCH ${url} failed: ${response.status} ${response.statusText}`
-                );
-            }
-
-            return response.json();
         },
         [apiCall]
     );
@@ -222,20 +271,32 @@ export function useApi(): UseApiReturn {
             url: string,
             options: ApiRequestOptions = {}
         ): Promise<T> => {
-            const response = await apiCall(url, {
-                ...options,
-                method: "DELETE",
-            });
+            try {
+                const response = await apiCall(url, {
+                    ...options,
+                    method: "DELETE",
+                });
 
-            if (!response.ok) {
-                throw new Error(
-                    `DELETE ${url} failed: ${response.status} ${response.statusText}`
-                );
+                if (!response.ok) {
+                    const error = await createErrorFromResponse(response, url, "DELETE");
+                    throw error;
+                }
+
+                // Handle empty responses (204 No Content)
+                const text = await response.text();
+                return text ? JSON.parse(text) : null;
+            } catch (error) {
+                // If it's already an ApiError, re-throw
+                if (isApiError(error)) {
+                    throw error;
+                }
+                // Otherwise wrap as NetworkError
+                throw new NetworkError({
+                    message: error instanceof Error ? error.message : "Network request failed",
+                    url,
+                    method: "DELETE",
+                });
             }
-
-            // Handle empty responses (204 No Content)
-            const text = await response.text();
-            return text ? JSON.parse(text) : null;
         },
         [apiCall]
     );
