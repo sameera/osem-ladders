@@ -4,8 +4,9 @@
  */
 
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import type { User } from '@/types/users';
 
@@ -55,6 +56,7 @@ export function TeamMemberList({ teamId, isExpanded }: TeamMemberListProps) {
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Email</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Roles</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Status</th>
+              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -84,6 +86,18 @@ export function TeamMemberList({ teamId, isExpanded }: TeamMemberListProps) {
                   <Badge variant={member.isActive ? 'default' : 'destructive'}>
                     {member.isActive ? 'Active' : 'Inactive'}
                   </Badge>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                  >
+                    <Link to={`/users/${encodeURIComponent(member.userId)}/review/manager`}>
+                      <Eye className="h-4 w-4 mr-1" />
+                      Review
+                    </Link>
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -116,6 +130,19 @@ export function TeamMemberList({ teamId, isExpanded }: TeamMemberListProps) {
                 ))}
               </div>
             )}
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="w-full"
+              >
+                <Link to={`/users/${encodeURIComponent(member.userId)}/review/manager`}>
+                  <Eye className="h-4 w-4 mr-1" />
+                  Review
+                </Link>
+              </Button>
+            </div>
           </div>
         ))}
       </div>
