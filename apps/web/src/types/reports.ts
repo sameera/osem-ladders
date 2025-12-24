@@ -55,7 +55,13 @@ export interface CompetencyResponse {
   selectedLevel: number;
 
   /** Optional text feedback */
-  feedback?: string;
+  feedback?: string;  // Deprecated, keep for backward compatibility
+
+  /** Evidence/strengths for selected level */
+  evidence?: string;
+
+  /** Opportunities for growth to next level */
+  nextLevelFeedback?: string;
 }
 
 /**

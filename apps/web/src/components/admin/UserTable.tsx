@@ -90,7 +90,7 @@ export function UserTable({
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <p className="text-gray-500">{emptyMessage}</p>
+          <p className="text-muted-foreground">{emptyMessage}</p>
         </CardContent>
       </Card>
     );
@@ -101,8 +101,8 @@ export function UserTable({
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" aria-hidden="true" />
-          <p className="text-gray-500 mt-4" role="status" aria-live="polite">Loading users...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" aria-hidden="true" />
+          <p className="text-muted-foreground mt-4" role="status" aria-live="polite">Loading users...</p>
         </CardContent>
       </Card>
     );
@@ -115,59 +115,59 @@ export function UserTable({
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full" aria-label="User management table">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Roles
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Team
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {users.map((user) => (
                   <tr
                     key={user.userId}
-                    className={`hover:bg-gray-50 transition-colors ${
+                    className={`hover:bg-muted/50 transition-colors ${
                       !user.isActive ? 'opacity-60' : ''
                     }`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-foreground">
                         {user.name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.userId}</div>
+                      <div className="text-sm text-muted-foreground">{user.userId}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <UserRolesBadges roles={user.roles} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {user.team || '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {user.isActive ? (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-800">
                           Active
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
                           Inactive
                         </Badge>
                       )}
@@ -178,7 +178,7 @@ export function UserTable({
                           variant="ghost"
                           size="sm"
                           onClick={() => setEditingUser(user)}
-                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-950/50"
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Edit Roles
@@ -189,7 +189,7 @@ export function UserTable({
                             variant="ghost"
                             size="sm"
                             onClick={() => setDeactivatingUser(user)}
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
                           >
                             <UserX className="h-4 w-4 mr-1" />
                             Deactivate
@@ -204,7 +204,7 @@ export function UserTable({
           </div>
 
           {/* Mobile Card View */}
-          <div className="md:hidden divide-y divide-gray-200" role="list" aria-label="User list">
+          <div className="md:hidden divide-y divide-border" role="list" aria-label="User list">
             {users.map((user) => (
               <div
                 key={user.userId}
@@ -212,30 +212,30 @@ export function UserTable({
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <div className="font-medium text-gray-900">{user.name}</div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="font-medium text-foreground">{user.name}</div>
+                    <div className="text-sm text-muted-foreground mt-1">
                       {user.userId}
                     </div>
                   </div>
                   {user.isActive ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-800">
                       Active
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">
+                    <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
                       Inactive
                     </Badge>
                   )}
                 </div>
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Roles:</span>
+                    <span className="text-xs text-muted-foreground">Roles:</span>
                     <UserRolesBadges roles={user.roles} />
                   </div>
                   {user.team && (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">Team:</span>
-                      <span className="text-sm text-gray-700">{user.team}</span>
+                      <span className="text-xs text-muted-foreground">Team:</span>
+                      <span className="text-sm text-foreground">{user.team}</span>
                     </div>
                   )}
                 </div>
@@ -255,7 +255,7 @@ export function UserTable({
                       variant="outline"
                       size="sm"
                       onClick={() => setDeactivatingUser(user)}
-                      className="w-full text-red-600 hover:text-red-800 border-red-200 hover:bg-red-50"
+                      className="w-full text-red-600 hover:text-red-800 border-red-200 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:border-red-800 dark:hover:bg-red-950/50"
                     >
                       <UserX className="h-4 w-4 mr-1" />
                       Deactivate
@@ -309,7 +309,7 @@ export function UserTable({
           <button
             onClick={onLoadMore}
             disabled={isFetchingNextPage}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isFetchingNextPage ? (
               <span className="flex items-center gap-2">

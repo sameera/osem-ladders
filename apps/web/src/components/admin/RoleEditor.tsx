@@ -119,7 +119,7 @@ export function RoleEditor({ user, open, onOpenChange }: RoleEditorProps) {
           <div className="space-y-4 py-4">
             <div className="space-y-3">
               <Label className="text-sm font-medium">Roles</Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Users without selected roles will have default user-level access.
               </p>
 
@@ -157,8 +157,8 @@ export function RoleEditor({ user, open, onOpenChange }: RoleEditorProps) {
             </div>
 
             {selectedRoles.length === 0 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                <p className="text-sm text-yellow-800">
+              <div className="bg-yellow-50 border border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800 rounded-md p-3">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
                   This user will have default user-level access only.
                 </p>
               </div>

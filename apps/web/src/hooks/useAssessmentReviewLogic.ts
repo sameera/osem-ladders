@@ -4,7 +4,7 @@
  * Manages assessment state, navigation, and auto-save functionality
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Category } from '@/data/model';
 import { useAssessmentNavigation } from '@/hooks/useAssessmentNavigation';
 import { useAssessmentCompletion } from '@/hooks/useAssessmentCompletion';
@@ -42,6 +42,7 @@ export function useAssessmentReviewLogic({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const pendingSaveRef = useRef(false); // Track immediate save requests
 
   // Create allCategories with Report screen
   const allCategories = [...categories.map((c) => c.title), 'Report'];
@@ -86,11 +87,18 @@ export function useAssessmentReviewLogic({
 
     // Only auto-save if there's actual data
     if (Object.keys(selections).length > 0) {
-      const timer = setTimeout(() => {
+      // Check if we need an immediate save
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
         performSave();
-      }, autoSaveInterval);
+      } else {
+        // Otherwise use debounced auto-save
+        const timer = setTimeout(() => {
+          performSave();
+        }, autoSaveInterval);
 
-      setAutoSaveTimer(timer);
+        setAutoSaveTimer(timer);
+      }
     }
 
     // Cleanup
@@ -131,6 +139,9 @@ export function useAssessmentReviewLogic({
           },
         },
       }));
+
+      // Mark that we need an immediate save
+      pendingSaveRef.current = true;
     },
     [currentCategory, categories]
   );

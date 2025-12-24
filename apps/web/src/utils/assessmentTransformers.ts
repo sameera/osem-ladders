@@ -58,6 +58,9 @@ export function uiToApiFormat(
 
       responses[key] = {
         selectedLevel: level,
+        evidence: competenceFeedback?.evidence,
+        nextLevelFeedback: competenceFeedback?.nextLevelFeedback,
+        // Keep old format for backward compatibility
         feedback: competenceFeedback
           ? `Evidence: ${competenceFeedback.evidence}\nNext: ${competenceFeedback.nextLevelFeedback}`
           : undefined,
@@ -89,12 +92,22 @@ export function apiToUiFormat(
     if (!selections[category]) selections[category] = {};
     selections[category][competence] = response.selectedLevel;
 
-    // Parse and set feedback
-    if (response.feedback) {
-      const [evidencePart, nextPart] = response.feedback.split('\nNext: ');
-      const evidence = evidencePart?.replace('Evidence: ', '') || '';
-      const nextLevelFeedback = nextPart || '';
+    // Parse feedback - prioritize new fields, fallback to old format
+    let evidence = '';
+    let nextLevelFeedback = '';
 
+    if (response.evidence !== undefined || response.nextLevelFeedback !== undefined) {
+      // New format - use dedicated fields
+      evidence = response.evidence || '';
+      nextLevelFeedback = response.nextLevelFeedback || '';
+    } else if (response.feedback) {
+      // Old format - parse from concatenated string
+      const [evidencePart, nextPart] = response.feedback.split('\nNext: ');
+      evidence = evidencePart?.replace('Evidence: ', '') || '';
+      nextLevelFeedback = nextPart || '';
+    }
+
+    if (evidence || nextLevelFeedback) {
       if (!feedback[category]) feedback[category] = {};
       if (!feedback[category][competence]) feedback[category][competence] = {};
 
