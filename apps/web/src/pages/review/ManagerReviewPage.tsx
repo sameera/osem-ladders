@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUserMeta } from "@/hooks/useUserMeta";
 import { useManagerCheck } from "@/hooks/useManagerCheck";
@@ -14,10 +14,17 @@ import { useAssessmentReport } from "@/hooks/useAssessmentReport";
 import { AssessmentView } from "@/components/assessment/AssessmentView";
 import { uiToApiFormat, apiToUiFormat } from "@/utils/assessmentTransformers";
 import type { AssessmentReviewData } from "@/hooks/useAssessmentReviewLogic";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Eye } from "lucide-react";
 import { ShareReportDialog } from "@/components/assessment/ShareReportDialog";
 import { UnshareReportDialog } from "@/components/assessment/UnshareReportDialog";
 import { SharedReportBanner } from "@/components/assessment/SharedReportBanner";
+import { Button } from "@/components/ui/button";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function ManagerReviewPage() {
     const { userId } = useParams<{ userId: string }>();
@@ -58,13 +65,25 @@ export default function ManagerReviewPage() {
         isSharing,
     } = useAssessmentReport(userId, activePlan?.season, "manager");
 
+    // Fetch team member's self-assessment (just to check if it exists for link visibility)
+    const {
+        report: selfReport,
+        isLoading: selfReportLoading,
+    } = useAssessmentReport(userId, activePlan?.season, "self");
+
+    // Check if self-report is submitted (to show link)
+    const hasSelfAssessment = useMemo(() => {
+        return selfReport?.status === 'submitted';
+    }, [selfReport]);
+
     // Loading states
     const isLoading =
         currentUserLoading ||
         targetUserLoading ||
         managerCheckLoading ||
         (targetUser?.team && plansLoading) ||
-        reportLoading;
+        reportLoading ||
+        selfReportLoading;
 
     // Show loading spinner
     if (isLoading) {
@@ -195,6 +214,41 @@ export default function ManagerReviewPage() {
         await submitReport();
     };
 
+    // Create navigation link
+    const navigationLink = (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            asChild={hasSelfAssessment}
+                            disabled={!hasSelfAssessment}
+                        >
+                            {hasSelfAssessment ? (
+                                <Link to={`/users/${userId}/review/self`}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Self-Assessment
+                                </Link>
+                            ) : (
+                                <>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Self-Assessment
+                                </>
+                            )}
+                        </Button>
+                    </span>
+                </TooltipTrigger>
+                {!hasSelfAssessment && (
+                    <TooltipContent>
+                        <p>{targetUser.name} hasn't submitted their self-assessment yet</p>
+                    </TooltipContent>
+                )}
+            </Tooltip>
+        </TooltipProvider>
+    );
+
     return (
         <>
             {report?.sharedWithAssessee && (
@@ -203,6 +257,7 @@ export default function ManagerReviewPage() {
                         sharedAt={report.sharedAt!}
                         sharedBy={report.sharedBy!}
                         assesseeName={targetUser.name}
+                        viewingContext="shared"
                     />
                 </div>
             )}
@@ -218,6 +273,7 @@ export default function ManagerReviewPage() {
                 onShareReport={report?.status === 'submitted' ? handleShareClick : undefined}
                 onUnshareReport={report?.status === 'submitted' ? handleUnshareClick : undefined}
                 isReportShared={report?.sharedWithAssessee}
+                navigationLink={navigationLink}
             />
 
             <ShareReportDialog
