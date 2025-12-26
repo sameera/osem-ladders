@@ -11,6 +11,7 @@ import type {
   UpdateReportInput,
   AssessmentType,
   createReportId,
+  parseReportId,
 } from '../types/reports';
 
 /**
@@ -191,4 +192,71 @@ export async function deleteReport(reportId: string): Promise<void> {
       ConditionExpression: 'attribute_exists(id) AND isActive = :active',
     })
   );
+}
+
+/**
+ * Share or unshare a manager assessment report with the assessee
+ */
+export async function shareReport(
+  reportId: string,
+  share: boolean,
+  sharedBy: string
+): Promise<AssessmentReport> {
+  const now = Date.now();
+
+  // Fetch report to validate
+  const report = await getReportById(reportId);
+  if (!report) {
+    throw new Error('REPORT_NOT_FOUND: Assessment report not found or inactive');
+  }
+
+  // Parse reportId to get type
+  const { type } = reportId.split('|').length === 3
+    ? { type: reportId.split('|')[2] as AssessmentType }
+    : { type: 'self' as AssessmentType };
+
+  // Only manager reports can be shared
+  if (type !== 'manager') {
+    throw new Error('INVALID_REPORT_TYPE: Only manager reports can be shared');
+  }
+
+  // Report must be submitted before sharing
+  if (report.status !== 'submitted') {
+    throw new Error('REPORT_NOT_SUBMITTED: Cannot share unsubmitted report');
+  }
+
+  // Build update expression based on share/unshare
+  let updateExpression: string;
+  const expressionAttributeValues: Record<string, any> = {
+    ':updatedAt': now,
+    ':active': true,
+  };
+
+  if (share) {
+    // Share the report
+    updateExpression = 'SET sharedWithAssessee = :shared, sharedAt = :sharedAt, sharedBy = :sharedBy, updatedAt = :updatedAt';
+    expressionAttributeValues[':shared'] = true;
+    expressionAttributeValues[':sharedAt'] = now;
+    expressionAttributeValues[':sharedBy'] = sharedBy;
+  } else {
+    // Unshare the report (remove sharing fields)
+    updateExpression = 'REMOVE sharedWithAssessee, sharedAt, sharedBy SET updatedAt = :updatedAt';
+  }
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableNames.AssessmentReports,
+      Key: { id: reportId },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ConditionExpression: 'attribute_exists(id) AND isActive = :active',
+      ReturnValues: 'ALL_NEW',
+    })
+  );
+
+  if (!result.Attributes) {
+    throw new Error('REPORT_NOT_FOUND: Assessment report not found or inactive');
+  }
+
+  return result.Attributes as AssessmentReport;
 }

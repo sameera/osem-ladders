@@ -42,6 +42,15 @@ export interface AssessmentReport {
 
   /** Email of user who created this record */
   createdBy: string;
+
+  /** Whether this report has been shared with the assessee */
+  sharedWithAssessee?: boolean;
+
+  /** Unix timestamp when shared with assessee */
+  sharedAt?: number;
+
+  /** Email of user who shared the report */
+  sharedBy?: string;
 }
 
 export type AssessmentType = 'self' | 'manager';

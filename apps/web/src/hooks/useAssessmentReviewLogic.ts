@@ -21,6 +21,7 @@ export interface UseAssessmentReviewLogicProps {
   initialData?: Partial<AssessmentReviewData>;
   onSave: (data: AssessmentReviewData) => Promise<void>;
   autoSaveInterval?: number; // milliseconds
+  readOnly?: boolean;
 }
 
 export type SaveStatus = 'saved' | 'saving' | 'error' | 'idle';
@@ -30,6 +31,7 @@ export function useAssessmentReviewLogic({
   initialData,
   onSave,
   autoSaveInterval = 30000, // 30 seconds default
+  readOnly = false,
 }: UseAssessmentReviewLogicProps) {
   // State
   const [selections, setSelections] = useState<Record<string, Record<string, number>>>(
@@ -80,6 +82,9 @@ export function useAssessmentReviewLogic({
 
   // Set up auto-save timer whenever data changes
   useEffect(() => {
+    // Skip auto-save in read-only mode
+    if (readOnly) return;
+
     // Clear existing timer
     if (autoSaveTimer) {
       clearTimeout(autoSaveTimer);
@@ -108,7 +113,7 @@ export function useAssessmentReviewLogic({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selections, feedback, wayForward]);
+  }, [selections, feedback, wayForward, readOnly]);
 
   // Manual save trigger
   const triggerManualSave = useCallback(async () => {

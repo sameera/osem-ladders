@@ -41,6 +41,7 @@ interface ReportProps {
     >;
     wayForward?: string;
     onWayForwardChange?: (wayForward: string) => void;
+    readOnly?: boolean;
 }
 function calculateMedian(values: number[]): number {
     if (values.length === 0) return 0;
@@ -80,6 +81,7 @@ export function Report({
     feedback,
     wayForward = "",
     onWayForwardChange,
+    readOnly = false,
 }: ReportProps) {
     const [viewType, setViewType] = useState<"radar" | "line">("radar");
     const levelNames = useMemo(() => parseLevels(levelsMarkdown), []);
@@ -164,6 +166,7 @@ export function Report({
                             onValueChange={(value) =>
                                 setBaselineLevel(parseInt(value))
                             }
+                            disabled={readOnly}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select baseline level" />
@@ -491,6 +494,7 @@ export function Report({
                                 onWayForwardChange?.(e.target.value)
                             }
                             className="min-h-[120px] resize-none"
+                            disabled={readOnly}
                         />
                     </div>
                 </CardContent>

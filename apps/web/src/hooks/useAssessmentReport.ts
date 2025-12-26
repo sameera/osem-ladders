@@ -75,6 +75,19 @@ export function useAssessmentReport(
     },
   });
 
+  // Share/unshare report mutation
+  const shareMutation = useMutation({
+    mutationFn: async (share: boolean) => {
+      if (!reportId) throw new Error('Report ID is required');
+      return await reportApi.shareReport(reportId, share);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['assessmentReport', userId, assessmentId, type],
+      });
+    },
+  });
+
   return {
     report,
     isLoading,
@@ -82,8 +95,10 @@ export function useAssessmentReport(
     createReport: createMutation.mutateAsync,
     updateReport: updateMutation.mutateAsync,
     submitReport: submitMutation.mutateAsync,
+    shareReport: shareMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
+    isSharing: shareMutation.isPending,
   };
 }

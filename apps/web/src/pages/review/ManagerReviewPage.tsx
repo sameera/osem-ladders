@@ -4,7 +4,7 @@
  * Accessible by manager only
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUserMeta } from "@/hooks/useUserMeta";
@@ -15,9 +15,16 @@ import { AssessmentView } from "@/components/assessment/AssessmentView";
 import { uiToApiFormat, apiToUiFormat } from "@/utils/assessmentTransformers";
 import type { AssessmentReviewData } from "@/hooks/useAssessmentReviewLogic";
 import { Loader2, AlertCircle } from "lucide-react";
+import { ShareReportDialog } from "@/components/assessment/ShareReportDialog";
+import { UnshareReportDialog } from "@/components/assessment/UnshareReportDialog";
+import { SharedReportBanner } from "@/components/assessment/SharedReportBanner";
 
 export default function ManagerReviewPage() {
     const { userId } = useParams<{ userId: string }>();
+
+    // Dialog state
+    const [showShareDialog, setShowShareDialog] = useState(false);
+    const [showUnshareDialog, setShowUnshareDialog] = useState(false);
 
     // Fetch users and check access
     const { data: currentUser, isLoading: currentUserLoading } =
@@ -47,6 +54,8 @@ export default function ManagerReviewPage() {
         createReport,
         updateReport,
         submitReport,
+        shareReport,
+        isSharing,
     } = useAssessmentReport(userId, activePlan?.season, "manager");
 
     // Loading states
@@ -142,6 +151,20 @@ export default function ManagerReviewPage() {
     // Convert report data to UI format
     const initialData = report ? apiToUiFormat(report.responses) : undefined;
 
+    // Share/unshare handlers
+    const handleShareClick = () => setShowShareDialog(true);
+    const handleUnshareClick = () => setShowUnshareDialog(true);
+
+    const handleShareConfirm = async () => {
+        await shareReport(true);
+        setShowShareDialog(false);
+    };
+
+    const handleUnshareConfirm = async () => {
+        await shareReport(false);
+        setShowUnshareDialog(false);
+    };
+
     // Save handler
     const handleSave = async (data: AssessmentReviewData) => {
         if (!currentUser || !userId) return;
@@ -173,14 +196,45 @@ export default function ManagerReviewPage() {
     };
 
     return (
-        <AssessmentView
-            assessmentPlan={activePlan}
-            assessmentType="manager"
-            userName={targetUser.name}
-            reviewerName={currentUser?.name || ""}
-            initialData={initialData}
-            onSave={handleSave}
-            onSubmit={handleSubmit}
-        />
+        <>
+            {report?.sharedWithAssessee && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                    <SharedReportBanner
+                        sharedAt={report.sharedAt!}
+                        sharedBy={report.sharedBy!}
+                        assesseeName={targetUser.name}
+                    />
+                </div>
+            )}
+
+            <AssessmentView
+                assessmentPlan={activePlan}
+                assessmentType="manager"
+                userName={targetUser.name}
+                reviewerName={currentUser?.name || ""}
+                initialData={initialData}
+                onSave={handleSave}
+                onSubmit={handleSubmit}
+                onShareReport={report?.status === 'submitted' ? handleShareClick : undefined}
+                onUnshareReport={report?.status === 'submitted' ? handleUnshareClick : undefined}
+                isReportShared={report?.sharedWithAssessee}
+            />
+
+            <ShareReportDialog
+                open={showShareDialog}
+                onOpenChange={setShowShareDialog}
+                onConfirm={handleShareConfirm}
+                isLoading={isSharing}
+                assesseeName={targetUser.name}
+            />
+
+            <UnshareReportDialog
+                open={showUnshareDialog}
+                onOpenChange={setShowUnshareDialog}
+                onConfirm={handleUnshareConfirm}
+                isLoading={isSharing}
+                assesseeName={targetUser.name}
+            />
+        </>
     );
 }

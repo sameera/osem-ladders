@@ -19,6 +19,7 @@ interface LevelingTableProps {
         evidence: string,
         nextLevelFeedback: string
     ) => void;
+    readOnly?: boolean;
 }
 
 // Configurable tooltip text length limit
@@ -29,6 +30,7 @@ export function LevelingTable({
     selections,
     feedback,
     onSelectionChange,
+    readOnly = false,
 }: LevelingTableProps) {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
@@ -113,6 +115,7 @@ export function LevelingTable({
                                                     }
                                                     feedback={cellFeedback}
                                                     hoverColor={hoverColor}
+                                                    readOnly={readOnly}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full p-1 text-center text-muted-foreground flex items-center justify-center min-h-[80px]">

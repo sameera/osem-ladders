@@ -4,7 +4,7 @@
  * Accessible by the user themselves OR their manager
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUserMeta } from "@/hooks/useUserMeta";
@@ -12,9 +12,11 @@ import { useManagerCheck } from "@/hooks/useManagerCheck";
 import { useAssessmentPlans } from "@/hooks/useAssessmentPlans";
 import { useAssessmentReport } from "@/hooks/useAssessmentReport";
 import { AssessmentView } from "@/components/assessment/AssessmentView";
+import { SharedReportBanner } from "@/components/assessment/SharedReportBanner";
 import { uiToApiFormat, apiToUiFormat } from "@/utils/assessmentTransformers";
 import type { AssessmentReviewData } from "@/hooks/useAssessmentReviewLogic";
 import { Loader2, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function SelfReviewPage() {
     const { userId } = useParams<{ userId: string }>();
@@ -46,7 +48,7 @@ export default function SelfReviewPage() {
             .sort((a, b) => b.createdAt - a.createdAt)[0];
     }, [plansResponse]);
 
-    // Fetch or create assessment report
+    // Fetch or create assessment report (self)
     const {
         report,
         isLoading: reportLoading,
@@ -55,13 +57,45 @@ export default function SelfReviewPage() {
         submitReport,
     } = useAssessmentReport(userId, activePlan?.season, "self");
 
+    // Fetch manager report (if viewing own page and report is shared)
+    const shouldFetchManagerReport = useMemo(() => {
+        return currentUser?.userId === userId; // Only if viewing own page
+    }, [currentUser, userId]);
+
+    const {
+        report: managerReport,
+        isLoading: managerReportLoading,
+    } = useAssessmentReport(
+        shouldFetchManagerReport ? userId : undefined,
+        shouldFetchManagerReport ? activePlan?.season : undefined,
+        shouldFetchManagerReport ? "manager" : undefined
+    );
+
+    // Filter to only show if shared
+    const sharedManagerReport = useMemo(() => {
+        if (!managerReport) return null;
+        if (!managerReport.sharedWithAssessee) return null;
+        return managerReport;
+    }, [managerReport]);
+
+    // Tab state
+    const [activeTab, setActiveTab] = useState<'self' | 'manager'>('self');
+
+    // Auto-switch to self tab if manager report becomes unavailable
+    useEffect(() => {
+        if (activeTab === 'manager' && !sharedManagerReport) {
+            setActiveTab('self');
+        }
+    }, [activeTab, sharedManagerReport]);
+
     // Loading states
     const isLoading =
         currentUserLoading ||
         targetUserLoading ||
         managerCheckLoading ||
         (targetUser?.team && plansLoading) ||
-        reportLoading;
+        reportLoading ||
+        (shouldFetchManagerReport && managerReportLoading);
 
     // Show loading spinner
     if (isLoading) {
@@ -164,6 +198,9 @@ export default function SelfReviewPage() {
 
     // Convert report data to UI format
     const initialData = report ? apiToUiFormat(report.responses) : undefined;
+    const managerInitialData = sharedManagerReport
+        ? apiToUiFormat(sharedManagerReport.responses)
+        : undefined;
 
     // Save handler
     const handleSave = async (data: AssessmentReviewData) => {
@@ -196,14 +233,74 @@ export default function SelfReviewPage() {
     };
 
     return (
-        <AssessmentView
-            assessmentPlan={activePlan}
-            assessmentType="self"
-            userName={targetUser.name}
-            reviewerName={currentUser?.name || ""}
-            initialData={initialData}
-            onSave={handleSave}
-            onSubmit={handleSubmit}
-        />
+        <>
+            {sharedManagerReport && (
+                <div className="border-b border-border bg-background">
+                    <div className="container mx-auto px-4">
+                        <div className="flex space-x-4">
+                            <button
+                                onClick={() => setActiveTab('self')}
+                                className={cn(
+                                    "px-4 py-3 font-medium border-b-2 transition-colors",
+                                    activeTab === 'self'
+                                        ? "border-primary text-primary"
+                                        : "border-transparent text-muted-foreground hover:text-foreground"
+                                )}
+                            >
+                                My Self-Assessment
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('manager')}
+                                className={cn(
+                                    "px-4 py-3 font-medium border-b-2 transition-colors",
+                                    activeTab === 'manager'
+                                        ? "border-primary text-primary"
+                                        : "border-transparent text-muted-foreground hover:text-foreground"
+                                )}
+                            >
+                                Manager's Assessment
+                                <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded">
+                                    Shared
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'self' && (
+                <AssessmentView
+                    assessmentPlan={activePlan}
+                    assessmentType="self"
+                    userName={targetUser.name}
+                    reviewerName={currentUser?.name || ""}
+                    initialData={initialData}
+                    onSave={handleSave}
+                    onSubmit={handleSubmit}
+                    readOnly={false}
+                />
+            )}
+
+            {activeTab === 'manager' && sharedManagerReport && (
+                <>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                        <SharedReportBanner
+                            sharedAt={sharedManagerReport.sharedAt!}
+                            sharedBy={sharedManagerReport.sharedBy!}
+                            assesseeName="you"
+                        />
+                    </div>
+                    <AssessmentView
+                        assessmentPlan={activePlan}
+                        assessmentType="manager"
+                        userName={targetUser.name}
+                        reviewerName={sharedManagerReport.assessorId}
+                        initialData={managerInitialData}
+                        onSave={async () => {}} // No-op for read-only
+                        readOnly={true}
+                    />
+                </>
+            )}
+        </>
     );
 }

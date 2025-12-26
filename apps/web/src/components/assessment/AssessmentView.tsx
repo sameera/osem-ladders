@@ -38,6 +38,15 @@ export interface AssessmentViewProps {
 
   /** Read-only mode */
   readOnly?: boolean;
+
+  /** Share report handler */
+  onShareReport?: () => void;
+
+  /** Unshare report handler */
+  onUnshareReport?: () => void;
+
+  /** Whether report is shared */
+  isReportShared?: boolean;
 }
 
 export function AssessmentView({
@@ -49,6 +58,9 @@ export function AssessmentView({
   onSave,
   onSubmit,
   readOnly = false,
+  onShareReport,
+  onUnshareReport,
+  isReportShared,
 }: AssessmentViewProps) {
   const categories = assessmentPlan.planConfig;
   const allCategories = [...categories.map((c) => c.title), 'Report'];
@@ -71,7 +83,8 @@ export function AssessmentView({
     categories,
     initialData,
     onSave,
-    autoSaveInterval: 30000, // 30 seconds
+    autoSaveInterval: readOnly ? undefined : 30000, // Disable auto-save in read-only
+    readOnly,
   });
 
   const handleSubmitAssessment = async () => {
@@ -107,19 +120,21 @@ export function AssessmentView({
         onOpenAssessment={() => {}} // Disabled for review mode
       />
 
-      {/* Save Status Bar */}
-      <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Reviewer: <span className="font-medium text-foreground">{reviewerName}</span>
+      {/* Save Status Bar - Hidden in read-only mode */}
+      {!readOnly && (
+        <div className="border-b border-border bg-card">
+          <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Reviewer: <span className="font-medium text-foreground">{reviewerName}</span>
+            </div>
+            <SaveStatusIndicator
+              status={saveStatus}
+              lastSavedAt={lastSavedAt}
+              onRetry={triggerManualSave}
+            />
           </div>
-          <SaveStatusIndicator
-            status={saveStatus}
-            lastSavedAt={lastSavedAt}
-            onRetry={triggerManualSave}
-          />
         </div>
-      </div>
+      )}
 
       <WizardNavigation
         screens={allCategories}
@@ -140,6 +155,7 @@ export function AssessmentView({
           onSelectionChange={handleSelectionChange}
           wayForward={wayForward}
           onWayForwardChange={setWayForward}
+          readOnly={readOnly}
         />
 
         <NavigationButtons
@@ -148,7 +164,11 @@ export function AssessmentView({
           isReportScreen={isReportScreen}
           onPrevious={handlePrevious}
           onNext={handleNext}
-          onSubmitAssessment={onSubmit ? handleSubmitAssessment : undefined}
+          onSubmitAssessment={onSubmit && !readOnly ? handleSubmitAssessment : undefined}
+          onShareReport={!readOnly ? onShareReport : undefined}
+          onUnshareReport={!readOnly ? onUnshareReport : undefined}
+          isReportShared={isReportShared}
+          readOnly={readOnly}
         />
       </main>
     </div>

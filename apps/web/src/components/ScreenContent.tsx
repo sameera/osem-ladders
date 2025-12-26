@@ -28,6 +28,7 @@ interface ScreenContentProps {
     ) => void;
     wayForward?: string;
     onWayForwardChange?: (wayForward: string) => void;
+    readOnly?: boolean;
 }
 
 export function ScreenContent({
@@ -41,6 +42,7 @@ export function ScreenContent({
     onSelectionChange,
     wayForward,
     onWayForwardChange,
+    readOnly = false,
 }: ScreenContentProps) {
     if (isReportScreen) {
         return (
@@ -50,6 +52,7 @@ export function ScreenContent({
                 feedback={feedback}
                 wayForward={wayForward}
                 onWayForwardChange={onWayForwardChange}
+                readOnly={readOnly}
             />
         );
     }
@@ -76,6 +79,7 @@ export function ScreenContent({
                     selections={currentSelections}
                     feedback={currentFeedback}
                     onSelectionChange={onSelectionChange}
+                    readOnly={readOnly}
                 />
             </div>
         </>

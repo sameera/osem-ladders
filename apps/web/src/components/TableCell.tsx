@@ -34,6 +34,7 @@ interface TableCellProps {
     tooltipTextLimit: number;
     feedback?: { evidence: string; nextLevelFeedback: string };
     hoverColor?: string;
+    readOnly?: boolean;
 }
 
 export function TableCell({
@@ -45,6 +46,7 @@ export function TableCell({
     tooltipTextLimit,
     feedback,
     hoverColor,
+    readOnly = false,
 }: TableCellProps) {
     const [showFeedbackPopup, setShowFeedbackPopup] = useState<boolean>(false);
     const [showFullDescriptionDialog, setShowFullDescriptionDialog] =
@@ -64,6 +66,7 @@ export function TableCell({
     };
 
     const handleCellClick = (e: React.MouseEvent): void => {
+        if (readOnly) return; // Prevent clicks in read-only mode
         e.stopPropagation();
         setShowFeedbackPopup(true);
     };
@@ -104,6 +107,7 @@ export function TableCell({
     const cellButton = (
         <button
             onClick={handleCellClick}
+            disabled={readOnly}
             className={cn(
                 "w-full h-full text-left p-3 rounded-md border transition-all duration-200",
                 "hover:shadow-md",
@@ -111,7 +115,8 @@ export function TableCell({
                 isSelected
                     ? "bg-primary/10 text-primary shadow-md"
                     : "border-border bg-background hover:bg-accent",
-                "cursor-pointer min-h-[120px] flex items-start"
+                readOnly ? "cursor-default opacity-90" : "cursor-pointer",
+                "min-h-[120px] flex items-start"
             )}
             style={{
                 ...(hoverColor
@@ -128,12 +133,12 @@ export function TableCell({
                     : {}),
             }}
             onMouseEnter={(e) => {
-                if (hoverColor && !isSelected) {
+                if (hoverColor && !isSelected && !readOnly) {
                     e.currentTarget.style.borderColor = hoverColor;
                 }
             }}
             onMouseLeave={(e) => {
-                if (hoverColor && !isSelected) {
+                if (hoverColor && !isSelected && !readOnly) {
                     e.currentTarget.style.borderColor = "";
                 }
             }}

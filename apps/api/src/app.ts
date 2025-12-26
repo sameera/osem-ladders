@@ -34,6 +34,7 @@ import {
     updateReportHandler,
     submitReportHandler,
     deleteReportHandler,
+    shareReportHandler,
 } from "./handlers/assessment-reports";
 
 export function buildApp(disableLogging?: boolean): FastifyInstance {
@@ -159,6 +160,7 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
     app.patch("/growth/reports/:reportId", updateReportHandler);
     app.put("/growth/reports/:reportId/submit", submitReportHandler);
     app.delete("/growth/reports/:reportId", deleteReportHandler);
+    app.patch("/growth/reports/:reportId/share", shareReportHandler);
 
     app.setErrorHandler((error: FastifyError, request, reply) => {
         request.log.error(error);

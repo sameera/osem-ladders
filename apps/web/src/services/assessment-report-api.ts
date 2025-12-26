@@ -21,6 +21,7 @@ export interface AssessmentReportApiClient {
         input: UpdateReportInput
     ) => Promise<AssessmentReport>;
     submitReport: (reportId: string) => Promise<AssessmentReport>;
+    shareReport: (reportId: string, share: boolean) => Promise<AssessmentReport>;
 }
 
 export function createAssessmentReportApi(
@@ -62,6 +63,14 @@ export function createAssessmentReportApi(
             const response = await api.put<CreateReportResponse>(
                 `/reports/${encodeURIComponent(reportId)}/submit`,
                 {}
+            );
+            return response.data;
+        },
+
+        async shareReport(reportId: string, share: boolean) {
+            const response = await api.patch<CreateReportResponse>(
+                `/reports/${encodeURIComponent(reportId)}/share`,
+                { share }
             );
             return response.data;
         },

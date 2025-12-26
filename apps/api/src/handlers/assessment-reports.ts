@@ -10,12 +10,15 @@ import {
   updateReport,
   submitReport,
   deleteReport,
+  shareReport,
 } from '../services/assessment-report-service';
+import { getUserById } from '../services/user-service';
 import type {
   AssessmentReport,
   CreateReportInput,
   UpdateReportInput,
 } from '../types/reports';
+import { parseReportId } from '../types/reports';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -38,8 +41,21 @@ export async function getReportHandler(
 ): Promise<void> {
   try {
     const { reportId } = request.params;
+    const decodedReportId = decodeURIComponent(reportId);
 
-    const report = await getReportById(decodeURIComponent(reportId));
+    // Get current user
+    const currentUserEmail = request.user?.email;
+    if (!currentUserEmail) {
+      return reply.status(401).send({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      } as ApiResponse<never>);
+    }
+
+    const report = await getReportById(decodedReportId);
 
     if (!report) {
       return reply.status(404).send({
@@ -47,6 +63,62 @@ export async function getReportHandler(
         error: {
           code: 'REPORT_NOT_FOUND',
           message: 'Assessment report not found',
+        },
+      } as ApiResponse<never>);
+    }
+
+    // Authorization checks
+    // Parse report ID to get the assessee userId
+    const { userId: assesseeId } = parseReportId(decodedReportId);
+
+    // Check if user is the assessor (created the report)
+    const isAssessor = report.assessorId === currentUserEmail;
+
+    // Check if user is the assessee viewing a shared report
+    const isAssesseeViewingShared =
+      report.userId === currentUserEmail && report.sharedWithAssessee === true;
+
+    // Check if user is a manager of the assessee
+    let isManager = false;
+    if (!isAssessor && !isAssesseeViewingShared) {
+      try {
+        const currentUser = await getUserById(currentUserEmail);
+        const assesseeUser = await getUserById(assesseeId);
+
+        // Check if current user has manager role and the assessee belongs to their team
+        if (
+          currentUser &&
+          currentUser.roles?.includes('manager') &&
+          assesseeUser &&
+          assesseeUser.team
+        ) {
+          // A user is a manager of the assessee if the assessee is in one of their teams
+          // For now, we check if the current user's team matches the assessee's team
+          // and if the current user has the manager role
+          isManager = currentUser.roles.includes('manager');
+        }
+      } catch (error) {
+        console.error('Error checking manager status:', error);
+        // If we can't verify manager status, proceed to deny access
+      }
+    }
+
+    // Check if user has admin role
+    let isAdmin = false;
+    try {
+      const currentUser = await getUserById(currentUserEmail);
+      isAdmin = currentUser?.roles?.includes('admin') || false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+
+    // Deny access if none of the authorization conditions are met
+    if (!isAssessor && !isAssesseeViewingShared && !isManager && !isAdmin) {
+      return reply.status(403).send({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to access this report',
         },
       } as ApiResponse<never>);
     }
@@ -235,6 +307,81 @@ export async function deleteReportHandler(
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to delete assessment report',
+      },
+    } as ApiResponse<never>);
+  }
+}
+
+/**
+ * PATCH /growth/reports/:reportId/share
+ * Share or unshare a manager assessment report with the assessee
+ */
+export async function shareReportHandler(
+  request: FastifyRequest<{
+    Params: { reportId: string };
+    Body: { share: boolean };
+  }>,
+  reply: FastifyReply
+): Promise<void> {
+  try {
+    const { reportId } = request.params;
+    const { share } = request.body;
+
+    const userEmail = request.user?.email;
+    if (!userEmail) {
+      return reply.status(401).send({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      } as ApiResponse<never>);
+    }
+
+    const report = await shareReport(decodeURIComponent(reportId), share, userEmail);
+
+    return reply.status(200).send({
+      success: true,
+      data: report,
+    } as ApiResponse<AssessmentReport>);
+  } catch (error: any) {
+    // Handle validation errors
+    if (error.message?.includes('REPORT_NOT_FOUND')) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'REPORT_NOT_FOUND',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message?.includes('INVALID_REPORT_TYPE')) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'INVALID_REPORT_TYPE',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    if (error.message?.includes('REPORT_NOT_SUBMITTED')) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'REPORT_NOT_SUBMITTED',
+          message: error.message.split(': ')[1] || error.message,
+        },
+      } as ApiResponse<never>);
+    }
+
+    console.error('Error sharing report:', error);
+    return reply.status(500).send({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to share assessment report',
       },
     } as ApiResponse<never>);
   }

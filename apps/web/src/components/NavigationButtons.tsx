@@ -12,6 +12,8 @@ import {
     Download,
     ChevronDown,
     FileDown,
+    Send,
+    EyeOff,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -22,7 +24,11 @@ interface NavigationButtonsProps {
     isReportScreen: boolean;
     onPrevious: () => void;
     onNext: () => void;
-    onSubmitAssessment: () => void;
+    onSubmitAssessment?: () => void;
+    onShareReport?: () => void;
+    onUnshareReport?: () => void;
+    isReportShared?: boolean;
+    readOnly?: boolean;
 }
 
 export function NavigationButtons({
@@ -32,6 +38,10 @@ export function NavigationButtons({
     onPrevious,
     onNext,
     onSubmitAssessment,
+    onShareReport,
+    onUnshareReport,
+    isReportShared,
+    readOnly = false,
 }: NavigationButtonsProps) {
     const handleDownloadPDF = async () => {
         // Wait a bit for the DOM to be ready
@@ -185,6 +195,22 @@ export function NavigationButtons({
                             <FileDown className="w-4 h-4" />
                             <span>Download as PDF</span>
                         </DropdownMenuItem>
+                        {onShareReport && !isReportShared && (
+                            <DropdownMenuItem
+                                onClick={onShareReport}
+                                className="flex items-center space-x-2 text-red-600 focus:text-red-700">
+                                <Send className="w-4 h-4" />
+                                <span>Send to Assessee</span>
+                            </DropdownMenuItem>
+                        )}
+                        {onUnshareReport && isReportShared && (
+                            <DropdownMenuItem
+                                onClick={onUnshareReport}
+                                className="flex items-center space-x-2">
+                                <EyeOff className="w-4 h-4" />
+                                <span>Unshare Report</span>
+                            </DropdownMenuItem>
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
