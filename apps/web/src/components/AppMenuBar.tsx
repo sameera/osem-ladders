@@ -1,4 +1,3 @@
-import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -15,16 +14,7 @@ import { useApi } from "@/hooks/useApi";
 import type { User } from "@/types/users";
 import type { ApiResponse } from "@/types/teams";
 
-interface AppMenuBarProps {
-    onNewAssessment?: () => void;
-    onOpenAssessment?: (data: any) => void;
-}
-
-export function AppMenuBar({
-    onNewAssessment,
-    onOpenAssessment,
-}: AppMenuBarProps) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
+export function AppMenuBar() {
     const navigate = useNavigate();
     const { isAuthenticated, signOutUser } = useAuth();
     const { get } = useApi();
@@ -47,31 +37,6 @@ export function AppMenuBar({
     const isAdmin = currentUser?.roles.includes("admin") ?? false;
     const isManager = currentUser?.roles.includes("manager") ?? false;
 
-    const handleOpenClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file && file.type === "application/json") {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target?.result as string);
-                    onOpenAssessment(data);
-                } catch (error) {
-                    console.error("Error parsing JSON file:", error);
-                    alert("Invalid JSON file format");
-                }
-            };
-            reader.readAsText(file);
-        } else {
-            alert("Please select a valid JSON file");
-        }
-        // Reset the input value so the same file can be selected again
-        event.target.value = "";
-    };
-
     return (
         <>
             <Menubar>
@@ -80,16 +45,6 @@ export function AppMenuBar({
                         <Menu className="h-4 w-4" />
                     </MenubarTrigger>
                     <MenubarContent>
-                        {onNewAssessment && onOpenAssessment && (
-                            <>
-                                <MenubarItem onClick={onNewAssessment}>
-                                    New assessment...
-                                </MenubarItem>
-                                <MenubarItem onClick={handleOpenClick}>
-                                    Open assessment...
-                                </MenubarItem>
-                            </>
-                        )}
                         {isManager && (
                             <>
                                 <MenubarSeparator />
@@ -116,9 +71,7 @@ export function AppMenuBar({
                         )}
                         {isAdmin && (
                             <>
-                                {onNewAssessment && onOpenAssessment && (
-                                    <MenubarSeparator />
-                                )}
+                                <MenubarSeparator />
                                 {isAdmin && (
                                     <>
                                         <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
@@ -152,15 +105,6 @@ export function AppMenuBar({
                     </MenubarContent>
                 </MenubarMenu>
             </Menubar>
-            {onOpenAssessment && (
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".json"
-                    onChange={handleFileChange}
-                    style={{ display: "none" }}
-                />
-            )}
         </>
     );
 }

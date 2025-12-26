@@ -7,8 +7,6 @@ interface AssessmentLayoutProps {
   allScreens: string[];
   currentScreen: number;
   completedScreens: Set<number>;
-  onNewAssessment: () => void;
-  onOpenAssessment: (data: any) => void;
   onScreenChange: (screen: number) => void;
   children: React.ReactNode;
 }
@@ -18,8 +16,6 @@ export function AssessmentLayout({
   allScreens,
   currentScreen,
   completedScreens,
-  onNewAssessment,
-  onOpenAssessment,
   onScreenChange,
   children
 }: AssessmentLayoutProps) {
@@ -28,8 +24,6 @@ export function AssessmentLayout({
       <AppHeader
         title={teamMemberName}
         subtitle={import.meta.env.VITE_BRANDING_APP_NAME || 'Career Growth Plan'}
-        onNewAssessment={onNewAssessment}
-        onOpenAssessment={onOpenAssessment}
       />
 
       <WizardNavigation
