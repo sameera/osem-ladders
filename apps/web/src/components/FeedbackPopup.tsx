@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -16,7 +16,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { Competence } from "@/data/model";
-import { cn } from "@/lib/utils";
 
 interface FeedbackPopupProps {
     isOpen: boolean;

@@ -4,20 +4,22 @@ This is a serverless API built with **AWS Lambda**, **Fastify**, and **DynamoDB*
 
 ## Architecture
 
-- **Router Framework**: Fastify with `@fastify/aws-lambda` adapter
-- **Single Lambda Deployment**: All API routes are handled by one Lambda function
-- **API Gateway**: Required to expose HTTP endpoints and handle Cognito authorization
-- **Runtime**: Node.js 18 (ESM modules)
+-   **Router Framework**: Fastify with `@fastify/aws-lambda` adapter
+-   **Single Lambda Deployment**: All API routes are handled by one Lambda function
+-   **API Gateway**: Required to expose HTTP endpoints and handle Cognito authorization
+-   **Runtime**: Node.js 18 (ESM modules)
 
 ## Routes
 
 ### Health Check
-- **GET /health** - Returns service status and configuration info
-- No authentication required
+
+-   **GET /health** - Returns service status and configuration info
+-   No authentication required
 
 ### User Management
-- **POST /users** - Create a new user (Admin role required)
-- **GET /users/me** - Get current authenticated user's profile
+
+-   **POST /users** - Create a new user (Admin role required)
+-   **GET /users/me** - Get current authenticated user's profile
 
 ## How the Router Works
 
@@ -46,8 +48,9 @@ DynamoDB
 ### Required Configuration
 
 You **must** use API Gateway because:
-- Lambda functions don't have public HTTP endpoints by themselves
-- API Gateway provides HTTP endpoint exposure, Cognito authorization, CORS, rate limiting
+
+-   Lambda functions don't have public HTTP endpoints by themselves
+-   API Gateway provides HTTP endpoint exposure, Cognito authorization, CORS, rate limiting
 
 ### Route Mapping
 
@@ -56,6 +59,7 @@ All routes are handled by the same Lambda function. API Gateway forwards the ent
 ## Development
 
 ### Build
+
 ```bash
 pnpm nx build api --configuration=production
 ```

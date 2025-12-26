@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { useCurrentUser } from './useCurrentUser';
-import { useUser } from './useUser';
+import { useUserMeta } from './useUserMeta';
 import { useTeam } from './useTeams';
 
 /**
@@ -13,7 +13,7 @@ import { useTeam } from './useTeams';
  */
 export function useManagerCheck(userId?: string) {
   const { data: currentUser } = useCurrentUser();
-  const { data: targetUser } = useUser(userId);
+  const { data: targetUser } = useUserMeta(userId);
   const { data: targetTeam } = useTeam(targetUser?.team || '');
 
   const isManager = useMemo(() => {

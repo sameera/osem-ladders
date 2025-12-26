@@ -7,7 +7,7 @@ import type { CompetencyResponse } from '@/types/reports';
 
 /**
  * UI format for assessment selections and feedback
- * Used by AssessmentContainer and AssessmentView components
+ * Used by AssessmentView component
  */
 export interface AssessmentUIData {
   selections: Record<string, Record<string, number>>;

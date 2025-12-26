@@ -7,7 +7,7 @@
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useUser } from "@/hooks/useUser";
+import { useUserMeta } from "@/hooks/useUserMeta";
 import { useManagerCheck } from "@/hooks/useManagerCheck";
 import { useAssessmentPlans } from "@/hooks/useAssessmentPlans";
 import { useAssessmentReport } from "@/hooks/useAssessmentReport";
@@ -22,7 +22,7 @@ export default function ManagerReviewPage() {
     // Fetch users and check access
     const { data: currentUser, isLoading: currentUserLoading } =
         useCurrentUser();
-    const { data: targetUser, isLoading: targetUserLoading } = useUser(userId);
+    const { data: targetUser, isLoading: targetUserLoading } = useUserMeta(userId);
     const { isManager, isLoading: managerCheckLoading } =
         useManagerCheck(userId);
 

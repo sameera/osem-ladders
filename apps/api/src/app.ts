@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance, type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import { getMeHandler } from "./handlers/users/get-me";
+import { getUserMetaHandler } from "./handlers/users/get-user-meta";
 import authPlugin from "./plugins/auth";
 import { requireAdmin, requireTeamManagerOrAdmin } from "./middleware/auth";
 import {
@@ -65,6 +66,7 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
 
     // User routes
     app.get("/growth/users/me", getMeHandler);
+    app.get("/growth/users/:userId", getUserMetaHandler);
 
     // Admin-only routes for user management
     app.register(async (adminRoutes) => {
@@ -83,10 +85,7 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         );
 
         // Team management routes (T011, T045)
-        adminRoutes.patch(
-            "/growth/admin/teams/:teamId",
-            updateTeamHandler
-        );
+        adminRoutes.patch("/growth/admin/teams/:teamId", updateTeamHandler);
         adminRoutes.patch(
             "/growth/admin/teams/:teamId/manager",
             updateManagerHandler
@@ -133,13 +132,16 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         }
     });
 
-    app.patch("/growth/teams/:teamId/plan/:season/status", async (request, reply) => {
-        const { teamId } = request.params as { teamId: string };
-        await requireTeamManagerOrAdmin(teamId)(request, reply);
-        if (!reply.sent) {
-            return togglePlanStatusHandler(request as any, reply);
+    app.patch(
+        "/growth/teams/:teamId/plan/:season/status",
+        async (request, reply) => {
+            const { teamId } = request.params as { teamId: string };
+            await requireTeamManagerOrAdmin(teamId)(request, reply);
+            if (!reply.sent) {
+                return togglePlanStatusHandler(request as any, reply);
+            }
         }
-    });
+    );
 
     // Assessment report routes (authenticated users)
     app.get("/growth/reports/:reportId", getReportHandler);

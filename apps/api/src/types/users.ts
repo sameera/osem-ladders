@@ -55,6 +55,27 @@ export interface User {
   createdBy: string;
 }
 
+/**
+ * User metadata (subset of User for authenticated access)
+ * Used for non-admin routes that need basic user information
+ */
+export interface UserMeta {
+  /** User's email address (immutable, serves as userId) */
+  userId: string;
+
+  /** User's full name */
+  name: string;
+
+  /** Elevated roles assigned to user (empty array = default user access) */
+  roles: UserRole[];
+
+  /** User activation status (false = deactivated/soft deleted) */
+  isActive: boolean;
+
+  /** Team ID user belongs to (null if no team assigned) */
+  team?: string | null;
+}
+
 // ============================================================================
 // API Request Types
 // ============================================================================
@@ -130,6 +151,14 @@ export interface UserResponse {
 export interface GetUserResponse {
   /** The requested user */
   user: User;
+}
+
+/**
+ * Response for GET /users/:userId
+ */
+export interface GetUserMetaResponse {
+  /** The requested user metadata */
+  user: UserMeta;
 }
 
 /**
