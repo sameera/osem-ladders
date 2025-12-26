@@ -47,11 +47,27 @@ export function createTeamApi(api: UseApiReturn) {
         },
 
         /**
-         * Fetch a single team by ID
+         * Fetch a single team by ID (admin endpoint)
          */
         async fetchTeam(teamId: string): Promise<Team> {
             const response = await api.get<ApiResponse<Team>>(
                 `/admin/teams/${teamId}`
+            );
+            if (!response.success || !response.data) {
+                throw new Error(
+                    response.error?.message || "Failed to fetch team"
+                );
+            }
+            return response.data;
+        },
+
+        /**
+         * Fetch a single team by ID (non-admin endpoint)
+         * Accessible by team members, managers, or admins
+         */
+        async fetchTeamAsMember(teamId: string): Promise<Team> {
+            const response = await api.get<ApiResponse<Team>>(
+                `/teams/${teamId}`
             );
             if (!response.success || !response.data) {
                 throw new Error(

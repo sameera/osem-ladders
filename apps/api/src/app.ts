@@ -3,7 +3,8 @@ import cors from "@fastify/cors";
 import { getMeHandler } from "./handlers/users/get-me";
 import { getUserMetaHandler } from "./handlers/users/get-user-meta";
 import authPlugin from "./plugins/auth";
-import { requireAdmin, requireTeamManagerOrAdmin } from "./middleware/auth";
+import { requireAdmin, requireTeamManagerOrAdmin, requireTeamMemberOrManagerOrAdmin } from "./middleware/auth";
+import { getTeamHandler as getTeamMemberHandler } from "./handlers/teams/get-team";
 import {
     createUserHandler,
     getUserHandler,
@@ -68,6 +69,15 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
     app.get("/growth/users/me", getMeHandler);
     app.get("/growth/users/:userId", getUserMetaHandler);
 
+    // Team routes (for team members)
+    app.get("/growth/teams/:teamId", async (request, reply) => {
+        const { teamId } = request.params as { teamId: string };
+        await requireTeamMemberOrManagerOrAdmin(teamId)(request, reply);
+        if (!reply.sent) {
+            return getTeamMemberHandler(request as any, reply);
+        }
+    });
+
     // Admin-only routes for user management
     app.register(async (adminRoutes) => {
         adminRoutes.addHook("preHandler", requireAdmin);
@@ -107,10 +117,10 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
         adminRoutes.post("/growth/admin/teams", createTeamHandler);
     });
 
-    // Assessment plan routes (team manager or admin access)
+    // Assessment plan routes (team member, manager, or admin access for read; manager or admin for write)
     app.get("/growth/teams/:teamId/plans", async (request, reply) => {
         const { teamId } = request.params as { teamId: string };
-        await requireTeamManagerOrAdmin(teamId)(request, reply);
+        await requireTeamMemberOrManagerOrAdmin(teamId)(request, reply);
         if (!reply.sent) {
             return listPlansHandler(request as any, reply);
         }
@@ -118,7 +128,7 @@ export function buildApp(disableLogging?: boolean): FastifyInstance {
 
     app.get("/growth/teams/:teamId/plan/:season", async (request, reply) => {
         const { teamId } = request.params as { teamId: string };
-        await requireTeamManagerOrAdmin(teamId)(request, reply);
+        await requireTeamMemberOrManagerOrAdmin(teamId)(request, reply);
         if (!reply.sent) {
             return getPlanHandler(request as any, reply);
         }

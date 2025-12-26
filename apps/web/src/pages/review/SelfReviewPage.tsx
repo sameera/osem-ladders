@@ -23,7 +23,7 @@ export default function SelfReviewPage() {
     const { data: currentUser, isLoading: currentUserLoading } =
         useCurrentUser();
     const { data: targetUser, isLoading: targetUserLoading } = useUserMeta(userId);
-    const { isManager, isLoading: managerCheckLoading } =
+    const { isManager, isLoading: managerCheckLoading, error: managerCheckError } =
         useManagerCheck(userId);
 
     // Check access: user themselves OR their manager
@@ -71,6 +71,23 @@ export default function SelfReviewPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
                     <p className="text-muted-foreground">
                         Loading assessment...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Check for permission errors
+    if (managerCheckError) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center max-w-md">
+                    <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-foreground mb-2">
+                        Access Error
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Unable to verify team access. Please contact your administrator.
                     </p>
                 </div>
             </div>

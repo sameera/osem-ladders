@@ -33,7 +33,7 @@ export function useTeams(query?: ListTeamsQuery) {
 }
 
 /**
- * T015: Hook for fetching a single team by ID
+ * T015: Hook for fetching a single team by ID (admin endpoint)
  */
 export function useTeam(teamId: string) {
   const api = useApi();
@@ -42,6 +42,22 @@ export function useTeam(teamId: string) {
   return useQuery({
     queryKey: ['team', teamId],
     queryFn: () => teamApi.fetchTeam(teamId),
+    enabled: !!teamId,
+    staleTime: 60 * 1000, // 1 minute cache
+  });
+}
+
+/**
+ * Hook for fetching a single team by ID (non-admin endpoint)
+ * Accessible by team members, managers, or admins
+ */
+export function useTeamAsMember(teamId: string) {
+  const api = useApi();
+  const teamApi = createTeamApi(api);
+
+  return useQuery({
+    queryKey: ['teamMember', teamId],
+    queryFn: () => teamApi.fetchTeamAsMember(teamId),
     enabled: !!teamId,
     staleTime: 60 * 1000, // 1 minute cache
   });

@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import { useCurrentUser } from './useCurrentUser';
 import { useUserMeta } from './useUserMeta';
-import { useTeam } from './useTeams';
+import { useTeamAsMember } from './useTeams';
 
 /**
  * Hook to check if current user is the manager of the specified user
@@ -14,7 +14,7 @@ import { useTeam } from './useTeams';
 export function useManagerCheck(userId?: string) {
   const { data: currentUser } = useCurrentUser();
   const { data: targetUser } = useUserMeta(userId);
-  const { data: targetTeam } = useTeam(targetUser?.team || '');
+  const { data: targetTeam, error: teamError } = useTeamAsMember(targetUser?.team || '');
 
   const isManager = useMemo(() => {
     if (!currentUser || !targetUser || !targetUser.team || !targetTeam) {
@@ -33,5 +33,6 @@ export function useManagerCheck(userId?: string) {
     currentUser,
     targetUser,
     targetTeam,
+    error: teamError,
   };
 }
