@@ -9,7 +9,7 @@ import {
     MenubarSeparator,
     MenubarTrigger,
 } from "@/components/ui/menubar";
-import { Menu } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/hooks/useApi";
 import type { User } from "@/types/users";
@@ -26,7 +26,7 @@ export function AppMenuBar({
 }: AppMenuBarProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, signOutUser } = useAuth();
     const { get } = useApi();
 
     // Fetch current user to check admin status
@@ -98,7 +98,9 @@ export function AppMenuBar({
                                 </div>
                                 <MenubarItem
                                     inset
-                                    onClick={() => navigate("/manager/my-teams")}
+                                    onClick={() =>
+                                        navigate("/manager/my-teams")
+                                    }
                                 >
                                     My Teams
                                 </MenubarItem>
@@ -142,6 +144,11 @@ export function AppMenuBar({
                                 )}
                             </>
                         )}
+                        <MenubarSeparator />
+                        <MenubarItem onClick={signOutUser}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Sign out
+                        </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
             </Menubar>
