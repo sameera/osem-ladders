@@ -36,7 +36,8 @@ export default function ManagerReviewPage() {
     // Fetch users and check access
     const { data: currentUser, isLoading: currentUserLoading } =
         useCurrentUser();
-    const { data: targetUser, isLoading: targetUserLoading } = useUserMeta(userId);
+    const { data: targetUser, isLoading: targetUserLoading } =
+        useUserMeta(userId);
     const { isManager, isLoading: managerCheckLoading } =
         useManagerCheck(userId);
 
@@ -66,14 +67,12 @@ export default function ManagerReviewPage() {
     } = useAssessmentReport(userId, activePlan?.season, "manager");
 
     // Fetch team member's self-assessment (just to check if it exists for link visibility)
-    const {
-        report: selfReport,
-        isLoading: selfReportLoading,
-    } = useAssessmentReport(userId, activePlan?.season, "self");
+    const { report: selfReport, isLoading: selfReportLoading } =
+        useAssessmentReport(userId, activePlan?.season, "self");
 
     // Check if self-report is submitted (to show link)
     const hasSelfAssessment = useMemo(() => {
-        return selfReport?.status === 'submitted';
+        return !!selfReport;
     }, [selfReport]);
 
     // Loading states
@@ -242,7 +241,10 @@ export default function ManagerReviewPage() {
                 </TooltipTrigger>
                 {!hasSelfAssessment && (
                     <TooltipContent>
-                        <p>{targetUser.name} hasn't submitted their self-assessment yet</p>
+                        <p>
+                            {targetUser.name} hasn't submitted their
+                            self-assessment yet
+                        </p>
                     </TooltipContent>
                 )}
             </Tooltip>
@@ -270,8 +272,16 @@ export default function ManagerReviewPage() {
                 initialData={initialData}
                 onSave={handleSave}
                 onSubmit={handleSubmit}
-                onShareReport={report?.status === 'submitted' ? handleShareClick : undefined}
-                onUnshareReport={report?.status === 'submitted' ? handleUnshareClick : undefined}
+                onShareReport={
+                    report?.status === "submitted"
+                        ? handleShareClick
+                        : undefined
+                }
+                onUnshareReport={
+                    report?.status === "submitted"
+                        ? handleUnshareClick
+                        : undefined
+                }
                 isReportShared={report?.sharedWithAssessee}
                 navigationLink={navigationLink}
             />

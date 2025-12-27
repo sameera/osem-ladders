@@ -63,26 +63,25 @@ export default function SelfReviewPage() {
         submitReport,
     } = useAssessmentReport(userId, activePlan?.season, "self");
 
-    // Fetch manager report (if viewing own page and report is shared)
-    const shouldFetchManagerReport = useMemo(() => {
-        return currentUser?.userId === userId; // Only if viewing own page
-    }, [currentUser, userId]);
-
+    // Fetch manager report (always fetch, but only use if viewing own page)
     const {
         report: managerReport,
         isLoading: managerReportLoading,
-    } = useAssessmentReport(
-        shouldFetchManagerReport ? userId : undefined,
-        shouldFetchManagerReport ? activePlan?.season : undefined,
-        shouldFetchManagerReport ? "manager" : undefined
-    );
+    } = useAssessmentReport(userId, activePlan?.season, "manager");
 
-    // Filter to only show if shared
+    // Filter to only show if viewing own page and report is shared
     const sharedManagerReport = useMemo(() => {
+        // Only show manager report if viewing own page
+        if (currentUser?.userId !== userId) return null;
         if (!managerReport) return null;
         if (!managerReport.sharedWithAssessee) return null;
         return managerReport;
-    }, [managerReport]);
+    }, [managerReport, currentUser, userId]);
+
+    // Check if this is being viewed by a manager
+    const isViewedByManager = useMemo(() => {
+        return currentUser?.userId !== userId && isManager;
+    }, [currentUser, userId, isManager]);
 
     // Loading states
     const isLoading =
@@ -91,7 +90,7 @@ export default function SelfReviewPage() {
         managerCheckLoading ||
         (targetUser?.team && plansLoading) ||
         reportLoading ||
-        (shouldFetchManagerReport && managerReportLoading);
+        managerReportLoading;
 
     // Show loading spinner
     if (isLoading) {
@@ -224,10 +223,6 @@ export default function SelfReviewPage() {
         await handleSave(data);
         await submitReport();
     };
-
-    const isViewedByManager = useMemo(() => {
-        return currentUser?.userId !== userId && isManager;
-    }, [currentUser, userId, isManager]);
 
     // Create navigation link
     const navigationLink = isViewedByManager ? (

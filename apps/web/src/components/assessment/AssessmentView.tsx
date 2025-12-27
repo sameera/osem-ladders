@@ -129,26 +129,27 @@ export function AssessmentView({
             />
 
             {/* Save Status Bar - Hidden in read-only mode */}
-            {!readOnly && (
-                <div className="border-b border-border bg-card">
-                    <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                            Reviewer:{" "}
-                            <span className="font-medium text-foreground">
-                                {reviewerName}
-                            </span>
-                            <div className="inline-block mx-5">
-                                {navigationLink}
-                            </div>
+
+            <div className="border-b border-border bg-card">
+                <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                        Reviewer:{" "}
+                        <span className="font-medium text-foreground">
+                            {reviewerName}
+                        </span>
+                        <div className="inline-block mx-5">
+                            {navigationLink}
                         </div>
+                    </div>{" "}
+                    {!readOnly && (
                         <SaveStatusIndicator
                             status={saveStatus}
                             lastSavedAt={lastSavedAt}
                             onRetry={triggerManualSave}
                         />
-                    </div>
+                    )}
                 </div>
-            )}
+            </div>
 
             <WizardNavigation
                 screens={allCategories}
