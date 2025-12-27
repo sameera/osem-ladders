@@ -11,7 +11,6 @@ on:
 
 env:
     AWS_REGION: ${{ vars.AWS_REGION }}
-    NODE_VERSION: 18
 
 permissions:
     id-token: write
@@ -28,7 +27,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: ${{ env.NODE_VERSION }}
+                  node-version: 18
 
             - name: Setup pnpm
               uses: pnpm/action-setup@v3
@@ -45,7 +44,47 @@ jobs:
                   VITE_COGNITO_USER_POOL_ID: ${{ secrets.VITE_COGNITO_USER_POOL_ID }}
                   VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.VITE_COGNITO_USER_POOL_CLIENT_ID }}
                   VITE_COGNITO_DOMAIN: ${{ secrets.VITE_COGNITO_DOMAIN }}
-              run: pnpm exec nx build web --configuration=production
+              run: pnpm exec nx build web
+
+            - name: Validate build and deployment configuration
+              run: |
+                  # Check build directory exists
+                  if [ ! -d "dist/apps/web" ]; then
+                    echo "❌ Error: Build directory not found at dist/apps/web"
+                    echo "Build may have failed or output path is incorrect"
+                    exit 1
+                  fi
+
+                  # Check build has files
+                  FILE_COUNT=$(find dist/apps/web -type f | wc -l)
+                  if [ "$FILE_COUNT" -eq 0 ]; then
+                    echo "❌ Error: Build directory is empty"
+                    exit 1
+                  fi
+
+                  echo "✅ Build validation passed"
+                  echo "   Files: $FILE_COUNT"
+                  echo "   Size: $(du -sh dist/apps/web | cut -f1)"
+
+                  # Validate required GitHub variables
+                  if [ -z "${{ vars.S3_BUCKET_NAME }}" ]; then
+                    echo "❌ Error: S3_BUCKET_NAME variable not configured"
+                    echo "Set it in GitHub repository Settings > Variables"
+                    exit 1
+                  fi
+
+                  echo "✅ Configuration validation passed"
+                  echo "   S3 Bucket: ${{ vars.S3_BUCKET_NAME }}"
+                  echo "   AWS Region: ${{ env.AWS_REGION }}"
+                  echo "   CloudFront: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID || 'Not configured' }}"
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: web-build-${{ github.sha }}
+                  path: dist/apps/web/
+                  retention-days: 7
 
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v4
@@ -74,20 +113,40 @@ jobs:
 
             - name: Invalidate CloudFront cache
               run: |
+                  # Check if CloudFront distribution is configured
+                  if [ -z "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" ]; then
+                    echo "⚠️  CloudFront distribution ID not configured"
+                    echo "Skipping cache invalidation (deployment still successful)"
+                    echo "Set CLOUDFRONT_DISTRIBUTION_ID variable to enable CloudFront invalidation"
+                    exit 0
+                  fi
+
                   echo "Creating CloudFront invalidation for distribution: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
 
+                  # Create invalidation
                   INVALIDATION_ID=$(aws cloudfront create-invalidation \
                     --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
                     --paths "/*" \
                     --query 'Invalidation.Id' \
-                    --output text)
+                    --output text 2>&1) || {
+                      echo "❌ Error: Failed to create CloudFront invalidation"
+                      echo "This may indicate invalid distribution ID or insufficient permissions"
+                      echo "Deployment to S3 succeeded, but cache won't be cleared"
+                      exit 0
+                    }
 
-                  echo "CloudFront invalidation created: $INVALIDATION_ID"
-                  echo "Waiting for invalidation to complete..."
+                  echo "✅ CloudFront invalidation created: $INVALIDATION_ID"
+                  echo "Waiting for invalidation to complete (timeout: 20 minutes)..."
 
-                  aws cloudfront wait invalidation-completed \
+                  # Wait for invalidation with timeout
+                  timeout 1200 aws cloudfront wait invalidation-completed \
                     --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
-                    --id $INVALIDATION_ID
+                    --id $INVALIDATION_ID 2>&1 || {
+                      echo "⚠️  Invalidation is taking longer than expected"
+                      echo "Check status: aws cloudfront get-invalidation --id $INVALIDATION_ID --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
+                      echo "Deployment succeeded, invalidation is still in progress"
+                      exit 0
+                    }
 
                   echo "✅ CloudFront cache invalidation completed successfully"
 
