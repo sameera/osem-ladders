@@ -1,15 +1,14 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider as OidcAuthProvider } from "react-oidc-context";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { oidcConfig } from "@/config/oidc";
+import { queryClient } from "@/config/queryClient";
 import { AppRoutes } from "./router";
-
-const queryClient = new QueryClient();
 
 const App = () => {
   return (

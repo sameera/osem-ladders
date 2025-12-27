@@ -35,6 +35,5 @@ export function useUser(userId?: string) {
         },
         enabled: !!userId,
         staleTime: 5 * 60 * 1000, // 5 minutes cache
-        retry: false, // Don't retry on 404
     });
 }

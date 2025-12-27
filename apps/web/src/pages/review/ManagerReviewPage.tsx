@@ -98,8 +98,21 @@ export default function ManagerReviewPage() {
         );
     }
 
-    // Check access - only manager can access
-    if (!isManager) {
+    // Check access - manager OR team member viewing their own shared report
+    const hasAccess = useMemo(() => {
+        if (!currentUser || !targetUser) return false;
+
+        // Manager can always access their team member's reports
+        if (isManager) return true;
+
+        // Team member can only access their own report if it has been shared
+        const isViewingOwnReport = currentUser.userId === targetUser.userId;
+        const isShared = report?.sharedWithAssessee === true;
+
+        return isViewingOwnReport && isShared;
+    }, [currentUser, targetUser, isManager, report]);
+
+    if (!hasAccess) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center max-w-md">
@@ -108,7 +121,9 @@ export default function ManagerReviewPage() {
                         Access Denied
                     </h1>
                     <p className="text-muted-foreground">
-                        Only managers can access this page.
+                        {currentUser?.userId === targetUser?.userId
+                            ? "This manager review has not been shared with you yet."
+                            : "You do not have permission to access this page."}
                     </p>
                 </div>
             </div>
