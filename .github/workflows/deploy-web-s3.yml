@@ -44,6 +44,7 @@ jobs:
                   VITE_COGNITO_USER_POOL_ID: ${{ secrets.VITE_COGNITO_USER_POOL_ID }}
                   VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.VITE_COGNITO_USER_POOL_CLIENT_ID }}
                   VITE_COGNITO_DOMAIN: ${{ secrets.VITE_COGNITO_DOMAIN }}
+                  VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
               run: pnpm exec nx build web
 
             - name: Validate build and deployment configuration
